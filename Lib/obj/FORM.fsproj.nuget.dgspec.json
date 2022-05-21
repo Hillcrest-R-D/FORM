@@ -1,0 +1,83 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {}
+  },
+  "projects": {
+    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
+        "projectName": "FORM",
+        "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
+        "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\macke\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "FSharp.Core": {
+              "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[6.0.1, )",
+              "generatePathProperty": true
+            },
+            "microsoft.data.sqlclient": {
+              "target": "Package",
+              "version": "[4.1.0, )",
+              "generatePathProperty": true
+            },
+            "microsoft.data.sqlite": {
+              "target": "Package",
+              "version": "[6.0.5, )",
+              "generatePathProperty": true
+            },
+            "mysqlconnector": {
+              "target": "Package",
+              "version": "[2.1.9, )",
+              "generatePathProperty": true
+            },
+            "npgsql": {
+              "target": "Package",
+              "version": "[6.0.4, )",
+              "generatePathProperty": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
