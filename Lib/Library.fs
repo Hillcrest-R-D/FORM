@@ -9,35 +9,35 @@ open Microsoft.Data.SqlClient
 open Microsoft.Data.Sqlite
 open MySqlConnector
 open System.Data.Common
+open Microsoft.FSharp.Core.LanguagePrimitives
 
 
-type DbContext =
-    | Auth
-    | Payments
-
+type DbContext = Enum
+ 
 type ContextInfo = (string * DbContext) array
 
 [<AbstractClass>]
 type DbAttribute() = 
     inherit Attribute()
-    abstract Value : (string * string)
+    abstract Value : (string * DbContext)
 
 ///<description>An attribute type which specifies a schema name</description>
 [<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
-type SchemaAttribute( alias : string, context : string ) = 
+type SchemaAttribute( alias : string, context : DbContext ) = 
     inherit DbAttribute()
     override _.Value = (alias, context)
     
 
 ///<description>An attribute type which specifies a table name</description>
-[<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
-type TableAttribute( alias : string, context : string ) = 
-    inherit DbAttribute()
-    override _.Value = (alias, context)
+[<AttributeUsage(AttributeTargets.Class)>]
+type TableAttribute( alias : string , ctx : ^T when ^T :> Enum and ^T : (member GetValue : int32)) = 
+    inherit Attribute()
+    member _.Value = alias
+    member _.Contexts = ctx |> EnumToValue
 
 ///<description>An attribute type which specifies a column name</description>
 [<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ColumnAttribute( alias : string, context : string ) = 
+type ColumnAttribute( alias : string, context : DbContext ) = 
     inherit DbAttribute()
     override _.Value = (alias, context)
     
@@ -52,10 +52,10 @@ type SqlMapping = {
 }
 
 type OrmState = 
-    | MSSQL     of ( string * string )
-    | MySQL     of ( string * string )
-    | PSQL      of ( string * string )
-    | SQLite    of ( string * string )
+    | MSSQL     of ( string * DbContext )
+    | MySQL     of ( string * DbContext )
+    | PSQL      of ( string * DbContext )
+    | SQLite    of ( string * DbContext )
 
 module Orm = 
     let inline connection< ^T > ( this : OrmState ) : DbConnection = 
@@ -78,29 +78,36 @@ module Orm =
         | PSQL      ( _, c ) -> c 
         | SQLite    ( _, c ) -> c 
 
-    let inline attrFold< ^A when ^A :> DbAttribute> attrs ctx = 
-        Array.fold ( fun s (x: ^A ) ->  
+    let inline attrFold (attrs : DbAttribute array) (ctx : DbContext) = 
+        printfn "HERE!"
+        Array.fold ( fun s (x : DbAttribute) ->  
                 if snd x.Value = ctx 
                 then fst x.Value
                 else s
             ) "" attrs
+    
+    
 
-    let inline attributes< ^T, ^A when ^A : equality and  ^A :> DbAttribute> ( this: OrmState ) =
+        
+        
+    let inline tableName< ^T > ( this : OrmState ) = 
         let attrs =
-            typedefof< ^T >.GetCustomAttributes(typeof< ^A >, false)
-            |> Array.map ( fun x -> x :?> ^A )
+            typedefof< ^T >.GetCustomAttributes(typeof< TableAttribute >, false)
+            |> Array.map ( fun x -> x :?> DbAttribute)
+
         if attrs = Array.empty then
             typedefof< ^T >.Name
         else 
-            attrFold< ^A > attrs (context< ^T > this)
-        
-    let inline tableName< ^T > ( this : OrmState ) = 
-        attributes< ^T, TableAttribute > this
+            attrFold attrs (context< ^T > this)
+        //attributes< ^T, TableAttribute > this
 
     let inline columnMapping< ^T > ( this : OrmState ) = 
         FSharpType.GetRecordFields typedefof< ^T > 
         |> Array.mapi ( fun i x -> 
-            let sqlName = attributes< ^T, ColumnAttribute> this
+            let sqlName =  
+                x.GetCustomAttributes(typeof< ColumnAttribute >, false) 
+                |> Array.map ( fun y -> y :?> DbAttribute)
+                |> fun y -> attrFold y (context< ^T > this)  //attributes< ^T, ColumnAttribute> this
             let fsharpName = x.Name
             let quotedName = sqlQuote< ^T > sqlName this
             { 
@@ -193,7 +200,9 @@ module Orm =
         f reader 
     
     let inline queryBase< ^T >  ( this : OrmState ) = 
+        printfn "No over here!"
         let cols = columns< ^T > this |> Array.map ( fun x -> sqlQuote< ^T > x this )
+        printfn "Done with cols: %A" cols
         ( String.concat ", " cols ) + " from " + table< ^T > this
 
     let inline exceptionHandler f =

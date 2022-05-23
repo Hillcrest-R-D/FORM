@@ -1,33 +1,40 @@
 ﻿open Form
 open dotenv.net
+open System
+open Microsoft.FSharp.Core.LanguagePrimitives
 
-DotEnv.Load( new DotEnvOptions( envFilePaths = ["../.env"], ignoreExceptions = false ) )
-    
+//DotEnv.Load( new DotEnvOptions( envFilePaths = ["../.env"], ignoreExceptions = false ) )
 
-type A = 
-    | Auth
-    | Payments
-    type B =
-        { Thing : string}
+[<Flags>]
+type Contexts   =     
+    | Auth  = 1
+    | Payments  = 2
 
-    let test = { Thing = "test" }
 
-A.test |> printfn "%A"
+printfn "%A" ((Contexts.Auth :> Enum))
 
 // type TestContext =
 //     | Auth // of DbContext
 //     | Payments // of DbContext
- 
 // let [<Literal>] context = TestContext()
-// let auth = PSQL( "", context.Auth)
-// let payments = PSQL( "", context.Payment)
+let auth = PSQL( "Auth", Contexts.Auth )
+// let payments = PSQL( "", Payment)
 
-// [<Table(Auth "AuthUser")>]
-// [<Table("PaymentsUser", paymentContext)>]
-// type User = 
-//     { [<Column("AuthId", authContext)>]
-//       Id : int 
-//     }
+[<AttributeUsage(AttributeTargets.Class)>]
+type TablesAttribute( alias : string, ctx : Contexts) = 
+    inherit Attribute()
+    member _.Value = (alias, EnumToValue ctx)
 
 
-// Orm< User >.queryBase auth |> printfn "%s"f
+//[<Table("PaymentsUser", Contexts.Payments)>]
+[<Table("AuthUser", Contexts.Auth)>]
+type User = 
+    { //[<Column("AuthId", Contexts.Auth)>]
+      Id : int 
+    }
+
+let test_user = {Id = 64}
+
+printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>))
+printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
+//Orm.columns< User > auth |> printfn "%A"
