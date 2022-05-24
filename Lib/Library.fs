@@ -12,34 +12,37 @@ open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 
-type DbContext = Enum
+type DbContext =
+    | Default = 99
  
 type ContextInfo = (string * DbContext) array
 
 [<AbstractClass>]
 type DbAttribute() = 
     inherit Attribute()
-    abstract Value : (string * DbContext)
+    abstract Value : (string * int)
+    
 
 ///<description>An attribute type which specifies a schema name</description>
 [<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
-type SchemaAttribute( alias : string, context : DbContext ) = 
+type SchemaAttribute( alias : string, context : obj ) = 
     inherit DbAttribute()
-    override _.Value = (alias, context)
+    override _.Value = (alias, (box(context) :?> DbContext)  |> EnumToValue)
     
 
 ///<description>An attribute type which specifies a table name</description>
-[<AttributeUsage(AttributeTargets.Class)>]
-type TableAttribute( alias : string , ctx : ^T when ^T :> Enum and ^T : (member GetValue : int32)) = 
-    inherit Attribute()
-    member _.Value = alias
-    member _.Contexts = ctx |> EnumToValue
+[<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
+type TableAttribute( alias : string , context : obj) = 
+    inherit DbAttribute()
+    override _.Value = (alias, (box(context) :?> DbContext)  |> EnumToValue)
+    member _.Context = (box(context) :?> DbContext)  |> EnumToValue
+
 
 ///<description>An attribute type which specifies a column name</description>
 [<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ColumnAttribute( alias : string, context : DbContext ) = 
+type ColumnAttribute( alias : string, context : obj) = 
     inherit DbAttribute()
-    override _.Value = (alias, context)
+    override _.Value = (alias,  (box(context) :?> DbContext)  |> EnumToValue)
     
 ///<description>A record type which holds the information required to map across BE and DB. </description>
 type SqlMapping = { 
@@ -52,10 +55,10 @@ type SqlMapping = {
 }
 
 type OrmState = 
-    | MSSQL     of ( string * DbContext )
-    | MySQL     of ( string * DbContext )
-    | PSQL      of ( string * DbContext )
-    | SQLite    of ( string * DbContext )
+    | MSSQL     of ( string * Enum )
+    | MySQL     of ( string * Enum )
+    | PSQL      of ( string * Enum )
+    | SQLite    of ( string * Enum )
 
 module Orm = 
     let inline connection< ^T > ( this : OrmState ) : DbConnection = 
@@ -75,13 +78,13 @@ module Orm =
         match this with 
         | MSSQL     ( _, c ) -> c 
         | MySQL     ( _, c ) -> c 
-        | PSQL      ( _, c ) -> c 
+        | PSQL      ( _, c ) -> c
         | SQLite    ( _, c ) -> c 
 
-    let inline attrFold (attrs : DbAttribute array) (ctx : DbContext) = 
+    let inline attrFold (attrs : DbAttribute array) ( ctx : Enum ) = 
         printfn "HERE!"
         Array.fold ( fun s (x : DbAttribute) ->  
-                if snd x.Value = ctx 
+                if snd x.Value = ((box(ctx) :?> DbContext) |> EnumToValue) 
                 then fst x.Value
                 else s
             ) "" attrs
@@ -102,9 +105,11 @@ module Orm =
         //attributes< ^T, TableAttribute > this
 
     let inline columnMapping< ^T > ( this : OrmState ) = 
+        printfn "columnMapping"
         FSharpType.GetRecordFields typedefof< ^T > 
         |> Array.mapi ( fun i x -> 
             let sqlName =  
+                printfn "sqlName";
                 x.GetCustomAttributes(typeof< ColumnAttribute >, false) 
                 |> Array.map ( fun y -> y :?> DbAttribute)
                 |> fun y -> attrFold y (context< ^T > this)  //attributes< ^T, ColumnAttribute> this
@@ -124,9 +129,11 @@ module Orm =
         tableName< ^T > this
     
     let inline mapping< ^T > ( this : OrmState ) = 
+        printfn "mapping"
         columnMapping< ^T > this
 
     let inline columns< ^T > ( this : OrmState ) = 
+        printfn "columns"
         mapping< ^T > this
         |> Array.map ( fun x -> x.SqlName )
         

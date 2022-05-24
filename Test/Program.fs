@@ -10,31 +10,42 @@ type Contexts   =
     | Auth  = 1
     | Payments  = 2
 
+type DbContexts =
+    | Auth
+    | Payments
 
-printfn "%A" ((Contexts.Auth :> Enum))
+let unionAsString case = 
+    match case with
+    | Auth -> "Auth"
+    | Payments -> "Payments"
+
+printfn "%A" ((box(Contexts.Payments) :?> DbContext))
 
 // type TestContext =
 //     | Auth // of DbContext
 //     | Payments // of DbContext
 // let [<Literal>] context = TestContext()
 let auth = PSQL( "Auth", Contexts.Auth )
-// let payments = PSQL( "", Payment)
+let payments = PSQL( "Payments", Contexts.Payments)
 
-[<AttributeUsage(AttributeTargets.Class)>]
-type TablesAttribute( alias : string, ctx : Contexts) = 
-    inherit Attribute()
-    member _.Value = (alias, EnumToValue ctx)
+// [<AttributeUsage(AttributeTargets.Class)>]
+// type TablesAttribute( alias : string, ctx : ^T when ^T :> Enum) = 
+//     inherit Attribute()
+//     member _.Value = (alias,  EnumToValue ctx)
 
 
-//[<Table("PaymentsUser", Contexts.Payments)>]
-[<Table("AuthUser", Contexts.Auth)>]
+[<Table("PaymentsUser", Contexts.Payments)>]
+[<Table( "AuthUser" , Contexts.Auth )>]
 type User = 
-    { //[<Column("AuthId", Contexts.Auth)>]
+    { [<Column("AuthId", Contexts.Auth)>]
+      [<Column("PaymentId", Contexts.Payments)>]
       Id : int 
     }
 
 let test_user = {Id = 64}
 
+printfn "The current context is: %A" (Orm.context<User> auth)
+
 printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>))
 printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
-//Orm.columns< User > auth |> printfn "%A"
+Orm.queryBase< User > payments |> printfn "%A"
