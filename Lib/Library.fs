@@ -266,3 +266,95 @@ module Orm =
         |> ignore
 
         exceptionHandler ( cmd.ExecuteNonQuery() )
+
+    
+    type Column< ^T > = 
+        { Name : string 
+          Value : ^T
+        }
+    
+    type Conjunction< ^T > =
+        | First of Column< ^T >
+        | Or of Column< ^T >
+        | And of Column< ^T >
+        
+        member inline this.Compile = 
+            match this with 
+            | First c -> c.Name + " like '%" + c.Value.ToString() + "%'"
+            | Or c -> " or " + c.Name + " like '%" + c.Value.ToString() + "%'"
+            | And c -> " and " + c.Name + " like '%" + c.Value.ToString() + "%'"
+
+    type Clause =
+        | Select of string
+        | From of string
+        | Join of string
+        | Where of string
+        | GroupBy of string
+        | Having of string
+        | OrderBy of string
+        | Take of string
+        | Skip of string
+
+        member this.Value = 
+            match this with 
+            | Select v ->  v
+            | From v -> v
+            | Join v -> v
+            | Where v -> v
+            | GroupBy v -> v
+            | Having v -> v
+            | OrderBy v -> v
+            | Take v -> v
+            | Skip v -> v
+
+    type Predicate =
+        | Equals  of string
+        | NotEquals of string
+        | GThan of string
+        | LThan of string
+        | Is of string
+        | Exists of string
+        | Between of string
+        | In  of string
+        | Like  of string
+        | ILike  of string
+        | All  of string
+        | Any  of string
+        | Some_ of string
+
+    type Desc = T
+
+
+    let inline select< ^T > (state : OrmState) = 
+        Select ( "SELECT " + (String.concat ", " (columns< ^T > state)) )
+    
+    let inline from< ^T > (state : OrmState) = 
+        From ( "FROM " + (table< ^T > state) )
+    
+    let inline where ( columns : Conjunction< _ > list ) = 
+        Where ( "WHERE " +  ( List.map ( fun ( x : Conjunction< _ > ) -> x.Compile ) columns |> List.fold (+) "" ) )
+
+    let inline searchWhere columns value = 
+        Where ( "WHERE CONCAT(" + (String.concat ", " columns ) + ") ILIKE '%" + value + "%'" )
+
+    let inline orderBy (column: Column< _ >) (direction : Desc option)  =
+        OrderBy ( "ORDER BY " + column.Name + 
+            match direction with 
+            | Some _-> "DESC"
+            | None -> ""
+        )
+    let inline skip (num : int) =
+        Skip ( $"OFFSET {num}" )
+
+    let inline take (num : int) =
+        Take ( $"LIMIT {num}" )
+
+    type Query = 
+        { clauses: Clause list }
+        member this.Compile =
+            List.fold ( fun acc ( elem : Clause ) -> if acc = "" then elem.Value else acc + "\n" + elem.Value ) "" this.clauses
+
+    type UnionAll =
+        { queries: Query list }
+        member this.Compile = 
+            List.fold ( fun acc ( elem : Query ) -> if acc = "" then elem.Compile else acc + "\n\nUNION ALL\n\n" + elem.Compile ) "" this.queries

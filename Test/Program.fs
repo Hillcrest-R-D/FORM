@@ -1,4 +1,5 @@
 ﻿open Form
+open Orm
 open dotenv.net
 open System
 open Microsoft.FSharp.Core.LanguagePrimitives
@@ -51,6 +52,12 @@ let test_user = {Id = 64; Login = "Me"; Password = "You!"}
 
 printfn "The current context is: %A" (Orm.context<User> auth)
 
-printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>))
+let query= { clauses = [ 
+                            select<User> auth 
+                            from<User> auth
+                        ] 
+                    }.Compile
+printfn "%A" query
+printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>, false))
 printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
 Orm.queryBase< User > payments |> printfn "queryBase: %A"
