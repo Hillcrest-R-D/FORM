@@ -82,7 +82,6 @@ module Orm =
         | SQLite    ( _, c ) -> c 
 
     let inline attrFold (attrs : DbAttribute array) ( ctx : Enum ) = 
-        printfn "HERE!"
         Array.fold ( fun s (x : DbAttribute) ->  
                 if snd x.Value = ((box(ctx) :?> DbContext) |> EnumToValue) 
                 then fst x.Value
@@ -105,11 +104,9 @@ module Orm =
         //attributes< ^T, TableAttribute > this
 
     let inline columnMapping< ^T > ( this : OrmState ) = 
-        printfn "columnMapping"
         FSharpType.GetRecordFields typedefof< ^T > 
         |> Array.mapi ( fun i x -> 
             let sqlName =  
-                printfn "sqlName";
                 x.GetCustomAttributes(typeof< ColumnAttribute >, false) 
                 |> Array.map ( fun y -> y :?> DbAttribute)
                 |> fun y -> attrFold y (context< ^T > this)  //attributes< ^T, ColumnAttribute> this
@@ -123,17 +120,16 @@ module Orm =
                 Type = x.PropertyType 
                 PropertyInfo = x
             }
-        )
+        ) 
+        |> Array.takeWhile (fun x -> x.SqlName <> "")
 
     let inline table< ^T > ( this : OrmState ) = 
         tableName< ^T > this
     
     let inline mapping< ^T > ( this : OrmState ) = 
-        printfn "mapping"
         columnMapping< ^T > this
 
     let inline columns< ^T > ( this : OrmState ) = 
-        printfn "columns"
         mapping< ^T > this
         |> Array.map ( fun x -> x.SqlName )
         

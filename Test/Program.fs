@@ -37,15 +37,20 @@ let payments = PSQL( "Payments", Contexts.Payments)
 [<Table("PaymentsUser", Contexts.Payments)>]
 [<Table( "AuthUser" , Contexts.Auth )>]
 type User = 
-    { [<Column("AuthId", Contexts.Auth)>]
-      [<Column("PaymentId", Contexts.Payments)>]
+    { [<Column("Id", Contexts.Auth)>]
+      [<Column("Id", Contexts.Payments)>]
       Id : int 
+      [<Column("Login", Contexts.Auth)>]
+      [<Column("Name", Contexts.Payments)>]
+      Login : string
+      [<Column("Password", Contexts.Auth)>]
+      Password : string
     }
 
-let test_user = {Id = 64}
+let test_user = {Id = 64; Login = "Me"; Password = "You!"}
 
 printfn "The current context is: %A" (Orm.context<User> auth)
 
 printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>))
 printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
-Orm.queryBase< User > payments |> printfn "%A"
+Orm.queryBase< User > payments |> printfn "queryBase: %A"
