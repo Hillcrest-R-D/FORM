@@ -64,6 +64,7 @@ let query =
     { clauses = 
         [ select<User>
         ; from<User>
+        ; join<User> [First ("Col1", Equals "2")]
         ] 
     }.Compile auth
 let query2 =

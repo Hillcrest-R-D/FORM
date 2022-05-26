@@ -373,7 +373,8 @@ module Orm =
     let inline from< ^T > (state : OrmState) = 
         From ( "FROM " + (table< ^T > state) )
 
-    //let inline join< ^T > (conjunctions : Conjunction seq) (state : OrmState) = 
+    let inline join< ^T > (conjunctions : Conjunction seq) (state : OrmState) = //JOIN "Payments.User" ON Col1 = Col2 AND Col3 = 5
+        Join ("JOIN " + (table< ^T > state) + " ON " + compile conjunctions)
     
     let inline where ( conditionals : Conjunction seq ) (state : OrmState) = 
         Where ( "WHERE " + compile conditionals )
