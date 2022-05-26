@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "FORM/1.0.0": {
         "dependencies": {
-          "FSharp.Core": "6.0.1",
+          "FSharp.Core": "6.0.2",
           "Microsoft.Data.SqlClient": "4.1.0",
           "Microsoft.Data.Sqlite": "6.0.5",
           "MySqlConnector": "2.1.9",
@@ -52,11 +52,11 @@
           }
         }
       },
-      "FSharp.Core/6.0.1": {
+      "FSharp.Core/6.0.2": {
         "runtime": {
           "lib/netstandard2.1/FSharp.Core.dll": {
             "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.121.52202"
+            "fileVersion": "6.0.221.63103"
           }
         },
         "resources": {
@@ -651,12 +651,12 @@
       "path": "azure.identity/1.3.0",
       "hashPath": "azure.identity.1.3.0.nupkg.sha512"
     },
-    "FSharp.Core/6.0.1": {
+    "FSharp.Core/6.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-VrFAiW8dEEekk+0aqlbvMNZzDvYXmgWZwAt68AUBqaWK8RnoEVUNglj66bZzhs4/U63q0EfXlhcEKnH1sTYLjw==",
-      "path": "fsharp.core/6.0.1",
-      "hashPath": "fsharp.core.6.0.1.nupkg.sha512"
+      "sha512": "sha512-8GZqv6buY71KQlWT+cl2eMi+aNX9xQ61RgI3Pzv9zPxPOX6tWCLRrBj0MYQ3h871r2RhiHUl7f0AXUD/POr8eA==",
+      "path": "fsharp.core/6.0.2",
+      "hashPath": "fsharp.core.6.0.2.nupkg.sha512"
     },
     "Microsoft.Bcl.AsyncInterfaces/1.0.0": {
       "type": "package",

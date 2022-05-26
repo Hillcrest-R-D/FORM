@@ -7,9 +7,9 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 //DotEnv.Load( new DotEnvOptions( envFilePaths = ["../.env"], ignoreExceptions = false ) )
 
 [<Flags>]
-type Contexts   =     
-    | Auth  = 1
-    | Payments  = 2
+type Contexts =     
+    | Auth = 1
+    | Payments = 2
 
 type DbContexts =
     | Auth
@@ -35,8 +35,8 @@ let payments = PSQL( "Payments", Contexts.Payments)
 //     member _.Value = (alias,  EnumToValue ctx)
 
 
-[<Table("PaymentsUser", Contexts.Payments)>]
-[<Table( "AuthUser" , Contexts.Auth )>]
+[<Table("Payments.User", Contexts.Payments)>]
+[<Table( "Auth.User" , Contexts.Auth )>]
 type User = 
     { [<Column("Id", Contexts.Auth)>]
       [<Column("Id", Contexts.Payments)>]
@@ -48,16 +48,45 @@ type User =
       Password : string
     }
 
-let test_user = {Id = 64; Login = "Me"; Password = "You!"}
 
-printfn "The current context is: %A" (Orm.context<User> auth)
 
-let query= { clauses = [ 
-                            select<User> auth 
-                            from<User> auth
-                        ] 
-                    }.Compile
-printfn "%A" query
-printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>, false))
-printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
-Orm.queryBase< User > payments |> printfn "queryBase: %A"
+// 
+// PaymentUser (Id, Name)
+// AuthUser => Paymentuser (Password)
+
+// let test_user = {Id = 64; Login = "Me"; Password = "You!"}
+
+// printfn "The current context is: %A" (Orm.context<User> auth)
+
+// Orm.selectAll< User > auth
+
+let query = 
+    { clauses = 
+        [ select<User>
+        ; from<User>
+        ] 
+    }.Compile auth
+let query2 =
+    { clauses = 
+        [ select<User>
+        ; from<User>
+        ] 
+    }.Compile payments
+printfn "%A\n\n%A" query query2
+// printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>, false))
+// printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
+// Orm.queryBase< User > payments |> printfn "queryBase: %A"
+
+let conditionals = 
+        [ Parenthesize 
+            [ Parenthesize 
+                [ First ("Col1", Equals "1") 
+                ; Or ("Col2", Equals "5")
+                ] 
+            ; And ("Col3", Equals "5")
+            ] 
+        ; Or ("Col4", Equals "0")
+        ]
+
+printfn "%A" conditionals
+printfn "%A" ( conditionals |> compile )

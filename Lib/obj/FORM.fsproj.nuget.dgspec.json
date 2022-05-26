@@ -1,25 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {}
+    "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
+    "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
         "projectName": "FORM",
-        "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
-        "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\obj\\",
+        "projectPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
+        "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\macke\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,7 +41,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[6.0.1, )",
+              "version": "[6.0.2, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {
@@ -75,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
         }
       }
     }

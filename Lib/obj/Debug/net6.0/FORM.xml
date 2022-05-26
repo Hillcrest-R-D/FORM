@@ -11,7 +11,9 @@
 <member name="T:Form.TableAttribute">
 <description>An attribute type which specifies a table name</description>
 </member>
-<member name="T:Form.SchemaAttribute">
+</members>
+</doc>
+.SchemaAttribute">
 <description>An attribute type which specifies a schema name</description>
 </member>
 </members>
