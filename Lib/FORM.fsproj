@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>0.9.9</Version>
+    <Version>0.9.10</Version>
     <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
     <Company>Hillcrest Research and Development</Company>
     <TargetFramework>net6.0</TargetFramework>

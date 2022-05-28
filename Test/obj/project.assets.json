@@ -836,7 +836,7 @@
           }
         }
       },
-      "FORM/1.0.0": {
+      "Form/0.9.9": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
@@ -847,10 +847,10 @@
           "npgsql": "6.0.4"
         },
         "compile": {
-          "bin/placeholder/FORM.dll": {}
+          "bin/placeholder/Form.dll": {}
         },
         "runtime": {
-          "bin/placeholder/FORM.dll": {}
+          "bin/placeholder/Form.dll": {}
         }
       }
     }
@@ -2795,7 +2795,7 @@
         "version.txt"
       ]
     },
-    "FORM/1.0.0": {
+    "Form/0.9.9": {
       "type": "project",
       "path": "../Lib/FORM.fsproj",
       "msbuildProject": "../Lib/FORM.fsproj"
@@ -2803,8 +2803,8 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "FORM >= 1.0.0",
       "FSharp.Core >= 6.0.1",
+      "Form >= 0.9.9",
       "dotenv.net >= 3.1.1"
     ]
   },

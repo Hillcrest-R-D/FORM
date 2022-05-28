@@ -60,14 +60,14 @@ type OrmState =
     | SQLite    of ( string * Enum )
 
 module Orm = 
-    let inline connection< ^T > ( this : OrmState ) : DbConnection = 
+    let inline connection ( this : OrmState ) : DbConnection = 
         match this with 
         | MSSQL     ( str, _ ) -> new SqlConnection( str ) 
         | MySQL     ( str, _ ) -> new MySqlConnection( str )
         | PSQL      ( str, _ ) -> new NpgsqlConnection( str )
         | SQLite    ( str, _ ) -> new SqliteConnection( str )
 
-    let inline sqlQuote< ^T > str ( this : OrmState ) =
+    let inline sqlQuote str ( this : OrmState ) =
         match this with 
         | MSSQL _ -> $"[{str}]"
         | MySQL _ -> $"`{str}`"
@@ -99,7 +99,7 @@ module Orm =
                 attrFold attrs (context< ^T > this)
         
         name.Split(".")
-        |> Array.map ( fun x -> sqlQuote< ^T > x this)
+        |> Array.map ( fun x -> sqlQuote x this)
         |> String.concat "."
         
 
@@ -112,7 +112,7 @@ module Orm =
                 |> fun y -> attrFold y (context< ^T > this)  //attributes< ^T, ColumnAttribute> this
                 |> fun y -> if y = "" then x.Name else y 
             let fsharpName = x.Name
-            let quotedName = sqlQuote< ^T > sqlName this
+            let quotedName = sqlQuote sqlName this
             { 
                 Index = i
                 SqlName = sqlName
@@ -183,7 +183,7 @@ module Orm =
         
         $"insert into {tableName}( {columnNames} ) values ( {placeHolders} )" 
     
-    let inline makeCommand< ^T > ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
+    let inline makeCommand ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
         // printfn "%A" query
         match this with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
@@ -191,22 +191,22 @@ module Orm =
         | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection)
         | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection)
 
-    let inline execute< ^T > sql  ( this : OrmState ) =
-        use conn = connection< ^T > this
+    let inline execute sql  ( this : OrmState ) =
+        use conn = connection this
         conn.Open()
-        use cmd = makeCommand< ^T > sql conn this
+        use cmd = makeCommand sql conn this
         cmd.ExecuteNonQuery()
     
-    let inline executeReader< ^T > sql f  ( this : OrmState ) =
-        use conn = connection< ^T > this
+    let inline executeReader sql f  ( this : OrmState ) =
+        use conn = connection this
         conn.Open()
-        use cmd = makeCommand< ^T > sql conn this
+        use cmd = makeCommand sql conn this
         use reader = cmd.ExecuteReader()
-        f reader 
+        f reader this
     
     let inline queryBase< ^T >  ( this : OrmState ) = 
         printfn "No over here!"
-        let cols = columns< ^T > this |> Array.map ( fun x -> sqlQuote< ^T > x this )
+        let cols = columns< ^T > this |> Array.map ( fun x -> sqlQuote x this )
         printfn "Done with cols: %A" cols
         ( String.concat ", " cols ) + " from " + table< ^T > this
 
@@ -218,20 +218,20 @@ module Orm =
 
     
     let inline selectLimit< ^T > lim  ( this : OrmState ) = 
-        use conn = connection< ^T > this
+        use conn = connection this
         conn.Open()
         let queryBase = 
             queryBase< ^T > this
         let query = 
             $"select top {lim} {queryBase}"
 
-        use cmd = makeCommand< ^T > query conn this
+        use cmd = makeCommand query conn this
         use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
 
         exceptionHandler ( generateReader< ^T > reader this )
 
     let inline selectWhere< ^T > where  ( this : OrmState ) = 
-        use conn = connection< ^T > this
+        use conn = connection this
         conn.Open()
         let queryBase = 
             queryBase< ^T > this
@@ -239,26 +239,26 @@ module Orm =
         let query = 
             $"select {queryBase} where {where}"
 
-        use cmd = makeCommand< ^T > query conn this
+        use cmd = makeCommand query conn this
         use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
         exceptionHandler ( generateReader< ^T > reader this )
         
     let inline selectAll< ^T >  ( this : OrmState ) = 
-        use conn = connection< ^T > this
+        use conn = connection this
         conn.Open()
         let queryBase = 
             queryBase< ^T > this
         let query = 
             $"select {queryBase}"
-        use cmd = makeCommand< ^T > query conn this
+        use cmd = makeCommand query conn this
         use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
         exceptionHandler ( generateReader< ^T > reader this )
 
     let inline insert< ^T > ( instance : ^T )  ( this : OrmState ) =
-        use connection = connection< ^T > this
+        use connection = connection this
         connection.Open()
         let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
-        use cmd = makeCommand< ^T > query connection this
+        use cmd = makeCommand query connection this
         
         mapping< ^T > this
         |> Seq.map ( fun x -> 
@@ -325,20 +325,20 @@ module Orm =
         // | Any of ( Predicate * string )
         // | Some_ of ( Predicate * string )
 
-        member this.Value = 
+        member this.Value (state : OrmState) = 
             match this with 
-            | Equals v -> "= " + v
-            | NotEquals v -> "<> " + v
-            | GreaterThan v -> "> " + v
-            | GreaterThanOrEqualTo v -> ">= " + v
-            | LessThan v -> "< " + v
-            | LessThanOrEqualTo v -> "<= " + v
-            | Is v -> "IS " + v
-            | Exists v -> "EXISTS " + v
-            | Between v -> "BETWEEN " + v
-            | In v -> "IN " + v
-            | Like v -> "LIKE " + v
-            | ILike v -> "ILIKE " + v
+            | Equals v -> "= " + v 
+            | NotEquals v -> "<> " + v 
+            | GreaterThan v -> "> " + v 
+            | GreaterThanOrEqualTo v -> ">= " + v 
+            | LessThan v -> "< " + v 
+            | LessThanOrEqualTo v -> "<= " + v 
+            | Is v -> "IS " + v 
+            | Exists v -> "EXISTS " + v 
+            | Between v -> "BETWEEN " + v 
+            | In v -> "IN " + v 
+            | Like v -> "LIKE " + v 
+            | ILike v -> "ILIKE " + v 
 
     type Order =
         | Descending
@@ -352,20 +352,20 @@ module Orm =
         | And of ( string * Predicate )
         | Parenthesize of Conjunction seq
 
-        member this.Compile = 
+        member this.Compile ( state : OrmState ) = 
             match this with 
-            | First ( c, pred ) -> $"{c} {pred.Value}"
-            | Or ( c, pred ) -> $" OR {c} {pred.Value}"
-            | And ( c, pred ) -> $" AND {c} {pred.Value}"
+            | First ( c, pred ) -> $"{sqlQuote c state} {pred.Value state}"
+            | Or ( c, pred ) -> $" OR {sqlQuote c state} {pred.Value state}"
+            | And ( c, pred ) -> $" AND {sqlQuote c state} {pred.Value state}"
             | Parenthesize cons -> 
                 cons
-                |> Seq.map ( fun x -> x.Compile ) 
+                |> Seq.map ( fun x -> x.Compile state ) 
                 |> Seq.fold ( fun acc x -> acc + x ) "( "
                 |> fun x -> x + " )"
 
-    let compile ( conjunctions : Conjunction seq ) = 
+    let compile ( conjunctions : Conjunction seq ) ( state : OrmState  ) = 
         conjunctions
-        |> Seq.map ( fun x -> x.Compile )
+        |> Seq.map ( fun x -> x.Compile state )
         |> String.concat " "
 
     let inline select< ^T > (state : OrmState) = 
@@ -375,10 +375,10 @@ module Orm =
         From ( "FROM " + (table< ^T > state) )
 
     let inline join< ^T > (conjunctions : Conjunction seq) (state : OrmState) = //JOIN "Payments.User" ON Col1 = Col2 AND Col3 = 5
-        Join ("JOIN " + (table< ^T > state) + " ON " + compile conjunctions)
+        Join ("JOIN " + (table< ^T > state) + " ON " + compile conjunctions state)
     
-    let inline where ( conditionals : Conjunction seq ) (state : OrmState) = 
-        Where ( "WHERE " + compile conditionals )
+    let inline where ( conjunctions : Conjunction seq ) (state : OrmState) = 
+        Where ( "WHERE " + compile conjunctions state )
     
     let inline groupBy ( cols: string seq ) (state : OrmState) = 
         GroupBy ( "GROUP BY " + ( String.concat ", " cols ) )
