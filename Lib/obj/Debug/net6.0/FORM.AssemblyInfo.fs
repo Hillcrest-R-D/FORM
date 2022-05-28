@@ -7,11 +7,11 @@ open System
 open System.Reflection
 
 
-[<assembly: System.Reflection.AssemblyCompanyAttribute("FORM")>]
+[<assembly: System.Reflection.AssemblyCompanyAttribute("Hillcrest Research and Development")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
-[<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")>]
+[<assembly: System.Reflection.AssemblyFileVersionAttribute("0.9.9.0")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.9.9")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("FORM")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("FORM")>]
-[<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]
+[<assembly: System.Reflection.AssemblyVersionAttribute("0.9.9.0")>]
 do()

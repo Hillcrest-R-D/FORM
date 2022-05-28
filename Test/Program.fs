@@ -8,26 +8,17 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 
 [<Flags>]
 type Contexts =     
-    | Auth = 1
-    | Payments = 2
+    | TestContext1 = 1
+    | TestContext2 = 2
 
-type DbContexts =
-    | Auth
-    | Payments
 
-let unionAsString case = 
-    match case with
-    | Auth -> "Auth"
-    | Payments -> "Payments"
 
-printfn "%A" ((box(Contexts.Payments) :?> DbContext))
 
-// type TestContext =
-//     | Auth // of DbContext
-//     | Payments // of DbContext
-// let [<Literal>] context = TestContext()
-let auth = PSQL( "Auth", Contexts.Auth )
-let payments = PSQL( "Payments", Contexts.Payments)
+printfn "%A" ((box(Contexts.TestContext2) :?> DbContext))
+
+
+let testState1 = PSQL( "TestContext1", Contexts.TestContext1 )
+let testState2 = PSQL( "TestContext2", Contexts.TestContext2)
 
 // [<AttributeUsage(AttributeTargets.Class)>]
 // type TablesAttribute( alias : string, ctx : ^T when ^T :> Enum) = 
@@ -35,30 +26,22 @@ let payments = PSQL( "Payments", Contexts.Payments)
 //     member _.Value = (alias,  EnumToValue ctx)
 
 
-[<Table("Payments.User", Contexts.Payments)>]
-[<Table( "Auth.User" , Contexts.Auth )>]
+[<Table("TestContext2.User", Contexts.TestContext2)>]
+[<Table( "TestContext1.User" , Contexts.TestContext1 )>]
 type User = 
-    { [<Column("Id", Contexts.Auth)>]
-      [<Column("Id", Contexts.Payments)>]
+    { [<Column("Id", Contexts.TestContext1)>]
+      [<Column("Id", Contexts.TestContext2)>]
       Id : int 
-      [<Column("Login", Contexts.Auth)>]
-      [<Column("Name", Contexts.Payments)>]
+      [<Column("Login", Contexts.TestContext1)>]
+      [<Column("Name", Contexts.TestContext2)>]
       Login : string
-      [<Column("Password", Contexts.Auth)>]
+      [<Column("Password", Contexts.TestContext1)>]
       Password : string
     }
 
 
 
-// 
-// PaymentUser (Id, Name)
-// AuthUser => Paymentuser (Password)
 
-// let test_user = {Id = 64; Login = "Me"; Password = "You!"}
-
-// printfn "The current context is: %A" (Orm.context<User> auth)
-
-// Orm.selectAll< User > auth
 
 let query = 
     { clauses = 
@@ -66,17 +49,17 @@ let query =
         ; from<User>
         ; join<User> [First ("Col1", Equals "2")]
         ] 
-    }.Compile auth
+    }.Compile testState1
 let query2 =
     { clauses = 
         [ select<User>
         ; from<User>
         ] 
-    }.Compile payments
+    }.Compile testState2
 printfn "%A\n\n%A" query query2
-// printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>, false))
-// printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
-// Orm.queryBase< User > payments |> printfn "queryBase: %A"
+printfn "%A" (System.Attribute.GetCustomAttributes(typedefof<User>, typedefof<TableAttribute>, false))
+printfn "%A" (typedefof<User>.GetCustomAttributes(typedefof<TableAttribute>,false))
+Orm.queryBase< User > testState2 |> printfn "queryBase: %A"
 
 let conditionals = 
         [ Parenthesize 

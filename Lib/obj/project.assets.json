@@ -2769,10 +2769,10 @@
     "C:\\Users\\macke\\.nuget\\packages\\": {}
   },
   "project": {
-    "version": "1.0.0",
+    "version": "0.9.9",
     "restore": {
       "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
-      "projectName": "FORM",
+      "projectName": "Form",
       "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
       "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\obj\\",

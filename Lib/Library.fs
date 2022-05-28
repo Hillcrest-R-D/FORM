@@ -138,16 +138,17 @@ module Orm =
         mapping< ^T > this
         |> Array.map ( fun x -> x.FSharpName )
     
-    let inline toOptionDynamic< ^T > (typ: Type) (value: obj)  ( _ : OrmState ) =
-        let opttyp = typedefof<Option<_>>.MakeGenericType([|typ|])
-        let tag, varr = if DBNull.Value.Equals(value) then 0, [||] else 1, [|value|]
-        let case = FSharpType.GetUnionCases(opttyp) |> Seq.find (fun uc -> uc.Tag = tag)
-        FSharpValue.MakeUnion(case, varr)
+    let inline toOption< ^T > (type_: Type) (value: obj)  ( _ : OrmState ) =
+        let tag, variable = if DBNull.Value.Equals(value) then 0, [||] else 1, [|value|]
+        let optionType = typedefof<Option<_>>.MakeGenericType([|type_|])
+        let case = FSharpType.GetUnionCases(optionType) |> Seq.find (fun info -> info.Tag = tag)
+        FSharpValue.MakeUnion(case, variable)
+    
 
-    let inline optionTypeArg< ^T > (typ : Type)  ( _ : OrmState ) =
-        let isOp = typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<Option<_>>
-        if isOp 
-        then Some (typ.GetGenericArguments()[0]) 
+
+    let inline optionType< ^T > (type_ : Type)  ( _ : OrmState ) =
+        if type_.IsGenericType && type_.GetGenericTypeDefinition() = typedefof<Option<_>>
+        then Some (type_.GetGenericArguments() |> Array.head) // optionType Option<User> -> User  
         else None
     
     let inline generateReader< ^T > ( reader : IDataReader )  ( this : OrmState ) = 
@@ -162,8 +163,8 @@ module Orm =
                     // |> fun x -> printfn "%A" x; x
                     |> Seq.sortBy (fun (n, _) ->  fields[n].Index )
                     |> Seq.map (fun (n, v) -> 
-                        match optionTypeArg< ^T > fields[n].Type this with
-                        | Some t -> toOptionDynamic< ^T > t v this
+                        match optionType< ^T > fields[n].Type this with
+                        | Some t -> toOption< ^T > t v this
                         | None   -> v
                     )
                     |> Seq.toArray
