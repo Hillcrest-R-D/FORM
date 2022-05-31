@@ -33,7 +33,7 @@ type User =
     }
 ```
 
-**Table** and **Column** attributes take a name and a context. The name must match that of the relevant object in the database which is referred to by the given context; that is to say, the **User** type refers to a table called "User" in Database1, and "Users" in Database2. If no attribute is given, the underlying logic will default to the name of the type/field, so if you use the same names in your project and your database(s), no **Table** attribute is necessary; i.e., the "Id" field will be assumed to map to an "Id" field in both the "User" table in **Database1**, and the same in the "Users" table in **Database2**.
+**Table** and **Column** attributes take a name and a context. The name must match that of the relevant object in the database which is referred to by the given context; that is to say, the **User** type refers to a table called "User" in Database1, and "Users" in Database2. If no attribute is given, the underlying logic will default to the name of the type/field, so if you use the same names in your project and your database(s), no **Table**/**Column** attribute is necessary; i.e., the "Id" field will be assumed to map to an "Id" field in both the "User" table in **Database1**, and the same in the "Users" table in **Database2**.
 
 Before we connect, we must also declare some OrmStates. We will need one for each context:
 
