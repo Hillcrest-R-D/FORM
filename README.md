@@ -38,20 +38,11 @@ type User =
 Before we connect, we must also declare some OrmStates. We will need one for each context:
 
 ```fsharp
-let db1State = PSQL("DB1", Contexts.Database1)
-let db1State = MSSQL("DB2", Contexts.Database2)
+let db1State = PSQL(db1ConnectionString, Contexts.Database1)
+let db2State = MSSQL(db2ConnectionString, Contexts.Database2)
 ```
 
-We don't know why you would want to have a project spread over databases of different flavors (here we have one in Postgres and one in SQL Server), but we provide this functionality just in case.
-
-Next, we connect to our databases:
-
-```fsharp
-let db1 = connection database1ConnectionString
-let db2 = connection database2ConnectionString
-```
-
-The connection strings should just be given as strings, deliver these however you see fit (we recommend either putting them in a .env file or setting an environmental variable the will deliver the connection string, we may add some helper functions for this later).
+The connection strings should just be given as strings, deliver these however you see fit (we recommend either putting them in a .env file or setting an environmental variable the will deliver the connection string, we may add some helper functions for this later). 
 
 Now we can do some querying:
 
