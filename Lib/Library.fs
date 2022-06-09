@@ -53,6 +53,7 @@ type SqlMapping = {
     PropertyInfo: PropertyInfo
 }
 
+///<description>Stores the flavor and context used for a particular connection.</description>
 type OrmState = 
     | MSSQL     of ( string * Enum )
     | MySQL     of ( string * Enum )
@@ -60,6 +61,7 @@ type OrmState =
     | SQLite    of ( string * Enum )
 
 module Orm = 
+    ///<description>Stores the flavor and context used for a particular connection.</description>
     let inline connection ( this : OrmState ) : DbConnection = 
         match this with 
         | MSSQL     ( str, _ ) -> new SqlConnection( str ) 
@@ -120,7 +122,7 @@ module Orm =
                 FSharpName = fsharpName
                 Type = x.PropertyType 
                 PropertyInfo = x
-            }
+            } 
         ) 
         //|> Array.takeWhile (fun x -> x.SqlName <> "")
 
@@ -160,7 +162,6 @@ module Orm =
         seq { while reader.Read() do
                 yield seq { 0..reader.FieldCount-1 }
                     |> Seq.map (fun i -> reader.GetName(i), reader.GetValue(i) )
-                    // |> fun x -> printfn "%A" x; x
                     |> Seq.sortBy (fun (n, _) ->  fields[n].Index )
                     |> Seq.map (fun (n, v) -> 
                         match optionType< ^T > fields[n].Type this with
@@ -171,11 +172,13 @@ module Orm =
                     |> makeEntity } 
         |> Seq.toArray
 
-    let inline makeInsert< ^T > tableName columns  ( _ : OrmState ) =
+    let inline makeInsert< ^T > tableName columns  ( this : OrmState ) =
         let placeHolders = 
             columns 
-            |> Seq.map ( fun _ -> 
-                "?"
+            |> Seq.mapi ( fun i _ -> 
+                match this with 
+                | PSQL _ -> $"${i+1}"
+                | _ -> "?"
             )
             |> String.concat ", "
         let columnNames =
@@ -184,7 +187,6 @@ module Orm =
         $"insert into {tableName}( {columnNames} ) values ( {placeHolders} )" 
     
     let inline makeCommand ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
-        // printfn "%A" query
         match this with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection)
@@ -202,12 +204,10 @@ module Orm =
         conn.Open()
         use cmd = makeCommand sql conn this
         use reader = cmd.ExecuteReader()
-        f reader this
+        f reader
     
     let inline queryBase< ^T >  ( this : OrmState ) = 
-        printfn "No over here!"
-        let cols = columns< ^T > this |> Array.map ( fun x -> sqlQuote x this )
-        printfn "Done with cols: %A" cols
+        let cols = columns< ^T > this 
         ( String.concat ", " cols ) + " from " + table< ^T > this
 
     let inline exceptionHandler f =
@@ -250,9 +250,19 @@ module Orm =
             queryBase< ^T > this
         let query = 
             $"select {queryBase}"
+            
         use cmd = makeCommand query conn this
         use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
         exceptionHandler ( generateReader< ^T > reader this )
+
+
+    let inline makeParameter (this : OrmState) : DbParameter =
+        match this with
+        | MSSQL _ -> SqlParameter()
+        | MySQL _ -> MySqlParameter()
+        | PSQL _ -> NpgsqlParameter()
+        | SQLite _ -> SqliteParameter()
+        
 
     let inline insert< ^T > ( instance : ^T )  ( this : OrmState ) =
         use connection = connection this
@@ -261,10 +271,21 @@ module Orm =
         use cmd = makeCommand query connection this
         
         mapping< ^T > this
-        |> Seq.map ( fun x -> 
-            cmd.Parameters.Add( x.PropertyInfo.GetValue( instance ) )
-        )
-        |> ignore
+        |> fun x -> printfn "%A" x; x
+        |> Array.map ( fun x -> 
+            let param = 
+                if (x.PropertyInfo.GetValue( instance )) = null then 
+                    //DbValue.null
+                    let mutable tmp = NpgsqlParameter()
+                    tmp.IsNullable <- true
+                    tmp.Value <- DBNull.Value
+                    tmp
+                else 
+                    let mutable tmp = NpgsqlParameter()
+                    tmp.Value <- (x.PropertyInfo.GetValue( instance ))
+                    tmp
+            cmd.Parameters.Add ( param )
+        ) |> ignore
 
         exceptionHandler ( cmd.ExecuteNonQuery() )
 
