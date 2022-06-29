@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "FORM/0.9.10": {
+      "FORM/0.9.13": {
         "dependencies": {
           "FSharp.Core": "6.0.1",
           "Microsoft.Data.SqlClient": "4.1.0",
@@ -632,7 +632,7 @@
     }
   },
   "libraries": {
-    "FORM/0.9.10": {
+    "FORM/0.9.13": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

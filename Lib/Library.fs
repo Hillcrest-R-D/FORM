@@ -276,12 +276,12 @@ module Orm =
             let param = 
                 if (x.PropertyInfo.GetValue( instance )) = null then 
                     //DbValue.null
-                    let mutable tmp = NpgsqlParameter()
+                    let mutable tmp = makeParameter this
                     tmp.IsNullable <- true
                     tmp.Value <- DBNull.Value
                     tmp
                 else 
-                    let mutable tmp = NpgsqlParameter()
+                    let mutable tmp = makeParameter this
                     tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                     tmp
             cmd.Parameters.Add ( param )
@@ -440,3 +440,11 @@ module Orm =
         { queries: Query list }
         member this.Compile ( state : OrmState ) =
             List.fold ( fun acc ( elem : Query ) -> if acc = "" then elem.Compile state else acc + "\n\nUNION ALL\n\n" + elem.Compile state ) "" this.queries
+
+
+
+    type IDataTransferObject =
+        class
+        end
+
+        
