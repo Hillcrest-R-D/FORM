@@ -99,12 +99,16 @@ type OrmState =
 
 module Orm = 
     ///<description>Stores the flavor and context used for a particular connection.</description>
-    let inline connection ( this : OrmState ) : DbConnection = 
-        match this with 
-        | MSSQL     ( str, _ ) -> new SqlConnection( str ) 
-        | MySQL     ( str, _ ) -> new MySqlConnection( str )
-        | PSQL      ( str, _ ) -> new NpgsqlConnection( str )
-        | SQLite    ( str, _ ) -> new SqliteConnection( str )
+    let inline connect ( this : OrmState ) : Result< DbConnection, exn > = 
+        try 
+            match this with 
+            | MSSQL     ( str, _ ) -> new SqlConnection( str ) :> DbConnection
+            | MySQL     ( str, _ ) -> new MySqlConnection( str ) :> DbConnection
+            | PSQL      ( str, _ ) -> new NpgsqlConnection( str ) :> DbConnection
+            | SQLite    ( str, _ ) -> new SqliteConnection( str ) :> DbConnection
+            |> Ok
+        with 
+        | exn -> Error exn
 
     let inline sqlQuote str ( this : OrmState ) =
         match this with 
@@ -229,17 +233,26 @@ module Orm =
         | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection)
 
     let inline execute sql  ( this : OrmState ) =
-        use conn = connection this
-        conn.Open()
-        use cmd = makeCommand sql conn this
-        cmd.ExecuteNonQuery()
+        match connect this with 
+        | Ok conn -> 
+            conn.Open()
+            use cmd = makeCommand sql conn this
+            let result = cmd.ExecuteNonQuery()
+            conn.Close()
+            Ok result
+        | Error e -> Error e
     
     let inline executeReader sql f  ( this : OrmState ) =
-        use conn = connection this
-        conn.Open()
-        use cmd = makeCommand sql conn this
-        use reader = cmd.ExecuteReader()
-        f reader
+        match connect this with
+        | Ok conn -> 
+            conn.Open()
+            use cmd = makeCommand sql conn this
+            use reader = cmd.ExecuteReader()
+            let result = f reader
+            conn.Close()
+            result
+        | Error e -> Error e
+        
     
     let inline queryBase< ^T >  ( this : OrmState ) = 
         let cols = columns< ^T > this 
@@ -249,48 +262,57 @@ module Orm =
         try 
             Ok f
         with 
-        | exn -> Error {| Message = exn.ToString() |}
+        | exn -> Error exn
 
     
     let inline selectLimit< ^T > lim  ( this : OrmState ) = 
-        use conn = connection this
-        conn.Open()
-        let queryBase = 
-            queryBase< ^T > this
-        let query = 
-            $"select top {lim} {queryBase}"
+        match connect this with 
+        | Ok conn -> 
+            conn.Open()
+            let queryBase = 
+                queryBase< ^T > this
+            let query = 
+                $"select top {lim} {queryBase}"
 
-        use cmd = makeCommand query conn this
-        use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
-
-        exceptionHandler ( generateReader< ^T > reader this )
+            use cmd = makeCommand query conn this
+            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
+            
+            let result = exceptionHandler ( generateReader< ^T > reader this )
+            result
+        | Error e -> Error e
 
     let inline selectWhere< ^T > where  ( this : OrmState ) = 
-        use conn = connection this
-        conn.Open()
-        let queryBase = 
-            queryBase< ^T > this
-        
-        let query = 
-            $"select {queryBase} where {where}"
+        match connect this with
+        | Ok conn -> 
+            conn.Open()
+            let queryBase = 
+                queryBase< ^T > this
+            
+            let query = 
+                $"select {queryBase} where {where}"
+            use cmd = makeCommand query conn this
+            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
+            let result = exceptionHandler ( generateReader< ^T > reader this )
+            result
+        | Error e -> Error e
 
-        use cmd = makeCommand query conn this
-        use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
-        exceptionHandler ( generateReader< ^T > reader this )
+        
         
     let inline selectAll< ^T >  ( this : OrmState ) = 
-        use conn = connection this
-        conn.Open()
-        let queryBase = 
-            queryBase< ^T > this
-        let query = 
-            $"select {queryBase}"
-            
-        use cmd = makeCommand query conn this
-        use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
-        exceptionHandler ( generateReader< ^T > reader this )
-
-
+        match connect this with 
+        | Ok conn -> 
+            conn.Open()
+            let queryBase = 
+                queryBase< ^T > this
+            let query = 
+                $"select {queryBase}"
+                
+            use cmd = makeCommand query conn this
+            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
+            let result = exceptionHandler ( generateReader< ^T > reader this )
+            result
+        | Error e -> Error e
+        
     let inline makeParameter (this : OrmState) : DbParameter =
         match this with
         | MSSQL _ -> SqlParameter()
@@ -300,33 +322,80 @@ module Orm =
         
 
     let inline insert< ^T > ( instance : ^T )  ( this : OrmState ) =
-        use connection = connection this
-        connection.Open()
-        let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
-        use cmd = makeCommand query connection this
         
-        mapping< ^T > this
-        |> fun x -> printfn "%A" x; x
-        |> Array.mapi ( fun index x -> 
-            let param = 
-                if (x.PropertyInfo.GetValue( instance )) = null then 
-                    //DbValue.null
-                    let mutable tmp = makeParameter this
-                    tmp.ParameterName <- sprintf "?%d" ( index + 1 )
-                    tmp.IsNullable <- true
-                    tmp.Value <- DBNull.Value
-                    tmp
-                else 
-                    let mutable tmp = makeParameter this
-                    tmp.ParameterName <- sprintf "?%d" ( index + 1 )
-                    tmp.Value <- (x.PropertyInfo.GetValue( instance ))
-                    tmp
-            cmd.Parameters.Add ( param )
-        ) |> ignore
+        match connect this with
+        | Ok conn ->
+            conn.Open()
+            let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
+            use cmd = makeCommand query conn this
+            
+            mapping< ^T > this
+            // |> fun x -> printfn "%A" x; x
+            |> Array.mapi ( fun index x -> 
+                let param = 
+                    if (x.PropertyInfo.GetValue( instance )) = null then 
+                        //DbValue.null
+                        let mutable tmp = makeParameter this
+                        tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                        tmp.IsNullable <- true
+                        tmp.Value <- DBNull.Value
+                        tmp
+                    else 
+                        let mutable tmp = makeParameter this
+                        tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                        tmp.Value <- (x.PropertyInfo.GetValue( instance ))
+                        tmp
+                cmd.Parameters.Add ( param )
+            ) |> ignore
 
-        exceptionHandler ( cmd.ExecuteNonQuery() )
+            let result = exceptionHandler ( cmd.ExecuteNonQuery() )
+            conn.Close()
+            result
+        | Error e -> Error e
 
+    let inline insertAll< ^T > ( instances : ^T seq )  ( this : OrmState ) =
+        match connect this with
+        | Ok conn -> 
+            conn.Open()
+            let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
+            use cmd = makeCommand query conn this
+            
+            let result = 
+                instances
+                |> Seq.map ( fun instance -> 
+                    mapping< ^T > this
+                    |> fun x -> printfn "%A" x; x
+                    |> Array.mapi ( fun index x -> 
+                        let param = 
+                            if (x.PropertyInfo.GetValue( instance )) = null then 
+                                //DbValue.null
+                                let mutable tmp = makeParameter this
+                                tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                                tmp.IsNullable <- true
+                                tmp.Value <- DBNull.Value
+                                tmp
+                            else 
+                                let mutable tmp = makeParameter this
+                                tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                                tmp.Value <- (x.PropertyInfo.GetValue( instance ))
+                                tmp
+                        cmd.Parameters.Add ( param )
+                    ) |> ignore                
+
+                    exceptionHandler ( cmd.ExecuteNonQuery() )
+                )
+                |> Seq.fold ( fun accumulator element -> 
+                    match accumulator, element with 
+                    | Ok a, Ok i -> Ok ( a + i )
+                    | Error e, _ -> Error e 
+                    | _, Error e -> Error e 
+                ) ( Ok 0 )
     
+            conn.Close()
+            result
+        | Error e -> Error e
+
+
     type Column< ^T > = 
         { Name : string 
           Value : ^T

@@ -1,10 +1,10 @@
-c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfoInputs.cache
-c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfo.fs
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\bin\Debug\net6.0\FORM.deps.json
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\bin\Debug\net6.0\FORM.dll
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\bin\Debug\net6.0\FORM.pdb
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\bin\Debug\net6.0\FORM.xml
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.fsproj.AssemblyReference.cache
+C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfoInputs.cache
+C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfo.fs
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.dll
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.xml
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.pdb
