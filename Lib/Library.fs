@@ -15,6 +15,24 @@ open Microsoft.FSharp.Core.LanguagePrimitives
 type DbContext =
     | Default = 99
  
+type Key =
+    | Primary = 1
+    // | Foreign = 2
+    | Alternate = 3
+    | Composite = 4
+    | Super = 5
+    | Candidate = 6
+    | Unique = 7 
+    // static member Value =
+    //     function
+    //     | Primary -> "1"
+    //     | Foreign -> "2"
+    //     | Alternate -> "3"
+    //     | Composite -> "4"
+    //     | Super -> "5"
+    //     | Candidate -> "6"
+    //     | Unique -> "7"
+
 type ContextInfo = (string * DbContext) array
 
 [<AbstractClass>]
@@ -33,27 +51,34 @@ type DbAttribute() =
 [<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
 type TableAttribute( alias : string , context : obj) = 
     inherit DbAttribute()
-    override _.Value = (alias, (box(context) :?> DbContext)  |> EnumToValue)
-    member _.Context = (box(context) :?> DbContext)  |> EnumToValue
+    override _.Value = (alias, (context :?> DbContext)  |> EnumToValue)
+    member _.Context = (context :?> DbContext)  |> EnumToValue
 
 
 ///<description>An attribute type which specifies a column name</description>
 [<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
 type ColumnAttribute( alias : string, context : obj) = 
     inherit DbAttribute()
-    override _.Value = (alias,  (box(context) :?> DbContext)  |> EnumToValue)
+    override _.Value = (alias,  (context :?> DbContext)  |> EnumToValue)
 
 ///<description>An attribute type which specifies a column name</description>
 [<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type KeyAttribute( column : string, context : obj) = 
+type KeyAttribute( key : obj, context : obj) = 
     inherit DbAttribute()
-    override _.Value = (column,  (box(context) :?> DbContext)  |> EnumToValue)
-
-///<description>An attribute type which specifies a column name</description>
+    override _.Value = (unbox<string> key,  (context :?> DbContext)  |> EnumToValue)
+    member _.Key = key
+    
 [<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ConstraintAttribute( alias : string, context : obj) = 
+type ConstraintAttribute( definition : string, context : obj) = 
     inherit DbAttribute()
-    override _.Value = (alias,  (box(context) :?> DbContext)  |> EnumToValue)
+    override _.Value = (definition,  (context :?> DbContext)  |> EnumToValue)
+
+[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
+type SQLTypeAttribute( definition : string, context : obj) = 
+    inherit DbAttribute()
+    override _.Value = (definition,  (context :?> DbContext)  |> EnumToValue)
+    
+
     
 ///<description>A record type which holds the information required to map across BE and DB. </description>
 type SqlMapping = { 
@@ -157,8 +182,6 @@ module Orm =
         let optionType = typedefof<Option<_>>.MakeGenericType([|type_|])
         let case = FSharpType.GetUnionCases(optionType) |> Seq.find (fun info -> info.Tag = tag)
         FSharpValue.MakeUnion(case, variable)
-    
-
 
     let inline optionType< ^T > (type_ : Type)  ( _ : OrmState ) =
         if type_.IsGenericType && type_.GetGenericTypeDefinition() = typedefof<Option<_>>
@@ -462,3 +485,10 @@ module Orm =
         end
 
         
+///<description>An attribute type which specifies a column name</description>
+[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
+type ForeignKeyAttribute( table : ^T, column : string, context : obj) = 
+    inherit DbAttribute()
+    override _.Value = (column,  (box(context) :?> DbContext)  |> EnumToValue)
+    member _.Table = table
+    member _.column = table 
