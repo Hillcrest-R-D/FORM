@@ -130,6 +130,31 @@
               "version": "[6.0.5, )",
               "generatePathProperty": true
             },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.1.0, )",
+              "generatePathProperty": true
+            },
+            "NUnit": {
+              "target": "Package",
+              "version": "[3.13.3, )",
+              "generatePathProperty": true
+            },
+            "NUnit.Analyzers": {
+              "target": "Package",
+              "version": "[3.3.0, )",
+              "generatePathProperty": true
+            },
+            "NUnit3TestAdapter": {
+              "target": "Package",
+              "version": "[4.2.1, )",
+              "generatePathProperty": true
+            },
+            "coverlet.collector": {
+              "target": "Package",
+              "version": "[3.1.2, )",
+              "generatePathProperty": true
+            },
             "dotenv.net": {
               "target": "Package",
               "version": "[3.1.1, )",
