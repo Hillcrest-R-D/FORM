@@ -21,8 +21,6 @@ type ContextInfo = (string * DbContext) array
 type DbAttribute() = 
     inherit Attribute()
     abstract Value : (string * int)
-
-//[<Abstract]
     
 // ///<description>An attribute type which specifies a schema name</description>
 // [<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
