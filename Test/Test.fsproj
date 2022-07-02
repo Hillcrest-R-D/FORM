@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Compile Include="Setup.fs" />
-    <Compile Include="UnitTest1.fs" />
+    <Compile Include="Orm.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

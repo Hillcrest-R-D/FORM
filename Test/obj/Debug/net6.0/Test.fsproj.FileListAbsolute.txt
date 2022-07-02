@@ -1,6 +1,6 @@
+c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\bin\Debug\net6.0\CoverletSourceRootsMapping
 c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.AssemblyInfoInputs.cache
 c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.AssemblyInfo.fs
-c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\bin\Debug\net6.0\CoverletSourceRootsMapping
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\bin\Debug\net6.0\testhost.dll
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\bin\Debug\net6.0\testhost.exe
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\bin\Debug\net6.0\Microsoft.TestPlatform.PlatformAbstractions.dll
@@ -164,4 +164,3 @@ C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.dll
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.pdb
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.genruntimeconfig.cache
-c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.fsproj.CoreCompileInputs.cache
