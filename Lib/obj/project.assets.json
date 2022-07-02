@@ -2762,7 +2762,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
-    "version": "0.9.13",
+    "version": "0.9.15",
     "restore": {
       "projectUniqueName": "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
       "projectName": "Form",

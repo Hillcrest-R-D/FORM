@@ -8,3 +8,4 @@ C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.dll
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.xml
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.pdb
+c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.fsproj.CoreCompileInputs.cache

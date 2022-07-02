@@ -164,3 +164,4 @@ C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.dll
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.pdb
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.genruntimeconfig.cache
+c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Test\obj\Debug\net6.0\Test.fsproj.CoreCompileInputs.cache

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bXOejxHFX0WUciZoL/KdCR99cPlgm40ZPtXOPeC9D/rMpYv2hc2xxWGMhYnzhmqB2i+y+FHBHNOIGOFB1mIJDw==",
+  "dgSpecHash": "yrllto8+OkwAd+y4siA2ekfw9bAAkqeziRlRVHJzLTg7En7LR2rTSWEluZzk+EvG2WgSINOgpLYJChFDorGKMw==",
   "success": true,
-  "projectFilePath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
+  "projectFilePath": "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\junky\\.nuget\\packages\\azure.core\\1.6.0\\azure.core.1.6.0.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\azure.identity\\1.3.0\\azure.identity.1.3.0.nupkg.sha512",
