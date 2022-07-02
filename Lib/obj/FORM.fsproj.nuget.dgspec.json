@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {}
+    "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {}
   },
   "projects": {
-    "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {
+    "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {
       "version": "0.9.13",
       "restore": {
-        "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
+        "projectPath": "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj",
         "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\obj\\",
+        "outputPath": "C:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

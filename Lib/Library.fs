@@ -21,6 +21,8 @@ type ContextInfo = (string * DbContext) array
 type DbAttribute() = 
     inherit Attribute()
     abstract Value : (string * int)
+
+//[<Abstract]
     
 // ///<description>An attribute type which specifies a schema name</description>
 // [<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
@@ -40,6 +42,18 @@ type TableAttribute( alias : string , context : obj) =
 ///<description>An attribute type which specifies a column name</description>
 [<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
 type ColumnAttribute( alias : string, context : obj) = 
+    inherit DbAttribute()
+    override _.Value = (alias,  (box(context) :?> DbContext)  |> EnumToValue)
+
+///<description>An attribute type which specifies a column name</description>
+[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
+type KeyAttribute( column : string, context : obj) = 
+    inherit DbAttribute()
+    override _.Value = (column,  (box(context) :?> DbContext)  |> EnumToValue)
+
+///<description>An attribute type which specifies a column name</description>
+[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
+type ConstraintAttribute( alias : string, context : obj) = 
     inherit DbAttribute()
     override _.Value = (alias,  (box(context) :?> DbContext)  |> EnumToValue)
     
@@ -178,7 +192,7 @@ module Orm =
             |> Seq.mapi ( fun i _ -> 
                 match this with 
                 | PSQL _ -> $"${i+1}"
-                | _ -> "?"
+                | _ -> $"?{i+1}"
             )
             |> String.concat ", "
         let columnNames =
@@ -272,16 +286,18 @@ module Orm =
         
         mapping< ^T > this
         |> fun x -> printfn "%A" x; x
-        |> Array.map ( fun x -> 
+        |> Array.mapi ( fun index x -> 
             let param = 
                 if (x.PropertyInfo.GetValue( instance )) = null then 
                     //DbValue.null
                     let mutable tmp = makeParameter this
+                    tmp.ParameterName <- sprintf "?%d" ( index + 1 )
                     tmp.IsNullable <- true
                     tmp.Value <- DBNull.Value
                     tmp
                 else 
                     let mutable tmp = makeParameter this
+                    tmp.ParameterName <- sprintf "?%d" ( index + 1 )
                     tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                     tmp
             cmd.Parameters.Add ( param )
