@@ -78,7 +78,13 @@ type SQLTypeAttribute( definition : string, context : obj) =
     inherit DbAttribute()
     override _.Value = (definition,  (context :?> DbContext)  |> EnumToValue)
     
-
+///<description>An attribute type which specifies a foreign key on a column</description>
+[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
+type ForeignKeyAttribute( table : ^T, column : string, context : obj) = 
+    inherit DbAttribute()
+    override _.Value = (column,  (box(context) :?> DbContext)  |> EnumToValue)
+    member _.Table = table
+    member _.column = table 
     
 ///<description>A record type which holds the information required to map across BE and DB. </description>
 type SqlMapping = { 
@@ -89,6 +95,11 @@ type SqlMapping = {
     Type : Type
     PropertyInfo: PropertyInfo
 }
+
+// ///<description></description>
+// type IDataTransferObject =
+//         class
+//         end
 
 ///<description>Stores the flavor and context used for a particular connection.</description>
 type OrmState = 
@@ -395,22 +406,24 @@ module Orm =
             result
         | Error e -> Error e
 
+module Ality =
+    
+    open Orm 
 
     type Column< ^T > = 
         { Name : string 
-          Value : ^T
-        }
+          Value : ^T }
 
     type ConjunctionState = 
         | Open 
         | None 
         | Close
         
-        // member inline this.Compile = 
-        //     match this with 
-        //     | First c -> c.Name + " like '%" + c.Value.ToString() + "%'"
-        //     | Or c -> " or " + c.Name + " like '%" + c.Value.ToString() + "%'"
-        //     | And c -> " and " + c.Name + " like '%" + c.Value.ToString() + "%'"
+    // member inline this.Compile = 
+    //     match this with 
+    //     | First c -> c.Name + " like '%" + c.Value.ToString() + "%'"
+    //     | Or c -> " or " + c.Name + " like '%" + c.Value.ToString() + "%'"
+    //     | And c -> " and " + c.Name + " like '%" + c.Value.ToString() + "%'"
 
     type Clause =
         | Select of string
@@ -471,25 +484,35 @@ module Orm =
         | Descending
         | Ascending
 
-
+    type ConjunctionType = 
+        | Single of ( string * Predicate )
+        | Many of Conjunction seq
         
-    type Conjunction =
-        | First of ( string * Predicate )
-        | Or of ( string * Predicate )
-        | And of ( string * Predicate )
-        | Parenthesize of Conjunction seq
-
         member this.Compile ( state : OrmState ) = 
             match this with 
-            | First ( c, pred ) -> $"{sqlQuote c state} {pred.Value state}"
-            | Or ( c, pred ) -> $" OR {sqlQuote c state} {pred.Value state}"
-            | And ( c, pred ) -> $" AND {sqlQuote c state} {pred.Value state}"
-            | Parenthesize cons -> 
-                cons
-                |> Seq.map ( fun x -> x.Compile state ) 
-                |> Seq.fold ( fun acc x -> acc + x ) "( "
-                |> fun x -> x + " )"
+            | Single ( c, pred ) -> 
+                $"{sqlQuote c state} {pred.Value state}"
+            | Many conj -> 
+                Seq.map ( fun ( x : Conjunction ) -> x.Compile state ) conj
+                |> String.concat " "
 
+    and Conjunction =
+        | First of ConjunctionType
+        | Or of ConjunctionType
+        | And of ConjunctionType
+        | Parenthesize of ConjunctionType 
+        
+        member this.Compile ( state : OrmState ) = 
+            match this with 
+            | First con -> con.Compile state
+            | Or con -> $"OR {con.Compile state}"
+            | And con -> $"AND {con.Compile state}"
+            | Parenthesize cons -> $"({cons.Compile state})"
+
+    module Conjunction = 
+        let asSeq ( state : Conjunction ) = seq { state }
+        let compile ( ormState : OrmState ) ( state : Conjunction ) = state.Compile ormState
+    
     let compile ( conjunctions : Conjunction seq ) ( state : OrmState  ) = 
         conjunctions
         |> Seq.map ( fun x -> x.Compile state )
@@ -547,17 +570,67 @@ module Orm =
         member this.Compile ( state : OrmState ) =
             List.fold ( fun acc ( elem : Query ) -> if acc = "" then elem.Compile state else acc + "\n\nUNION ALL\n\n" + elem.Compile state ) "" this.queries
 
+    // [<AutoOpen>]
+    // module Helpers = 
+    let firstSingle = 
+        Single >> First
 
+    let andSingle = 
+        Single >> And 
+        
+    let orSingle = 
+        Single >> Or
+    
+    let parenthesizeSingle =
+        Single >> Parenthesize
 
-    type IDataTransferObject =
-        class
-        end
+    let firstMany = 
+        Many >> First
+
+    let andMany = 
+        Many >> And 
+        
+    let orMany = 
+        Many >> Or
+        
+    let parenthesizeMany =
+        Many >> Parenthesize
+
+    let (==) left right =
+        ( left, Equals right )
+
+    let (!=) left right =
+        ( left, NotEquals right)
+
+    let (>>>>) left right = 
+        (left, GreaterThan right)
+
+    let (<<<<) left right = 
+        (left, LessThan right)
+
+    let (>>=) left right = 
+        (left, GreaterThanOrEqualTo right)
+
+    let (<<=) left right = 
+        (left, LessThanOrEqualTo right)
+
+    let (<->) left right =
+        (left, Predicate.Is right )
+
+    let (><) left right =
+        (left, Exists right)
+
+    let (>-<) left right =
+        (left, Between right)
+
+    let (->>) left right =
+        (left, In right)
+
+    let (%%) left right =
+        (left, Like right)
+
+    let (%%%) left right =
+        (left, ILike right)
+
 
         
-///<description>An attribute type which specifies a column name</description>
-[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ForeignKeyAttribute( table : ^T, column : string, context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (column,  (box(context) :?> DbContext)  |> EnumToValue)
-    member _.Table = table
-    member _.column = table 

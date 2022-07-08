@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Compile Include="Setup.fs" />
+    <Compile Include="Formality.fs" />
     <Compile Include="Orm.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

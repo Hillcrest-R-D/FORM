@@ -1,4 +1,4 @@
-module Test.Orm
+module HCRD.FORM.Tests.Orm
 
 open Form
 open HCRD.FORM.Tests.Setup 
@@ -30,15 +30,14 @@ let Setup () =
     match Orm.connect sqliteState with 
     | Ok con -> 
         con.Open()
-        Orm.execute createTable sqliteState |> printfn "%A"
+        Orm.execute createTable sqliteState |> ignore
         con.Close()
     | Error e -> failwith (e.ToString())
 
 let inline passIfTrue cond = 
-    if cond then
-        Assert.Pass()
-    else 
-        Assert.Fail()
+    if   cond 
+    then Assert.Pass()
+    else Assert.Fail()
 
 [<Test>]
 let insertTest () =
@@ -58,11 +57,3 @@ let selectTest () =
     | Ok facts -> Assert.Pass(sprintf "%A" facts) 
     | Error e -> Assert.Fail(e.ToString())
 
-// [<TearDown>] 
-// let TearDown () = 
-//     match Orm.connect sqliteState with 
-//     | Ok con -> 
-//         con.Open() 
-//         Orm.execute "drop table Fact;" sqliteState |> printfn "%A"
-//         con.Close()
-//     | Error e -> failwith <| e.ToString()
