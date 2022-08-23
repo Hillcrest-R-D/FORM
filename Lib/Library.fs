@@ -370,13 +370,13 @@ module Orm =
                             if (x.PropertyInfo.GetValue( instance )) = null then 
                                 //DbValue.null
                                 let mutable tmp = makeParameter this
-                                tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                                tmp.ParameterName <- sprintf "$%d" ( index + 1 )
                                 tmp.IsNullable <- true
                                 tmp.Value <- DBNull.Value
                                 tmp
                             else 
                                 let mutable tmp = makeParameter this
-                                tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                                tmp.ParameterName <- sprintf "$%d" ( index + 1 )
                                 tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                                 tmp
                         cmd.Parameters.Add ( param )

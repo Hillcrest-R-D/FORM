@@ -9,9 +9,9 @@ open System.Reflection
 
 [<assembly: System.Reflection.AssemblyCompanyAttribute("Hillcrest Research and Development")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
-[<assembly: System.Reflection.AssemblyFileVersionAttribute("0.9.15.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.9.15")>]
+[<assembly: System.Reflection.AssemblyFileVersionAttribute("0.9.17.0")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.9.17")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("FORM")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("FORM")>]
-[<assembly: System.Reflection.AssemblyVersionAttribute("0.9.15.0")>]
+[<assembly: System.Reflection.AssemblyVersionAttribute("0.9.17.0")>]
 do()
