@@ -217,7 +217,7 @@ module Orm =
             |> Seq.mapi ( fun i _ -> 
                 match this with 
                 | PSQL _ -> $"${i+1}"
-                | _ -> $"?{i+1}"
+                | _ -> $"${i+1}"
             )
             |> String.concat ", "
         let columnNames =
