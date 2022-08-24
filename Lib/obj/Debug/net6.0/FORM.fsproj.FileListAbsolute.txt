@@ -9,3 +9,13 @@ C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.xml
 C:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.pdb
 c:\Users\junky\Desktop\projects\testing_ground\fsharp\FORM\Lib\obj\Debug\net6.0\FORM.fsproj.CoreCompileInputs.cache
+C:\Users\macke\Documents\Github\FORM\Lib\bin\Debug\net6.0\FORM.deps.json
+C:\Users\macke\Documents\Github\FORM\Lib\bin\Debug\net6.0\FORM.dll
+C:\Users\macke\Documents\Github\FORM\Lib\bin\Debug\net6.0\FORM.pdb
+C:\Users\macke\Documents\Github\FORM\Lib\bin\Debug\net6.0\FORM.xml
+C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.fsproj.AssemblyReference.cache
+C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfoInputs.cache
+C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfo.fs
+C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.dll
+C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.xml
+C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.pdb

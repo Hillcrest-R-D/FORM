@@ -53,7 +53,7 @@
           "lib/netstandard2.1/dotenv.net.dll": {}
         }
       },
-      "FSharp.Core/6.0.5": {
+      "FSharp.Core/6.0.1": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/FSharp.Core.dll": {}
@@ -1568,11 +1568,11 @@
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
       },
-      "Form/0.9.13": {
+      "Form/0.9.19": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
-          "FSharp.Core": "6.0.5",
+          "FSharp.Core": "6.0.1",
           "microsoft.data.sqlclient": "4.1.0",
           "microsoft.data.sqlite": "6.0.5",
           "mysqlconnector": "2.1.9",
@@ -1687,17 +1687,17 @@
         "lib/netstandard2.1/dotenv.net.dll"
       ]
     },
-    "FSharp.Core/6.0.5": {
-      "sha512": "FwdQVtpj34xt8vKyFUUeNIS+obWlEnSrSW7y1ivRVts/ZsrUsKyOd0bZehgFhWdnB/NBsa9DCWvNFMTO0XDFcg==",
+    "FSharp.Core/6.0.1": {
+      "sha512": "VrFAiW8dEEekk+0aqlbvMNZzDvYXmgWZwAt68AUBqaWK8RnoEVUNglj66bZzhs4/U63q0EfXlhcEKnH1sTYLjw==",
       "type": "package",
-      "path": "fsharp.core/6.0.5",
+      "path": "fsharp.core/6.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "contentFiles/any/netstandard2.0/FSharp.Core.xml",
         "contentFiles/any/netstandard2.1/FSharp.Core.xml",
-        "fsharp.core.6.0.5.nupkg.sha512",
+        "fsharp.core.6.0.1.nupkg.sha512",
         "fsharp.core.nuspec",
         "lib/netstandard2.0/FSharp.Core.dll",
         "lib/netstandard2.0/FSharp.Core.xml",
@@ -5797,7 +5797,7 @@
         "system.xml.xdocument.nuspec"
       ]
     },
-    "Form/0.9.13": {
+    "Form/0.9.19": {
       "type": "project",
       "path": "../Lib/FORM.fsproj",
       "msbuildProject": "../Lib/FORM.fsproj"
@@ -5805,8 +5805,8 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "FSharp.Core >= 6.0.5",
-      "Form >= 0.9.13",
+      "FSharp.Core >= 6.0.1",
+      "Form >= 0.9.19",
       "Microsoft.NET.Test.Sdk >= 17.1.0",
       "NUnit >= 3.13.3",
       "NUnit.Analyzers >= 3.3.0",
@@ -5816,39 +5816,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\junky\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\macke\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Test\\Test.fsproj",
+      "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\Test.fsproj",
       "projectName": "Test",
-      "projectPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Test\\Test.fsproj",
-      "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Test\\obj\\",
+      "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\Test.fsproj",
+      "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-      ],
       "configFilePaths": [
-        "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\macke\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\sdk\\6.0.301\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj": {
-              "projectPath": "c:\\Users\\junky\\Desktop\\projects\\testing_ground\\fsharp\\FORM\\Lib\\FORM.fsproj"
+            "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
+              "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj"
             }
           }
         }
@@ -5861,7 +5854,7 @@
           "FSharp.Core": {
             "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
             "target": "Package",
-            "version": "[6.0.5, )",
+            "version": "[6.0.1, )",
             "generatePathProperty": true
           },
           "Microsoft.NET.Test.Sdk": {
@@ -5910,7 +5903,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.301\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }

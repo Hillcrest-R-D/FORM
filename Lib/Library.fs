@@ -211,19 +211,39 @@ module Orm =
                     |> makeEntity } 
         |> Seq.toArray
 
-    let inline makeInsert< ^T > tableName columns  ( this : OrmState ) =
+    let inline makeInsert< ^T > tableName columns ( this : OrmState ) =
         let placeHolders = 
             columns 
             |> Seq.mapi ( fun i _ -> 
                 match this with 
                 | PSQL _ -> $"${i+1}"
-                | _ -> $"${i+1}"
+                | MSSQL _ -> $"@{i+1}"
+                | _ -> $"?{i+1}"
             )
             |> String.concat ", "
         let columnNames =
             String.concat ", " columns
         
-        $"insert into {tableName}( {columnNames} ) values ( {placeHolders} )" 
+        $"insert into {tableName}( {columnNames} ) values ( {placeHolders} )"
+
+    let inline makeInsertMany< ^T > tableName columns (instances : ^T seq) ( this : OrmState ) =
+        let placeHolders = 
+            instances 
+            |> Seq.mapi ( fun j _ ->
+                columns 
+                |> Seq.mapi ( fun i _ -> 
+                    match this with 
+                    | PSQL _ -> $"${i+1+j*Seq.length(columns)}"
+                    | MSSQL _ -> $"@{i+1+j*Seq.length(columns)}"
+                    | _ -> $"?{i+1}"
+                )
+                |> String.concat ", "
+            )
+            |> String.concat "), ("
+        let columnNames =
+            String.concat ", " columns
+        
+        $"insert into {tableName}( {columnNames} ) values ( ({placeHolders}) )" 
     
     let inline makeCommand ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
         match this with 
@@ -319,7 +339,13 @@ module Orm =
         | MySQL _ -> MySqlParameter()
         | PSQL _ -> NpgsqlParameter()
         | SQLite _ -> SqliteParameter()
-        
+    
+    let inline makeParamChar this = 
+        match this with
+        | MSSQL _ -> "@"
+        | MySQL _ -> "$"
+        | PSQL _ -> "$"
+        | SQLite _ -> "$"       
 
     let inline insert< ^T > ( instance : ^T )  ( this : OrmState ) =
         
@@ -329,6 +355,8 @@ module Orm =
             let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
             use cmd = makeCommand query conn this
             
+            let paramChar = makeParamChar this 
+
             mapping< ^T > this
             // |> fun x -> printfn "%A" x; x
             |> Array.mapi ( fun index x -> 
@@ -336,13 +364,13 @@ module Orm =
                     if (x.PropertyInfo.GetValue( instance )) = null then 
                         //DbValue.null
                         let mutable tmp = makeParameter this
-                        tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                        tmp.ParameterName <- $"{paramChar}{( index + 1)}"
                         tmp.IsNullable <- true
                         tmp.Value <- DBNull.Value
                         tmp
                     else 
                         let mutable tmp = makeParameter this
-                        tmp.ParameterName <- sprintf "?%d" ( index + 1 )
+                        tmp.ParameterName <- $"{paramChar}{( index + 1)}"
                         tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                         tmp
                 cmd.Parameters.Add ( param )
@@ -357,12 +385,15 @@ module Orm =
         match connect this with
         | Ok conn -> 
             conn.Open()
-            let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
+            let query = makeInsertMany ( table< ^T > this )  ( columns< ^T > this )  instances this
             use cmd = makeCommand query conn this
+            printfn "%A" query
+            let numInst = Seq.length instances
+            let paramChar = (makeParamChar this)
             
             let result = 
                 instances
-                |> Seq.map ( fun instance -> 
+                |> Seq.mapi ( fun jindex instance  -> 
                     mapping< ^T > this
                     |> fun x -> printfn "%A" x; x
                     |> Array.mapi ( fun index x -> 
@@ -370,13 +401,13 @@ module Orm =
                             if (x.PropertyInfo.GetValue( instance )) = null then 
                                 //DbValue.null
                                 let mutable tmp = makeParameter this
-                                tmp.ParameterName <- sprintf "$%d" ( index + 1 )
+                                tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex*numInst )}"
                                 tmp.IsNullable <- true
                                 tmp.Value <- DBNull.Value
                                 tmp
                             else 
                                 let mutable tmp = makeParameter this
-                                tmp.ParameterName <- sprintf "$%d" ( index + 1 )
+                                tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex*numInst )}"
                                 tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                                 tmp
                         cmd.Parameters.Add ( param )
