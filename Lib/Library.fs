@@ -581,7 +581,7 @@ module Orm =
 
 
     type IDataTransferObject =
-        class
+        interface
         end
 
         

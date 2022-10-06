@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
-      "version": "0.9.20",
+      "version": "0.9.21",
       "restore": {
         "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
@@ -20,6 +20,7 @@
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files\\dotnet\\sdk\\6.0.400\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,7 +37,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[6.0.1, )",
+              "version": "[6.0.5, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {
@@ -66,7 +67,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -75,7 +77,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }
