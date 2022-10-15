@@ -19,3 +19,5 @@ C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfo.fs
 C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.dll
 C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.xml
 C:\Users\macke\Documents\Github\FORM\Lib\obj\Debug\net6.0\FORM.pdb
+c:\Users\junky\Desktop\projects\hcrd\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfoInputs.cache
+c:\Users\junky\Desktop\projects\hcrd\FORM\Lib\obj\Debug\net6.0\FORM.AssemblyInfo.fs

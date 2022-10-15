@@ -246,6 +246,9 @@ module Orm =
         $"insert into {tableName}( {columnNames} ) values ( ({placeHolders}) )" 
     
     let inline makeCommand ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
+#if DEBUG
+        printfn "Query being generated:\n\n%s\n\n\n" query
+#endif
         match this with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection)

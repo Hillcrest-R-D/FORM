@@ -1,25 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {}
+    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
+    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj": {
       "version": "0.9.21",
       "restore": {
-        "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
-        "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\obj\\",
+        "projectPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\macke\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\sdk\\6.0.400\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
