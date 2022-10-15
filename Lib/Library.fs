@@ -210,15 +210,19 @@ module Orm =
                     |> Seq.toArray
                     |> makeEntity } 
         |> Seq.toArray
+    let inline makeParamChar this = 
+        match this with
+        | MSSQL _ -> "@"
+        | MySQL _ -> "$"
+        | PSQL _ -> "$"
+        | SQLite _ -> "@a"   
 
     let inline makeInsert< ^T > tableName columns ( this : OrmState ) =
+        let paramChar = makeParamChar this
         let placeHolders = 
             columns 
             |> Seq.mapi ( fun i _ -> 
-                match this with 
-                | PSQL _ -> $"${i+1}"
-                | MSSQL _ -> $"@{i+1}"
-                | _ -> $"?{i+1}"
+                $"{paramChar}{i+1}"
             )
             |> String.concat ", "
         let columnNames =
@@ -226,24 +230,26 @@ module Orm =
         
         $"insert into {tableName}( {columnNames} ) values ( {placeHolders} )"
 
+//INSERT INTO TABLE1 VALUES
+// ($1, $2, $3),
+// ($4, $5, $6),
     let inline makeInsertMany< ^T > tableName columns (instances : ^T seq) ( this : OrmState ) =
+        let paramChar = makeParamChar this
         let placeHolders = 
             instances 
             |> Seq.mapi ( fun j _ ->
                 columns 
                 |> Seq.mapi ( fun i _ -> 
-                    match this with 
-                    | PSQL _ -> $"${i+1+j*Seq.length(columns)}"
-                    | MSSQL _ -> $"@{i+1+j*Seq.length(columns)}"
-                    | _ -> $"?{i+1}"
+                    $"{paramChar}{i+1+j*Seq.length(columns)}"
                 )
                 |> String.concat ", "
             )
             |> String.concat "), ("
+        // printfn "%A" placeHolders
         let columnNames =
             String.concat ", " columns
         
-        $"insert into {tableName}( {columnNames} ) values ( ({placeHolders}) )" 
+        $"insert into {tableName}( {columnNames} ) values ({placeHolders});" 
     
     let inline makeCommand ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
 #if DEBUG
@@ -287,54 +293,32 @@ module Orm =
         with 
         | exn -> Error exn
 
+    let inline private select< ^T > query ( this : OrmState ) = 
+        match connect this with 
+        | Ok conn -> 
+            conn.Open()
+            use cmd = makeCommand query conn this
+            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
+            
+            let result = exceptionHandler ( generateReader< ^T > reader this )
+            result
+        | Error e -> Error e
+
+
+    let inline selectHelper< ^T > f ( this : OrmState ) = 
+        queryBase< ^T > this
+        |> f
+        |> fun x -> select< ^T > x this
     
     let inline selectLimit< ^T > lim  ( this : OrmState ) = 
-        match connect this with 
-        | Ok conn -> 
-            conn.Open()
-            let queryBase = 
-                queryBase< ^T > this
-            let query = 
-                $"select top {lim} {queryBase}"
-
-            use cmd = makeCommand query conn this
-            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
-            
-            let result = exceptionHandler ( generateReader< ^T > reader this )
-            result
-        | Error e -> Error e
+        selectHelper< ^T > ( fun x -> $"select top {lim} {x}" ) this
 
     let inline selectWhere< ^T > where  ( this : OrmState ) = 
-        match connect this with
-        | Ok conn -> 
-            conn.Open()
-            let queryBase = 
-                queryBase< ^T > this
-            
-            let query = 
-                $"select {queryBase} where {where}"
-            use cmd = makeCommand query conn this
-            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
-            let result = exceptionHandler ( generateReader< ^T > reader this )
-            result
-        | Error e -> Error e
-
-        
+        selectHelper< ^T > ( fun x -> $"select {x} where {where}" ) this
         
     let inline selectAll< ^T >  ( this : OrmState ) = 
-        match connect this with 
-        | Ok conn -> 
-            conn.Open()
-            let queryBase = 
-                queryBase< ^T > this
-            let query = 
-                $"select {queryBase}"
-                
-            use cmd = makeCommand query conn this
-            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
-            let result = exceptionHandler ( generateReader< ^T > reader this )
-            result
-        | Error e -> Error e
+        selectHelper< ^T > ( fun x -> $"select {x}" ) this
+
         
     let inline makeParameter (this : OrmState) : DbParameter =
         match this with
@@ -343,15 +327,8 @@ module Orm =
         | PSQL _ -> NpgsqlParameter()
         | SQLite _ -> SqliteParameter()
     
-    let inline makeParamChar this = 
-        match this with
-        | MSSQL _ -> "@"
-        | MySQL _ -> "$"
-        | PSQL _ -> "$"
-        | SQLite _ -> "$"       
-
+    
     let inline insert< ^T > ( instance : ^T )  ( this : OrmState ) =
-        
         match connect this with
         | Ok conn ->
             conn.Open()
@@ -366,14 +343,15 @@ module Orm =
                 let param = 
                     if (x.PropertyInfo.GetValue( instance )) = null then 
                         //DbValue.null
-                        let mutable tmp = makeParameter this
-                        tmp.ParameterName <- $"{paramChar}{( index + 1)}"
+                        // printfn "BIG NIPS -- %A | %A" x instance
+                        let mutable tmp = cmd.CreateParameter()
+                        tmp.ParameterName <- $"a{( index + 1)}"
                         tmp.IsNullable <- true
                         tmp.Value <- DBNull.Value
                         tmp
                     else 
-                        let mutable tmp = makeParameter this
-                        tmp.ParameterName <- $"{paramChar}{( index + 1)}"
+                        let mutable tmp = cmd.CreateParameter()
+                        tmp.ParameterName <- $"a{( index + 1)}"
                         tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                         tmp
                 cmd.Parameters.Add ( param )
@@ -390,46 +368,48 @@ module Orm =
             conn.Open()
             let query = makeInsertMany ( table< ^T > this )  ( columns< ^T > this )  instances this
             use cmd = makeCommand query conn this
-            printfn "%A" query
-            let numInst = Seq.length instances
+            // printfn "%A" query
             let paramChar = (makeParamChar this)
+            let numCols = columns< ^T > this |> Seq.length
+            instances
+            |> Seq.iteri ( fun jindex instance  -> 
+                mapping< ^T > this
+                // |> fun x -> printfn "%A" x; x
+                |> Array.mapi ( fun index x -> 
+                    
+                    let param = 
+                        if (x.PropertyInfo.GetValue( instance )) = null then 
+                            //DbValue.null
+                            
+                            // printfn "LITTLE NIPS -- %A | %A" x instance
+                            let mutable tmp = cmd.CreateParameter()
+                            tmp.ParameterName <- $"a{( index + 1 + jindex*numCols )}"
+                            tmp.IsNullable <- true
+                            tmp.Value <- DBNull.Value
+                            tmp
+                        else 
+                            let mutable tmp = cmd.CreateParameter()
+                            tmp.ParameterName <- $"a{( index + 1 + jindex*numCols )}"
+                            tmp.Value <- (x.PropertyInfo.GetValue( instance ))
+                            tmp
+                    cmd.Parameters.Add ( param )
+                ) |> ignore                
+            ) 
+            printfn "Param count: %A" cmd.Parameters.Count
             
-            let result = 
-                instances
-                |> Seq.mapi ( fun jindex instance  -> 
-                    mapping< ^T > this
-                    |> fun x -> printfn "%A" x; x
-                    |> Array.mapi ( fun index x -> 
-                        let param = 
-                            if (x.PropertyInfo.GetValue( instance )) = null then 
-                                //DbValue.null
-                                let mutable tmp = makeParameter this
-                                tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex*numInst )}"
-                                tmp.IsNullable <- true
-                                tmp.Value <- DBNull.Value
-                                tmp
-                            else 
-                                let mutable tmp = makeParameter this
-                                tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex*numInst )}"
-                                tmp.Value <- (x.PropertyInfo.GetValue( instance ))
-                                tmp
-                        cmd.Parameters.Add ( param )
-                    ) |> ignore                
+            for i in [0..cmd.Parameters.Count-1] do 
+                printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
 
-                    exceptionHandler ( cmd.ExecuteNonQuery() )
-                )
-                |> Seq.fold ( fun accumulator element -> 
-                    match accumulator, element with 
-                    | Ok a, Ok i -> Ok ( a + i )
-                    | Error e, _ -> Error e 
-                    | _, Error e -> Error e 
-                ) ( Ok 0 )
+            let result = 
+                cmd.ExecuteNonQuery()
+                |> exceptionHandler 
     
             conn.Close()
             result
         | Error e -> Error e
 
-
+module DSL = 
+    open Orm
     type Column< ^T > = 
         { Name : string 
           Value : ^T

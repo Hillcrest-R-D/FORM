@@ -13,13 +13,18 @@ let connector f =
         Assert.Pass()
     | Error e -> Assert.Fail(e.ToString())
 
+(* 
+    This may cause issues with timing. We noticed SetUp, even though it's called setup, 
+    is not actually executed first.
+*)
 [<SetUp>]
+[<NonParallelizable>]
 let Setup () =
     let createTable = 
         "drop table if exists Fact;
         create table Fact (
             Id text primary key,
-            sqliteName text not null,
+            sqliteName text null,
             TimeStamp text,
             SpecialChar text,
             MaybeSomething text,
@@ -41,21 +46,43 @@ let inline passIfTrue cond =
         Assert.Fail()
 
 [<Test>]
+[<NonParallelizable>]
+let connTest () =
+    match Orm.connect sqliteState with 
+    | Ok _ -> Assert.Pass()
+    | Error e -> Assert.Fail(e.ToString())
+
+
+[<Test>]
+[<NonParallelizable>]
 let insertTest () =
     match Orm.insert< Fact > ( Fact.init() ) sqliteState with 
     | Ok _ -> Assert.Pass() 
     | Error e -> Assert.Fail(e.ToString())
 
 [<Test>]
+[<NonParallelizable>]
+let insertManyTest () =
+    let str8Facts = [Fact.init(); Fact.init(); Fact.init(); Fact.init()]
+    match Orm.insertAll< Fact > ( str8Facts ) sqliteState with 
+    | Ok _ -> Assert.Pass() 
+    | Error e -> Assert.Fail(e.ToString())
+    
+[<Test>]
+[<NonParallelizable>]
 let queryBuildTest () =
     printfn "%A" (Orm.queryBase< Fact > sqliteState)
     Assert.Pass()
 
 
 [<Test>]
+[<NonParallelizable>]
 let selectTest () =
+    printfn "Selecting All..."
     match Orm.selectAll< Fact > sqliteState with 
-    | Ok facts -> Assert.Pass(sprintf "%A" facts) 
+    | Ok facts -> 
+        printf "facts: %A" facts
+        Assert.Pass(sprintf "facts: %A" facts) 
     | Error e -> Assert.Fail(e.ToString())
 
 // [<TearDown>] 

@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\Test.fsproj": {}
+    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Test\\Test.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
-      "version": "0.9.19",
+    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+      "version": "0.9.22",
       "restore": {
-        "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj",
-        "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\obj\\",
+        "projectPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\macke\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\sdk\\6.0.400\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,7 +42,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[6.0.1, )",
+              "version": "[6.0.5, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {
@@ -66,7 +72,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -75,34 +82,40 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\Test.fsproj": {
+    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Test\\Test.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\Test.fsproj",
+        "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Test\\Test.fsproj",
         "projectName": "Test",
-        "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\Test.fsproj",
-        "packagesPath": "C:\\Users\\macke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Test\\obj\\",
+        "projectPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Test\\Test.fsproj",
+        "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Test\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\macke\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\sdk\\6.0.400\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj": {
-                "projectPath": "C:\\Users\\macke\\Documents\\Github\\FORM\\Lib\\FORM.fsproj"
+              "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+                "projectPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj"
               }
             }
           }
@@ -115,7 +128,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[6.0.1, )",
+              "version": "[6.0.5, )",
               "generatePathProperty": true
             },
             "Microsoft.NET.Test.Sdk": {
@@ -155,7 +168,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -164,7 +178,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

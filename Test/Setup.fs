@@ -28,7 +28,7 @@ type Fact =
         [<Key(Key.Primary, Contexts.MySQL)>]
         [<Key(Key.Primary, Contexts.MSSQL)>]
         [<Key(Key.Primary, Contexts.SQLite)>]
-        Id: System.Guid
+        Id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]
         [<Column("mssqlName", Contexts.MSSQL)>]
@@ -42,9 +42,9 @@ type Fact =
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.PSQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP()", Contexts.MySQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.SQLite)>]
-        TimeStamp: System.DateTime
-        SpecialChar : char
-        MaybeSomething : bool
+        TimeStamp: string    
+        SpecialChar : string
+        MaybeSomething : string
         SometimesNothing : int option
         BiteSize : string
     }
@@ -52,11 +52,11 @@ type Fact =
 module Fact = 
     let init () = 
         {
-            Id = System.Guid.NewGuid()
+            Id = System.Guid.NewGuid().ToString()
             Name = "Gerry McGuire"
-            TimeStamp = System.DateTime.Now
-            SpecialChar = 'Δ'
-            MaybeSomething = true 
+            TimeStamp = System.DateTime.Now.ToString()
+            SpecialChar = "Δ"
+            MaybeSomething = "true"
             SometimesNothing = None
             BiteSize =  "!yourmom"
         }
