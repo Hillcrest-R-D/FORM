@@ -7,7 +7,7 @@
     <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
     <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\junky\.nuget\packages\;C:\Program Files\dotnet\sdk\NuGetFallbackFolder</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
-    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.3.0</NuGetToolVersion>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.3.1</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <SourceRoot Include="C:\Users\junky\.nuget\packages\" />
@@ -18,6 +18,6 @@
     <PkgMySqlConnector Condition=" '$(PkgMySqlConnector)' == '' ">C:\Users\junky\.nuget\packages\mysqlconnector\2.1.9</PkgMySqlConnector>
     <PkgMicrosoft_Data_Sqlite Condition=" '$(PkgMicrosoft_Data_Sqlite)' == '' ">C:\Users\junky\.nuget\packages\microsoft.data.sqlite\6.0.5</PkgMicrosoft_Data_Sqlite>
     <PkgMicrosoft_Data_SqlClient Condition=" '$(PkgMicrosoft_Data_SqlClient)' == '' ">C:\Users\junky\.nuget\packages\microsoft.data.sqlclient\4.1.0</PkgMicrosoft_Data_SqlClient>
-    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\junky\.nuget\packages\fsharp.core\6.0.5</PkgFSharp_Core>
+    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\junky\.nuget\packages\fsharp.core\6.0.6</PkgFSharp_Core>
   </PropertyGroup>
 </Project>

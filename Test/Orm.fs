@@ -18,7 +18,7 @@ let connector f =
     is not actually executed first.
 *)
 [<SetUp>]
-[<NonParallelizable>]
+// [<NonParallelizable>]
 let Setup () =
     let createTable = 
         "drop table if exists Fact;
@@ -35,7 +35,7 @@ let Setup () =
     match Orm.connect sqliteState with 
     | Ok con -> 
         con.Open()
-        Orm.execute createTable sqliteState |> printfn "%A"
+        Orm.Execute createTable sqliteState |> printfn "%A"
         con.Close()
     | Error e -> failwith (e.ToString())
 
@@ -45,8 +45,8 @@ let inline passIfTrue cond =
     else 
         Assert.Fail()
 
-[<Test>]
 [<NonParallelizable>]
+[<Test>]
 let connTest () =
     match Orm.connect sqliteState with 
     | Ok _ -> Assert.Pass()
@@ -56,7 +56,7 @@ let connTest () =
 [<Test>]
 [<NonParallelizable>]
 let insertTest () =
-    match Orm.insert< Fact > ( Fact.init() ) sqliteState with 
+    match Orm.Insert< Fact > ( Fact.init() ) sqliteState with 
     | Ok _ -> Assert.Pass() 
     | Error e -> Assert.Fail(e.ToString())
 
@@ -64,7 +64,7 @@ let insertTest () =
 [<NonParallelizable>]
 let insertManyTest () =
     let str8Facts = [Fact.init(); Fact.init(); Fact.init(); Fact.init()]
-    match Orm.insertAll< Fact > ( str8Facts ) sqliteState with 
+    match Orm.InsertAll< Fact > ( str8Facts ) sqliteState with 
     | Ok _ -> Assert.Pass() 
     | Error e -> Assert.Fail(e.ToString())
     
@@ -79,11 +79,13 @@ let queryBuildTest () =
 [<NonParallelizable>]
 let selectTest () =
     printfn "Selecting All..."
-    match Orm.selectAll< Fact > sqliteState with 
+    match Orm.SelectAll< Fact > sqliteState with 
     | Ok facts -> 
         printf "facts: %A" facts
         Assert.Pass(sprintf "facts: %A" facts) 
     | Error e -> Assert.Fail(e.ToString())
+
+
 
 // [<TearDown>] 
 // let TearDown () = 

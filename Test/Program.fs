@@ -15,7 +15,7 @@ module Main =
     [<EntryPoint>]
     let main _ = 
         let test1 = [{ Col1 = 2; Col2 = 3 }; {Col1 = 1; Col2 = 4}]
-        Orm.makeInsertMany ( table< Test > mssql )  ( columns< Test > mssql )  test1 mssql 
+        Orm.makeInsertMany ( Table< Test > mssql )  ( Columns< Test > mssql )  test1 mssql 
         |> printfn "%A"
         0
 

@@ -61,7 +61,7 @@
           "lib/netstandard2.1/dotenv.net.dll": {}
         }
       },
-      "FSharp.Core/6.0.5": {
+      "FSharp.Core/6.0.6": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/FSharp.Core.dll": {
@@ -1784,7 +1784,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
-          "FSharp.Core": "6.0.5",
+          "FSharp.Core": "6.0.6",
           "microsoft.data.sqlclient": "4.1.0",
           "microsoft.data.sqlite": "6.0.5",
           "mysqlconnector": "2.1.9",
@@ -1899,17 +1899,17 @@
         "lib/netstandard2.1/dotenv.net.dll"
       ]
     },
-    "FSharp.Core/6.0.5": {
-      "sha512": "FwdQVtpj34xt8vKyFUUeNIS+obWlEnSrSW7y1ivRVts/ZsrUsKyOd0bZehgFhWdnB/NBsa9DCWvNFMTO0XDFcg==",
+    "FSharp.Core/6.0.6": {
+      "sha512": "ZSwKKw+q50wDYHNs12WkKKgZ5vJScN2+cbq6+4jvn8H/D2W8rGMlybGNLHSF96v/Igx680mV7fPTtQe3V/quxg==",
       "type": "package",
-      "path": "fsharp.core/6.0.5",
+      "path": "fsharp.core/6.0.6",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "contentFiles/any/netstandard2.0/FSharp.Core.xml",
         "contentFiles/any/netstandard2.1/FSharp.Core.xml",
-        "fsharp.core.6.0.5.nupkg.sha512",
+        "fsharp.core.6.0.6.nupkg.sha512",
         "fsharp.core.nuspec",
         "lib/netstandard2.0/FSharp.Core.dll",
         "lib/netstandard2.0/FSharp.Core.xml",
@@ -6017,7 +6017,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "FSharp.Core >= 6.0.5",
+      "FSharp.Core >= 6.0.6",
       "Form >= 0.9.22",
       "Microsoft.NET.Test.Sdk >= 17.1.0",
       "NUnit >= 3.13.3",
@@ -6052,7 +6052,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\sdk\\6.0.400\\FSharp\\library-packs": {},
+        "C:\\Program Files\\dotnet\\sdk\\6.0.402\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -6073,7 +6073,7 @@
           "FSharp.Core": {
             "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
             "target": "Package",
-            "version": "[6.0.5, )",
+            "version": "[6.0.6, )",
             "generatePathProperty": true
           },
           "Microsoft.NET.Test.Sdk": {
@@ -6123,7 +6123,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
       }
     }
   }

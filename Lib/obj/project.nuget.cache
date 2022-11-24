@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "cdMgVvEyYyuvdBp6cbqOU7g/fzF5HMVOsyrZT5sVO9SxBBRM//3PX5MQm0GAwn0iFL/XR1ONjqGmqTnH5ndTRw==",
+  "dgSpecHash": "hszG2nVSRhRzcgX1a0G5duVxsqnL+rxqjOP5vq+bCuFNxu1tEpoq4NW5+4SaDJowvKS+sw2mbz2LOqDWm4p1gw==",
   "success": true,
   "projectFilePath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\junky\\.nuget\\packages\\azure.core\\1.6.0\\azure.core.1.6.0.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\azure.identity\\1.3.0\\azure.identity.1.3.0.nupkg.sha512",
-    "C:\\Users\\junky\\.nuget\\packages\\fsharp.core\\6.0.5\\fsharp.core.6.0.5.nupkg.sha512",
+    "C:\\Users\\junky\\.nuget\\packages\\fsharp.core\\6.0.6\\fsharp.core.6.0.6.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.0.0\\microsoft.bcl.asyncinterfaces.1.0.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\microsoft.data.sqlclient\\4.1.0\\microsoft.data.sqlclient.4.1.0.nupkg.sha512",

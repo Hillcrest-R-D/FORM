@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "BUC0j65R4Bu9wVVStngqSqCDwnM823c785ZpjZZl5Dv8ijajKK00ppCyhnImWAs2RRyqISK7tAVyGj7KItJCeQ==",
+  "dgSpecHash": "gcAEOQXxO7NhXu6f/MGSOOj0sKJyVw0VCoMLOphAahWpgyuy/SDeoxp1Q4ZQS3ovh1DuX6wdaFBr2L0wAjuaGg==",
   "success": true,
   "projectFilePath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Test\\Test.fsproj",
   "expectedPackageFiles": [
@@ -8,7 +8,7 @@
     "C:\\Users\\junky\\.nuget\\packages\\azure.identity\\1.3.0\\azure.identity.1.3.0.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\coverlet.collector\\3.1.2\\coverlet.collector.3.1.2.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\dotenv.net\\3.1.1\\dotenv.net.3.1.1.nupkg.sha512",
-    "C:\\Users\\junky\\.nuget\\packages\\fsharp.core\\6.0.5\\fsharp.core.6.0.5.nupkg.sha512",
+    "C:\\Users\\junky\\.nuget\\packages\\fsharp.core\\6.0.6\\fsharp.core.6.0.6.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.0.0\\microsoft.bcl.asyncinterfaces.1.0.0.nupkg.sha512",
     "C:\\Users\\junky\\.nuget\\packages\\microsoft.codecoverage\\17.1.0\\microsoft.codecoverage.17.1.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",

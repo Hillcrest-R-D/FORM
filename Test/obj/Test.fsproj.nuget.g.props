@@ -7,7 +7,7 @@
     <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
     <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\junky\.nuget\packages\;C:\Program Files\dotnet\sdk\NuGetFallbackFolder</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
-    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.3.0</NuGetToolVersion>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.3.1</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <SourceRoot Include="C:\Users\junky\.nuget\packages\" />
@@ -26,7 +26,7 @@
     <PkgNUnit Condition=" '$(PkgNUnit)' == '' ">C:\Users\junky\.nuget\packages\nunit\3.13.3</PkgNUnit>
     <PkgNewtonsoft_Json Condition=" '$(PkgNewtonsoft_Json)' == '' ">C:\Program Files\dotnet\sdk\NuGetFallbackFolder\newtonsoft.json\9.0.1</PkgNewtonsoft_Json>
     <PkgMicrosoft_NET_Test_Sdk Condition=" '$(PkgMicrosoft_NET_Test_Sdk)' == '' ">C:\Users\junky\.nuget\packages\microsoft.net.test.sdk\17.1.0</PkgMicrosoft_NET_Test_Sdk>
-    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\junky\.nuget\packages\fsharp.core\6.0.5</PkgFSharp_Core>
+    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\junky\.nuget\packages\fsharp.core\6.0.6</PkgFSharp_Core>
     <Pkgdotenv_net Condition=" '$(Pkgdotenv_net)' == '' ">C:\Users\junky\.nuget\packages\dotenv.net\3.1.1</Pkgdotenv_net>
     <Pkgcoverlet_collector Condition=" '$(Pkgcoverlet_collector)' == '' ">C:\Users\junky\.nuget\packages\coverlet.collector\3.1.2</Pkgcoverlet_collector>
   </PropertyGroup>

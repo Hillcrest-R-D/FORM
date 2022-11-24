@@ -24,10 +24,10 @@ let sqliteState =   SQLite( sqliteConnectionString, Contexts.SQLite )
 [<Table("Fact", Contexts.SQLite)>]
 type Fact =
     {
-        [<Key(Key.Primary, Contexts.PSQL)>]
-        [<Key(Key.Primary, Contexts.MySQL)>]
-        [<Key(Key.Primary, Contexts.MSSQL)>]
-        [<Key(Key.Primary, Contexts.SQLite)>]
+        [<Key(Key.PrimaryKey, Contexts.PSQL)>]
+        [<Key(Key.PrimaryKey, Contexts.MySQL)>]
+        [<Key(Key.PrimaryKey, Contexts.MSSQL)>]
+        [<Key(Key.PrimaryKey, Contexts.SQLite)>]
         Id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]
