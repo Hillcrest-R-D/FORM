@@ -46,7 +46,7 @@
           }
         }
       },
-      "FSharp.Core/6.0.6": {
+      "FSharp.Core/6.0.7": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/FSharp.Core.dll": {
@@ -1010,17 +1010,17 @@
         "pkgicon.png"
       ]
     },
-    "FSharp.Core/6.0.6": {
-      "sha512": "ZSwKKw+q50wDYHNs12WkKKgZ5vJScN2+cbq6+4jvn8H/D2W8rGMlybGNLHSF96v/Igx680mV7fPTtQe3V/quxg==",
+    "FSharp.Core/6.0.7": {
+      "sha512": "e6wGrq5smV3Yk2fBE/Y0nBG5oFyF59k5Je0a0QDydUpg6liyaafGjD3xvutciKepCP2knspZ/sWViC/F1OyyQQ==",
       "type": "package",
-      "path": "fsharp.core/6.0.6",
+      "path": "fsharp.core/6.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "contentFiles/any/netstandard2.0/FSharp.Core.xml",
         "contentFiles/any/netstandard2.1/FSharp.Core.xml",
-        "fsharp.core.6.0.6.nupkg.sha512",
+        "fsharp.core.6.0.7.nupkg.sha512",
         "fsharp.core.nuspec",
         "lib/netstandard2.0/FSharp.Core.dll",
         "lib/netstandard2.0/FSharp.Core.xml",
@@ -2896,7 +2896,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "FSharp.Core >= 6.0.6",
+      "FSharp.Core >= 6.0.7",
       "microsoft.data.sqlclient >= 4.1.0",
       "microsoft.data.sqlite >= 6.0.5",
       "mysqlconnector >= 2.1.9",
@@ -2904,31 +2904,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\junky\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\Fenton\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {}
   },
   "project": {
     "version": "0.9.22",
     "restore": {
-      "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
       "projectName": "Form",
-      "projectPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
-      "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\obj\\",
+      "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "packagesPath": "C:\\Users\\Fenton\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        "C:\\Microsoft\\Xamarin\\NuGet\\"
       ],
       "configFilePaths": [
-        "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Fenton\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\sdk\\6.0.402\\FSharp\\library-packs": {},
+        "C:\\Program Files\\dotnet\\sdk\\6.0.403\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -2945,7 +2946,7 @@
           "FSharp.Core": {
             "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
             "target": "Package",
-            "version": "[6.0.6, )",
+            "version": "[6.0.7, )",
             "generatePathProperty": true
           },
           "microsoft.data.sqlclient": {
@@ -2985,7 +2986,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.403\\RuntimeIdentifierGraph.json"
       }
     }
   }

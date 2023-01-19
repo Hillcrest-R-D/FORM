@@ -345,13 +345,13 @@ module Orm =
                         //DbValue.null
                         // printfn "BIG NIPS -- %A | %A" x instance
                         let mutable tmp = cmd.CreateParameter()
-                        tmp.ParameterName <- $"a{( index + 1)}"
+                        tmp.ParameterName <- $"{paramChar}{( index + 1 )}"
                         tmp.IsNullable <- true
                         tmp.Value <- DBNull.Value
                         tmp
                     else 
                         let mutable tmp = cmd.CreateParameter()
-                        tmp.ParameterName <- $"a{( index + 1)}"
+                        tmp.ParameterName <- $"{paramChar}{( index + 1 )}"
                         tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                         tmp
                 cmd.Parameters.Add ( param )
@@ -383,13 +383,13 @@ module Orm =
                             
                             // printfn "LITTLE NIPS -- %A | %A" x instance
                             let mutable tmp = cmd.CreateParameter()
-                            tmp.ParameterName <- $"a{( index + 1 + jindex * numCols )}"
+                            tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex * numCols )}"
                             tmp.IsNullable <- true
                             tmp.Value <- DBNull.Value
                             tmp
                         else 
                             let mutable tmp = cmd.CreateParameter()
-                            tmp.ParameterName <- $"a{( index + 1 + jindex*numCols )}"
+                            tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex*numCols )}"
                             tmp.Value <- (x.PropertyInfo.GetValue( instance ))
                             tmp
 

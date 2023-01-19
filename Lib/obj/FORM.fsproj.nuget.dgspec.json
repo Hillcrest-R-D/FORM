@@ -1,31 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
+    "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
   },
   "projects": {
-    "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+    "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj": {
       "version": "0.9.22",
       "restore": {
-        "projectUniqueName": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\FORM.fsproj",
-        "packagesPath": "C:\\Users\\junky\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\junky\\Desktop\\projects\\hcrd\\FORM\\Lib\\obj\\",
+        "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "packagesPath": "C:\\Users\\Fenton\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
         ],
         "configFilePaths": [
-          "C:\\Users\\junky\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Fenton\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\6.0.402\\FSharp\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\6.0.403\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -42,7 +43,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[6.0.6, )",
+              "version": "[6.0.7, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {
@@ -82,7 +83,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.403\\RuntimeIdentifierGraph.json"
         }
       }
     }
