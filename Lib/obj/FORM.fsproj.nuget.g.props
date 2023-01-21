@@ -5,19 +5,19 @@
     <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
     <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
     <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Fenton\.nuget\packages\;C:\Microsoft\Xamarin\NuGet\</NuGetPackageFolders>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\junky\.nuget\packages\;C:\Program Files\dotnet\sdk\NuGetFallbackFolder</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
-    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.3.1</NuGetToolVersion>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.4.0</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <SourceRoot Include="C:\Users\Fenton\.nuget\packages\" />
-    <SourceRoot Include="C:\Microsoft\Xamarin\NuGet\" />
+    <SourceRoot Include="C:\Users\junky\.nuget\packages\" />
+    <SourceRoot Include="C:\Program Files\dotnet\sdk\NuGetFallbackFolder\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgNpgsql Condition=" '$(PkgNpgsql)' == '' ">C:\Users\Fenton\.nuget\packages\npgsql\6.0.4</PkgNpgsql>
-    <PkgMySqlConnector Condition=" '$(PkgMySqlConnector)' == '' ">C:\Users\Fenton\.nuget\packages\mysqlconnector\2.1.9</PkgMySqlConnector>
-    <PkgMicrosoft_Data_Sqlite Condition=" '$(PkgMicrosoft_Data_Sqlite)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.data.sqlite\6.0.5</PkgMicrosoft_Data_Sqlite>
-    <PkgMicrosoft_Data_SqlClient Condition=" '$(PkgMicrosoft_Data_SqlClient)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.data.sqlclient\4.1.0</PkgMicrosoft_Data_SqlClient>
-    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Fenton\.nuget\packages\fsharp.core\6.0.7</PkgFSharp_Core>
+    <PkgNpgsql Condition=" '$(PkgNpgsql)' == '' ">C:\Users\junky\.nuget\packages\npgsql\6.0.4</PkgNpgsql>
+    <PkgMySqlConnector Condition=" '$(PkgMySqlConnector)' == '' ">C:\Users\junky\.nuget\packages\mysqlconnector\2.1.9</PkgMySqlConnector>
+    <PkgMicrosoft_Data_Sqlite Condition=" '$(PkgMicrosoft_Data_Sqlite)' == '' ">C:\Users\junky\.nuget\packages\microsoft.data.sqlite\6.0.5</PkgMicrosoft_Data_Sqlite>
+    <PkgMicrosoft_Data_SqlClient Condition=" '$(PkgMicrosoft_Data_SqlClient)' == '' ">C:\Users\junky\.nuget\packages\microsoft.data.sqlclient\4.1.0</PkgMicrosoft_Data_SqlClient>
+    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\junky\.nuget\packages\fsharp.core\7.0.0</PkgFSharp_Core>
   </PropertyGroup>
 </Project>

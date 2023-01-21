@@ -214,7 +214,7 @@ module Orm =
         match this with
         | MSSQL _ -> "@"
         | MySQL _ -> "$"
-        | PSQL _ -> "$"
+        | PSQL _ -> "@"
         | SQLite _ -> "@a"   
 
     let inline makeInsert< ^T > tableName columns ( this : OrmState ) =
@@ -237,7 +237,10 @@ module Orm =
         let paramChar = makeParamChar this
         let placeHolders = 
             instances 
-            |> Seq.mapi ( fun j _ ->
+            |> Seq.mapi ( fun j e ->
+#if DEBUG
+                printfn "%A" e
+#endif          
                 columns 
                 |> Seq.mapi ( fun i _ -> 
                     $"{paramChar}{i+1+j*Seq.length(columns)}"
@@ -257,8 +260,8 @@ module Orm =
 #endif
         match this with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
-        | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection)
-        | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection)
+        | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection )
+        | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
         | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection)
 
     let inline Execute sql  ( this : OrmState ) =
@@ -287,9 +290,9 @@ module Orm =
         let cols = Columns< ^T > this 
         ( String.concat ", " cols ) + " From " + Table< ^T > this
 
-    let inline exceptionHAndler f =
+    let inline exceptionHandler f =
         try 
-            Ok f
+            Ok <| f()
         with 
         | exn -> Error exn
 
@@ -300,7 +303,7 @@ module Orm =
             use cmd = makeCommand query conn this
             use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
             
-            let result = exceptionHAndler ( generateReader< ^T > reader this )
+            let result = exceptionHandler ( fun () -> generateReader< ^T > reader this )
             result
         | Error e -> Error e
 
@@ -338,12 +341,9 @@ module Orm =
             let paramChar = makeParamChar this 
 
             mapping< ^T > this
-            // |> fun x -> printfn "%A" x; x
             |> Array.mapi ( fun index x -> 
                 let param = 
                     if (x.PropertyInfo.GetValue( instance )) = null then 
-                        //DbValue.null
-                        // printfn "BIG NIPS -- %A | %A" x instance
                         let mutable tmp = cmd.CreateParameter()
                         tmp.ParameterName <- $"{paramChar}{( index + 1 )}"
                         tmp.IsNullable <- true
@@ -356,8 +356,15 @@ module Orm =
                         tmp
                 cmd.Parameters.Add ( param )
             ) |> ignore
+            
+#if DEBUG
+            printfn "Param count: %A" cmd.Parameters.Count
+            
+            for i in [0..cmd.Parameters.Count-1] do 
+                printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+#endif
 
-            let result = exceptionHAndler ( cmd.ExecuteNonQuery() )
+            let result = exceptionHandler ( fun () -> cmd.ExecuteNonQuery () )
             conn.Close()
             result
         | Error e -> Error e
@@ -368,20 +375,15 @@ module Orm =
             conn.Open()
             let query = makeInsertMany ( Table< ^T > this )  ( Columns< ^T > this )  instances this
             use cmd = makeCommand query conn this
-            // printfn "%A" query
             let paramChar = (makeParamChar this)
             let numCols = Columns< ^T > this |> Seq.length
             instances
             |> Seq.iteri ( fun jindex instance  -> 
                 mapping< ^T > this
-                // |> fun x -> printfn "%A" x; x
                 |> Array.mapi ( fun index x -> 
                     
                     let param = 
                         if (x.PropertyInfo.GetValue( instance )) = null then 
-                            //DbValue.null
-                            
-                            // printfn "LITTLE NIPS -- %A | %A" x instance
                             let mutable tmp = cmd.CreateParameter()
                             tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex * numCols )}"
                             tmp.IsNullable <- true
@@ -396,14 +398,14 @@ module Orm =
                     cmd.Parameters.Add ( param )
                 ) |> ignore                
             ) 
+#if DEBUG
             printfn "Param count: %A" cmd.Parameters.Count
             
             for i in [0..cmd.Parameters.Count-1] do 
                 printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-
+#endif
             let result = 
-                cmd.ExecuteNonQuery()
-                |> exceptionHAndler 
+                exceptionHandler ( fun () -> cmd.ExecuteNonQuery () ) 
     
             conn.Close()
             result
@@ -522,20 +524,20 @@ module DSL =
         GroupBy ( "Group By " + ( String.concat ", " cols ) )
 
     let inline OrderBy ( cols: ( string * Order option ) seq ) (state : OrmState) =
-        let Ordering = 
+        let ordering = 
             cols 
             |> Seq.map ( fun x -> 
                 let direction = 
                     match snd x with 
-                    | Some Order -> 
-                        match Order with 
+                    | Some order -> 
+                        match order with 
                         | Ascending -> " Asc"
                         | Descending -> " Desc"
                     | _ -> ""
                 $"{fst x}{direction}"
             ) 
             |> String.concat ", "
-        OrderBy ( "Order By " + Ordering)
+        OrderBy ( "Order By " + ordering)
 
     let inline skip (Nyn : int) (state : OrmState) =
         Skip ( $"OFFSet {Nyn}" )
