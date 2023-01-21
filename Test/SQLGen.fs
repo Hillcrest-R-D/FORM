@@ -4,14 +4,6 @@ open Form
 open HCRD.FORM.Tests.Setup 
 open NUnit.Framework
 
-let connector f =
-    match Orm.connect sqliteState with 
-    | Ok conn -> 
-        conn.Open() 
-        f conn
-        conn.Close() 
-        Assert.Pass()
-    | Error e -> Assert.Fail(e.ToString())
 type Contexts =
     | Default = 0
 
@@ -53,10 +45,10 @@ let Setup () =
     //     con.Close()
     // | Error e -> failwith (e.ToString())
 
-[<Test>]
-[<NonParallelizable>]
-let basic_querygen () =
-    let query = 
-        [ select<StraightFacts>
-        ]
-    printfn "%A" query.Compile 
+// [<Test>]
+// [<NonParallelizable>]
+// let basic_querygen () =
+//     let query = 
+//         [ select<StraightFacts>
+//         ]
+//     printfn "%A" query.Compile 

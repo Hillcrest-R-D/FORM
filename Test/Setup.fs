@@ -2,10 +2,14 @@ module HCRD.FORM.Tests.Setup
 
 open Form
 
-let psqlConnectionString = ""
+DotNetEnv.Env.Load() |> ignore
+
+let psqlConnectionString = 
+    System.Environment.GetEnvironmentVariable("postgres_connection_string")
 let mysqlConnectionString = ""
 let mssqlConnectionString = ""
-let sqliteConnectionString = "Data Source=./test.db;"
+let sqliteConnectionString = 
+    System.Environment.GetEnvironmentVariable("sqlite_connection_string")
 
 type Contexts =
     | PSQL = 1
@@ -16,7 +20,7 @@ type Contexts =
 let psqlState =     PSQL( psqlConnectionString, Contexts.PSQL )
 let mysqlState =    MySQL( mysqlConnectionString, Contexts.MySQL )
 let mssqlState =    MSSQL( mssqlConnectionString, Contexts.MSSQL )
-let sqliteState =   SQLite( sqliteConnectionString, Contexts.SQLite )
+let sqliteState  =   SQLite( sqliteConnectionString, Contexts.SQLite )
 
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
@@ -28,7 +32,7 @@ type Fact =
         [<Key(Key.PrimaryKey, Contexts.MySQL)>]
         [<Key(Key.PrimaryKey, Contexts.MSSQL)>]
         [<Key(Key.PrimaryKey, Contexts.SQLite)>]
-        Id: string
+        id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]
         [<Column("mssqlName", Contexts.MSSQL)>]
@@ -37,28 +41,55 @@ type Fact =
         [<SQLType("varchar(16)", Contexts.MySQL)>]
         [<SQLType("varchar(16)", Contexts.MSSQL)>]
         // [<SQLType("varchar(16)", Contexts.SQLite)>] !!! Won't work, sqlite doesn't have varchar
-        Name: string 
+        name: string 
         [<Constraint("DEFAULT GETDATE()", Contexts.MSSQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.PSQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP()", Contexts.MySQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.SQLite)>]
-        TimeStamp: string    
-        SpecialChar : string
-        MaybeSomething : string
-        SometimesNothing : int option
-        BiteSize : string
+        timeStamp: string    
+        specialChar : string
+        maybeSomething : string
+        sometimesNothing : int option
+        biteSize : string
     }
 
 module Fact = 
     let init () = 
         {
-            Id = System.Guid.NewGuid().ToString()
-            Name = "Gerry McGuire"
-            TimeStamp = System.DateTime.Now.ToString()
-            SpecialChar = "Δ"
-            MaybeSomething = "true"
-            SometimesNothing = None
-            BiteSize =  "!yourmom"
+            id = System.Guid.NewGuid().ToString()
+            name = "Gerry McGuire"
+            timeStamp = System.DateTime.Now.ToString()
+            specialChar = "Δ"
+            maybeSomething = "true"
+            sometimesNothing = None
+            biteSize =  "!yourmom"
         }
 
     
+type SerializedLogger() =
+
+    // create the mailbox processor
+    let agent = MailboxProcessor.Start(fun inbox ->
+
+        // the message processing function
+        let rec messageLoop () = async{
+
+            // read a message
+            let! msg = inbox.Receive()
+
+            // write it to the log
+            printfn "%A" msg
+
+            // loop to top
+            return! messageLoop ()
+            }
+
+        // start the loop
+        messageLoop ()
+        )
+
+    // public interface
+    member _.Log msg = agent.Post msg
+
+// test in isolation
+let logger = SerializedLogger()
