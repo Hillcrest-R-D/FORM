@@ -33,50 +33,50 @@ type Key =
     //     | CAndidate -> "6"
     //     | Unique -> "7"
 
-type ContextInfo = (string * DbContext) array
+type ContextInfo = ( string * DbContext ) array
 
 [<AbstractClass>]
-type DbAttribute() = 
-    inherit Attribute()
-    abstract Value : (string * int)
+type DbAttribute( ) = 
+    inherit Attribute( )
+    abstract Value : ( string * int )
     
 // ///<Description>An attribute type which specifies a schema name</Description>
-// [<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
+// [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
 // type SchemaAttribute( aliAs : string, context : obj ) = 
-//     inherit DbAttribute()
-//     override _.Value = (aliAs, (box(context) :?> DbContext)  |> EnumToValue)
+//     inherit DbAttribute( )
+//     override _.Value = ( aliAs, ( box( context ) :?> DbContext )  |> EnumToValue )
     
 
 ///<Description>An attribute type which specifies a Table name</Description>
-[<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
-type TableAttribute( aliAs : string , context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (aliAs, (context :?> DbContext)  |> EnumToValue)
-    member _.Context = (context :?> DbContext)  |> EnumToValue
+[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
+type TableAttribute( aliAs : string , context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( aliAs, ( context :?> DbContext )  |> EnumToValue )
+    member _.Context = ( context :?> DbContext )  |> EnumToValue
 
 
 ///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ColumnAttribute( aliAs : string, context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (aliAs,  (context :?> DbContext)  |> EnumToValue)
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type ColumnAttribute( aliAs : string, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( aliAs,  ( context :?> DbContext )  |> EnumToValue )
 
 ///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type KeyAttribute( key : obj, context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (unbox<string> key,  (context :?> DbContext)  |> EnumToValue)
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type KeyAttribute( key : obj, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( unbox<string> key,  ( context :?> DbContext )  |> EnumToValue )
     member _.Key = key
     
-[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ConstraintAttribute( definition : string, context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (definition,  (context :?> DbContext)  |> EnumToValue)
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type ConstraintAttribute( definition : string, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
 
-[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type SQLTypeAttribute( definition : string, context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (definition,  (context :?> DbContext)  |> EnumToValue)
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type SQLTypeAttribute( definition : string, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
     
 
     
@@ -123,26 +123,26 @@ module Orm =
         | PSQL      ( _, c ) -> c
         | SQLite    ( _, c ) -> c 
 
-    let inline attrFold (attrs : DbAttribute array) ( ctx : Enum ) = 
-        Array.fold ( fun s (x : DbAttribute) ->  
-                if snd x.Value = ((box(ctx) :?> DbContext) |> EnumToValue) 
+    let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
+        Array.fold ( fun s ( x : DbAttribute ) ->  
+                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
                 then fst x.Value
                 else s
             ) "" attrs
         
     let inline TableName< ^T > ( this : OrmState ) = 
         let attrs =
-            typedefof< ^T >.GetCustomAttributes(typeof< TableAttribute >, false)
-            |> Array.map ( fun x -> x :?> DbAttribute)
+            typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
+            |> Array.map ( fun x -> x :?> DbAttribute )
         
         let name = 
             if attrs = Array.empty then
                 typedefof< ^T >.Name
             else 
-                attrFold attrs (context< ^T > this)
+                attrFold attrs ( context< ^T > this )
         
-        name.Split(".")
-        |> Array.map ( fun x -> sqlQuote x this)
+        name.Split( "." )
+        |> Array.map ( fun x -> sqlQuote x this )
         |> String.concat "."
         
 
@@ -150,9 +150,9 @@ module Orm =
         FSharpType.GetRecordFields typedefof< ^T > 
         |> Array.mapi ( fun i x -> 
             let sqlName =  
-                x.GetCustomAttributes(typeof< ColumnAttribute >, false) 
-                |> Array.map ( fun y -> y :?> DbAttribute)
-                |> fun y -> attrFold y (context< ^T > this)  //attributes< ^T, ColumnAttribute> this
+                x.GetCustomAttributes( typeof< ColumnAttribute >, false ) 
+                |> Array.map ( fun y -> y :?> DbAttribute )
+                |> fun y -> attrFold y ( context< ^T > this )  //attributes< ^T, ColumnAttribute> this
                 |> fun y -> if y = "" then x.Name else y 
             let fsharpName = x.Name
             let quotedName = sqlQuote sqlName this
@@ -164,8 +164,7 @@ module Orm =
                 Type = x.PropertyType 
                 PropertyInfo = x
             } 
-        ) 
-        //|> Array.takeWhile (fun x -> x.SqlName <> "")
+        )
 
     let inline Table< ^T > ( this : OrmState ) = 
         TableName< ^T > this
@@ -181,35 +180,38 @@ module Orm =
         mapping< ^T > this
         |> Array.map ( fun x -> x.FSharpName )
     
-    let inline toOption< ^T > (type_: Type) (value: obj)  ( _ : OrmState ) =
-        let tag, variable = if DBNull.Value.Equals(value) then 0, [||] else 1, [|value|]
-        let optionType = typedefof<Option<_>>.MakeGenericType([|type_|])
-        let Case = FSharpType.GetUnionCases(optionType) |> Seq.find (fun info -> info.Tag = tag)
-        FSharpValue.MakeUnion(Case, variable)
+    let inline toOption< ^T > ( type_: Type ) ( value: obj )  ( _ : OrmState ) =
+        let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
+        let optionType = typedefof<Option<_>>.MakeGenericType( [|type_|] )
+        let Case = FSharpType.GetUnionCases( optionType ) |> Seq.find ( fun info -> info.Tag = tag )
+        FSharpValue.MakeUnion( Case, variable )
 
-    let inline optionType< ^T > (type_ : Type)  ( _ : OrmState ) =
-        if type_.IsGenericType && type_.GetGenericTypeDefinition() = typedefof<Option<_>>
-        then Some (type_.GetGenericArguments() |> Array.head) // optionType Option<User> -> User  
+    let inline optionType< ^T > ( type_ : Type )  ( _ : OrmState ) =
+        if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
+        then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
         else None
     
     let inline generateReader< ^T > ( reader : IDataReader )  ( this : OrmState ) = 
-        let rty = typeof< ^T>
-        let makeEntity vals = FSharpValue.MakeRecord(rty, vals) :?>  ^T
+        let rty = typeof< ^T >
+        let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
         let fields = 
             seq { for fld in ( ColumnMapping< ^T > this ) -> fld.SqlName, fld } 
             |> dict 
-        seq { while reader.Read() do
-                yield seq { 0..reader.FieldCount-1 }
-                    |> Seq.map (fun i -> reader.GetName(i), reader.GetValue(i) )
-                    |> Seq.sortBy (fun (n, _) ->  fields[n].Index )
-                    |> Seq.map (fun (n, v) -> 
-               match optionType< ^T > fields[n].Type this with
-               | Some t -> toOption< ^T > t v this
-               | None   -> v
+        seq { 
+            while reader.Read( ) do
+                yield 
+                    seq { 0..reader.FieldCount-1 }
+                    |> Seq.map ( fun i -> reader.GetName( i ), reader.GetValue( i ) )
+                    |> Seq.sortBy ( fun ( n, _ ) ->  fields[n].Index )
+                    |> Seq.map ( fun ( n, v ) -> 
+                        match optionType< ^T > fields[n].Type this with
+                        | Some t -> toOption< ^T > t v this
+                        | None   -> v
                     )
                     |> Seq.toArray
-                    |> makeEntity } 
-        |> Seq.toArray
+                    |> makeEntity 
+        } 
+
     let inline makeParamChar this = 
         match this with
         | MSSQL _ -> "@"
@@ -230,10 +232,10 @@ module Orm =
         
         $"Insert Into {tableName}( {columnNames} ) Values ( {placeHolders} )"
 
-//Insert Into Table1 Values
-// ($1, $2, $3),
-// ($4, $5, $6),
-    let inline makeInsertMany< ^T > tableName columns (instances : ^T seq) ( this : OrmState ) =
+    //Insert Into Table1 Values
+    // ( $1, $2, $3 ),
+    // ( $4, $5, $6 ),
+    let inline makeInsertMany< ^T > tableName columns ( instances : ^T seq ) ( this : OrmState ) =
         let paramChar = makeParamChar this
         let placeHolders = 
             instances 
@@ -243,16 +245,16 @@ module Orm =
 #endif          
                 columns 
                 |> Seq.mapi ( fun i _ -> 
-                    $"{paramChar}{i+1+j*Seq.length(columns)}"
+                    $"{paramChar}{i+1+j*Seq.length( columns )}"
                 )
                 |> String.concat ", "
             )
-            |> String.concat "), ("
+            |> String.concat " ), ( "
         // printfn "%A" placeHolders
         let columnNames =
             String.concat ", " columns
         
-        $"Insert Into {tableName}( {columnNames} ) Values ({placeHolders});" 
+        $"Insert Into {tableName}( {columnNames} ) Values ( {placeHolders} );" 
     
     let inline makeCommand ( query : string ) ( connection : DbConnection )  ( this : OrmState ) : DbCommand = 
 #if DEBUG
@@ -262,26 +264,26 @@ module Orm =
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection )
         | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
-        | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection)
+        | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection )
 
     let inline Execute sql  ( this : OrmState ) =
         match connect this with 
         | Ok conn -> 
-            conn.Open()
+            conn.Open( )
             use cmd = makeCommand sql conn this
-            let result = cmd.ExecuteNonQuery()
-            conn.Close()
+            let result = cmd.ExecuteNonQuery( )
+            conn.Close( )
             Ok result
         | Error e -> Error e
     
     let inline ExecuteReader sql f  ( this : OrmState ) =
         match connect this with
         | Ok conn -> 
-            conn.Open()
+            conn.Open( )
             use cmd = makeCommand sql conn this
-            use reader = cmd.ExecuteReader()
+            use reader = cmd.ExecuteReader( )
             let result = f reader
-            conn.Close()
+            conn.Close( )
             result
         | Error e -> Error e
         
@@ -292,18 +294,18 @@ module Orm =
 
     let inline exceptionHandler f =
         try 
-            Ok <| f()
+            Ok <| f( )
         with 
         | exn -> Error exn
 
     let inline private Select< ^T > query ( this : OrmState ) = 
         match connect this with 
         | Ok conn -> 
-            conn.Open()
+            conn.Open( )
             use cmd = makeCommand query conn this
-            use reader = cmd.ExecuteReader(CommandBehavior.CloseConnection)
+            use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
             
-            let result = exceptionHandler ( fun () -> generateReader< ^T > reader this )
+            let result = exceptionHandler ( fun ( ) -> generateReader< ^T > reader this )
             result
         | Error e -> Error e
 
@@ -323,18 +325,18 @@ module Orm =
         SelectHelper< ^T > ( fun x -> $"Select {x}" ) this
 
         
-    let inline makeParameter (this : OrmState) : DbParameter =
+    let inline makeParameter ( this : OrmState ) : DbParameter =
         match this with
-        | MSSQL _ -> SqlParameter()
-        | MySQL _ -> MySqlParameter()
-        | PSQL _ -> NpgsqlParameter()
-        | SQLite _ -> SqliteParameter()
+        | MSSQL _ -> SqlParameter( )
+        | MySQL _ -> MySqlParameter( )
+        | PSQL _ -> NpgsqlParameter( )
+        | SQLite _ -> SqliteParameter( )
     
     
     let inline Insert< ^T > ( instance : ^T )  ( this : OrmState ) =
         match connect this with
         | Ok conn ->
-            conn.Open()
+            conn.Open( )
             let query = makeInsert ( Table< ^T > this ) ( Columns< ^T > this ) this
             use cmd = makeCommand query conn this
             
@@ -343,16 +345,16 @@ module Orm =
             mapping< ^T > this
             |> Array.mapi ( fun index x -> 
                 let param = 
-                    if (x.PropertyInfo.GetValue( instance )) = null then 
-                        let mutable tmp = cmd.CreateParameter()
+                    if ( x.PropertyInfo.GetValue( instance ) ) = null then 
+                        let mutable tmp = cmd.CreateParameter( )
                         tmp.ParameterName <- $"{paramChar}{( index + 1 )}"
                         tmp.IsNullable <- true
                         tmp.Value <- DBNull.Value
                         tmp
                     else 
-                        let mutable tmp = cmd.CreateParameter()
+                        let mutable tmp = cmd.CreateParameter( )
                         tmp.ParameterName <- $"{paramChar}{( index + 1 )}"
-                        tmp.Value <- (x.PropertyInfo.GetValue( instance ))
+                        tmp.Value <- ( x.PropertyInfo.GetValue( instance ) )
                         tmp
                 cmd.Parameters.Add ( param )
             ) |> ignore
@@ -364,18 +366,18 @@ module Orm =
                 printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
 #endif
 
-            let result = exceptionHandler ( fun () -> cmd.ExecuteNonQuery () )
-            conn.Close()
+            let result = exceptionHandler ( fun ( ) -> cmd.ExecuteNonQuery ( ) )
+            conn.Close( )
             result
         | Error e -> Error e
 
     let inline InsertAll< ^T > ( instances : ^T seq )  ( this : OrmState ) =
         match connect this with
         | Ok conn -> 
-            conn.Open()
+            conn.Open( )
             let query = makeInsertMany ( Table< ^T > this )  ( Columns< ^T > this )  instances this
             use cmd = makeCommand query conn this
-            let paramChar = (makeParamChar this)
+            let paramChar = ( makeParamChar this )
             let numCols = Columns< ^T > this |> Seq.length
             instances
             |> Seq.iteri ( fun jindex instance  -> 
@@ -383,16 +385,16 @@ module Orm =
                 |> Array.mapi ( fun index x -> 
                     
                     let param = 
-                        if (x.PropertyInfo.GetValue( instance )) = null then 
-                            let mutable tmp = cmd.CreateParameter()
+                        if ( x.PropertyInfo.GetValue( instance ) ) = null then 
+                            let mutable tmp = cmd.CreateParameter( )
                             tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex * numCols )}"
                             tmp.IsNullable <- true
                             tmp.Value <- DBNull.Value
                             tmp
                         else 
-                            let mutable tmp = cmd.CreateParameter()
+                            let mutable tmp = cmd.CreateParameter( )
                             tmp.ParameterName <- $"{paramChar}{( index + 1 + jindex*numCols )}"
-                            tmp.Value <- (x.PropertyInfo.GetValue( instance ))
+                            tmp.Value <- ( x.PropertyInfo.GetValue( instance ) )
                             tmp
 
                     cmd.Parameters.Add ( param )
@@ -405,9 +407,9 @@ module Orm =
                 printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
 #endif
             let result = 
-                exceptionHandler ( fun () -> cmd.ExecuteNonQuery () ) 
+                exceptionHandler ( fun ( ) -> cmd.ExecuteNonQuery ( ) ) 
     
-            conn.Close()
+            conn.Close( )
             result
         | Error e -> Error e
 
@@ -421,9 +423,9 @@ module DSL =
         
         // member inline this.Compile = 
         //     match this with 
-        //     | First c -> c.Name + " Like '%" + c.Value.ToString() + "%'"
-        //     | Or c -> " or " + c.Name + " Like '%" + c.Value.ToString() + "%'"
-        //     | And c -> " And " + c.Name + " Like '%" + c.Value.ToString() + "%'"
+        //     | First c -> c.Name + " Like '%" + c.Value.ToString( ) + "%'"
+        //     | Or c -> " or " + c.Name + " Like '%" + c.Value.ToString( ) + "%'"
+        //     | And c -> " And " + c.Name + " Like '%" + c.Value.ToString( ) + "%'"
 
     type Clause =
         | Select of string
@@ -465,7 +467,7 @@ module DSL =
         // | Any of ( Predicate * string )
         // | Some_ of ( Predicate * string )
 
-        member this.Value (state : OrmState) = 
+        member this.Value ( state : OrmState ) = 
             match this with 
             | Equals v -> "= " + v 
             | NotEquals v -> "<> " + v 
@@ -508,22 +510,22 @@ module DSL =
         |> Seq.map ( fun x -> x.Compile state )
         |> String.concat " "
 
-    let inline Select< ^T > (state : OrmState) = 
-        Select ( "Select " + (String.concat ", " (Columns< ^T > state)) )
+    let inline Select< ^T > ( state : OrmState ) = 
+        Select ( "Select " + ( String.concat ", " ( Columns< ^T > state ) ) )
     
-    let inline From< ^T > (state : OrmState) = 
-        From ( "From " + (Table< ^T > state) )
+    let inline From< ^T > ( state : OrmState ) = 
+        From ( "From " + ( Table< ^T > state ) )
 
-    let inline Join< ^T > (conjunctions : Conjunction seq) (state : OrmState) = //Join "Payments.User" ON Col1 = Col2 And Col3 = 5
-        Join ("Join " + (Table< ^T > state) + " ON " + compile conjunctions state)
+    let inline Join< ^T > ( conjunctions : Conjunction seq ) ( state : OrmState ) = //Join "Payments.User" ON Col1 = Col2 And Col3 = 5
+        Join ( "Join " + ( Table< ^T > state ) + " ON " + compile conjunctions state )
     
-    let inline Where ( conjunctions : Conjunction seq ) (state : OrmState) = 
+    let inline Where ( conjunctions : Conjunction seq ) ( state : OrmState ) = 
         Where ( "Where " + compile conjunctions state )
     
-    let inline GroupBy ( cols: string seq ) (state : OrmState) = 
+    let inline GroupBy ( cols: string seq ) ( state : OrmState ) = 
         GroupBy ( "Group By " + ( String.concat ", " cols ) )
 
-    let inline OrderBy ( cols: ( string * Order option ) seq ) (state : OrmState) =
+    let inline OrderBy ( cols: ( string * Order option ) seq ) ( state : OrmState ) =
         let ordering = 
             cols 
             |> Seq.map ( fun x -> 
@@ -537,12 +539,12 @@ module DSL =
                 $"{fst x}{direction}"
             ) 
             |> String.concat ", "
-        OrderBy ( "Order By " + ordering)
+        OrderBy ( "Order By " + ordering )
 
-    let inline skip (Nyn : int) (state : OrmState) =
+    let inline skip ( Nyn : int ) ( state : OrmState ) =
         Skip ( $"OFFSet {Nyn}" )
 
-    let inline take (Nyn : int) (state : OrmState) =
+    let inline take ( Nyn : int ) ( state : OrmState ) =
         Take ( $"Limit {Nyn}" )
 
     type ClauseState = 
@@ -552,7 +554,7 @@ module DSL =
     type Query = 
         { clauses: ( OrmState -> Clause ) list }
         member this.Compile ( state : OrmState ) =
-            List.fold ( fun acc ( elem : ( OrmState -> Clause ) ) -> if acc = "" then (elem state).Compile  else acc + "\n" + (elem state).Compile ) "" this.clauses
+            List.fold ( fun acc ( elem : ( OrmState -> Clause ) ) -> if acc = "" then ( elem state ).Compile  else acc + "\n" + ( elem state ).Compile ) "" this.clauses
 
     type UnionAll =
         { queries: Query list }
@@ -611,17 +613,17 @@ module SqlGeneration =
         | Constraint            // 	Adds or Deletes a Constraint
         | Create                // 	Creates a Database, Index, View, Table, or Procedure
         | CreateDatabase        // 	Creates a new SQL Database
-        | CreateIndex           // 	Creates an Index on a Table (Allows duplicate Values)
+        | CreateIndex           // 	Creates an Index on a Table ( Allows duplicate Values )
         | CreateOrReplaceView   // 	Updates a View
         | CreateTable           // 	Creates a new Table in the Database
         | CreateProcedure       // 	Creates a stored Procedure
-        | CreateUniqueIndex     // 	Creates a Unique Index on a Table (no duplicate Values)
+        | CreateUniqueIndex     // 	Creates a Unique Index on a Table ( no duplicate Values )
         | CreateView            // 	Creates a View bAsed on the result Set of a Select statement
         | Database              //	Creates or Deletes an SQL Database
         | Default               // 	A Constraint that provides a Default value for a Column
         | Delete                // 	Deletes Rows From a Table
         | Desc                  // 	Sorts the result Set in Descending Order
-        | Distinct              // 	Selects only Distinct (different) Values
+        | Distinct              // 	Selects only Distinct ( different ) Values
         | Drop                  // 	Deletes a Column, Constraint, Database, Index, Table, or View
         | DropColumn            // 	Deletes a Column in a Table
         | DropConstraint        // 	Deletes a Unique, PrimaryKey, FOREIGN KEY, or Check Constraint
@@ -635,7 +637,7 @@ module SqlGeneration =
         | ForeignKey            // 	A Constraint that is a key used to link two Tables together
         | From                  // 	Specifies which Table to Select or Delete data From
         | FullOuterJoin         // 	Returns All Rows when there is a match in either Left Table or Right Table
-        | GroupBy               // 	Groups the result Set (used with aggregate functions: COUNT, MAX, MIN, SUM, AVG)
+        | GroupBy               // 	Groups the result Set ( used with aggregate functions: COUNT, MAX, MIN, SUM, AVG )
         | Having                // 	Used instead of Where with aggregate functions
         | In                    // 	Allows you to specify multiple Values in a Where clause
         | Index                 // 	Creates or Deletes an Index in a Table
@@ -658,15 +660,15 @@ module SqlGeneration =
         | RightJoin             // 	Returns All Rows From the Right Table, And the matching Rows From the Left Table
         | RowNyn                // 	Specifies the Nynber of records to return in the result Set
         | Select                // 	Selects data From a Database
-        | SelectDistinct        // 	Selects only Distinct (different) Values
+        | SelectDistinct        // 	Selects only Distinct ( different ) Values
         | SelectInto            // 	Copies data From one Table Into a new Table
         | SelectTop             // 	Specifies the Nynber of records to return in the result Set
         | Set                   // 	Specifies which Columns And Values that should be Updated in a Table
         | Table                 // 	Creates a Table, or adds, Deletes, or modifies Columns in a Table, or Deletes a Table or data inside a Table
         | Top                   // 	Specifies the Nynber of records to return in the result Set
         | TruncateTable         // 	Deletes the data inside a Table, but Not the Table itself
-        | Union                 // 	Combines the result Set of two or more Select statements (only Distinct Values)
-        | UnionAll              // 	Combines the result Set of two or more Select statements (Allows duplicate Values)
+        | Union                 // 	Combines the result Set of two or more Select statements ( only Distinct Values )
+        | UnionAll              // 	Combines the result Set of two or more Select statements ( Allows duplicate Values )
         | Unique                // 	A Constraint that ensures that All Values in a Column are Unique
         | Update                // 	Updates existing Rows in a Table
         | Values                // 	Specifies the Values of an Insert Into statement
@@ -768,14 +770,14 @@ module SqlGeneration =
                 
             | None -> FSharpType.GetRecordFields typeof< ^T > |> Array.map ( fun x -> x.Name )
 
-        member _.MakeTable () =
+        member _.MakeTable ( ) =
             sprintf "Create Table %s "
 
 
 ///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage(AttributeTargets.Property, AllowMultiple = true)>]
-type ForeignKeyAttribute( Table : ^T, Column : string, context : obj) = 
-    inherit DbAttribute()
-    override _.Value = (Column,  (box(context) :?> DbContext)  |> EnumToValue)
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type ForeignKeyAttribute( Table : ^T, Column : string, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( Column,  ( box( context ) :?> DbContext )  |> EnumToValue )
     member _.Table = Table
     member _.Column = Table 
