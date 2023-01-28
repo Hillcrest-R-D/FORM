@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "/vmGEU2sJGYENuUILUg9/ZVHjOOhBDi9fEuyCKjG4bCF8JLdPUZ9P5OnywgbZZ5uxlg3r/WeXozKOsdtjYeePg==",
+  "dgSpecHash": "aZPizTWBGxgQuGO19O9fRoYq+mxoFP5SqDbwupXOiEe3CbfUoD9GeUXSZN9qptCspsGxYIpE30QXr0YMfo6jqA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\Fenton\\.nuget\\packages\\azure.core\\1.6.0\\azure.core.1.6.0.nupkg.sha512",
     "C:\\Users\\Fenton\\.nuget\\packages\\azure.identity\\1.3.0\\azure.identity.1.3.0.nupkg.sha512",
-    "C:\\Users\\Fenton\\.nuget\\packages\\fsharp.core\\6.0.7\\fsharp.core.6.0.7.nupkg.sha512",
+    "C:\\Users\\Fenton\\.nuget\\packages\\fsharp.core\\7.0.0\\fsharp.core.7.0.0.nupkg.sha512",
     "C:\\Users\\Fenton\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.0.0\\microsoft.bcl.asyncinterfaces.1.0.0.nupkg.sha512",
     "C:\\Users\\Fenton\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\Fenton\\.nuget\\packages\\microsoft.data.sqlclient\\4.1.0\\microsoft.data.sqlclient.4.1.0.nupkg.sha512",
@@ -57,7 +57,10 @@
     "C:\\Users\\Fenton\\.nuget\\packages\\system.text.json\\4.6.0\\system.text.json.4.6.0.nupkg.sha512",
     "C:\\Users\\Fenton\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
     "C:\\Users\\Fenton\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.2\\system.threading.tasks.extensions.4.5.2.nupkg.sha512",
-    "C:\\Users\\Fenton\\.nuget\\packages\\system.windows.extensions\\5.0.0\\system.windows.extensions.5.0.0.nupkg.sha512"
+    "C:\\Users\\Fenton\\.nuget\\packages\\system.windows.extensions\\5.0.0\\system.windows.extensions.5.0.0.nupkg.sha512",
+    "C:\\Users\\Fenton\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.13\\microsoft.netcore.app.ref.6.0.13.nupkg.sha512",
+    "C:\\Users\\Fenton\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.13\\microsoft.windowsdesktop.app.ref.6.0.13.nupkg.sha512",
+    "C:\\Users\\Fenton\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.13\\microsoft.aspnetcore.app.ref.6.0.13.nupkg.sha512"
   ],
   "logs": []
 }

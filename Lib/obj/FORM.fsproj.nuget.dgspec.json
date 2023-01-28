@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj": {
-      "version": "0.9.25",
+      "version": "0.9.26",
       "restore": {
         "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
@@ -26,7 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\6.0.403\\FSharp\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\7.0.102\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,7 +43,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[6.0.7, )",
+              "version": "[7.0.0, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {
@@ -78,12 +78,26 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[6.0.13, 6.0.13]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[6.0.13, 6.0.13]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[6.0.13, 6.0.13]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     }
