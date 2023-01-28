@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>0.9.26</Version>
+    <Version>0.9.27</Version>
     <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
     <Company>Hillcrest Research and Development</Company>
     <TargetFramework>net6.0</TargetFramework>
@@ -13,7 +13,7 @@
   <ItemGroup>
     <Compile Include="Library.fs" />
     <None Include="LICENSE" Pack="true" PackagePath=""/>
-    <None Include="README.md" Pack="true" PackagePath=""/>
+    <None Include="../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="microsoft.data.sqlclient" Version="4.1.0" />
