@@ -97,6 +97,18 @@ type OrmState =
     | PSQL      of ( string * Enum )
     | SQLite    of ( string * Enum )
 
+type Relation<^T,^S> =
+    {
+        id : ^T 
+        value : ^S option    
+    }
+    static member inline Value state =
+        let id = lookupId<^S>()
+        Orm.SelectWhere<^S> $"{id} = '{state.id}'"  
+
+    // ormstate
+    // |> Relation.Value transaction.employee 
+
 module Orm = 
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( this : OrmState ) : Result< DbConnection, exn > = 
