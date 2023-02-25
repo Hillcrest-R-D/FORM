@@ -87,6 +87,14 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" facts) 
         | Error e -> Assert.Fail(e.ToString())
 
+    [<Test>]
+    [<NonParallelizable>]
+    member _.SelectWhereTest () =
+        printfn "Selecting All..."
+        match Orm.SelectWhere< Fact > "1=0" testingState with 
+        | Ok facts -> 
+            Assert.Pass(sprintf "facts: %A" facts) 
+        | Error e -> Assert.Fail(e.ToString())
     // [<TearDown>] 
     // member _.TearDown () = 
     //     match Orm.connect testingState with 

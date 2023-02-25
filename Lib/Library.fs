@@ -97,14 +97,14 @@ type OrmState =
     | PSQL      of ( string * Enum )
     | SQLite    of ( string * Enum )
 
-type Relation<^T,^S> =
-    {
-        id : ^T 
-        value : ^S option    
-    }
-    static member inline Value state =
-        let id = lookupId<^S>()
-        Orm.SelectWhere<^S> $"{id} = '{state.id}'"  
+// type Relation<^T,^S> =
+//     {
+//         id : ^T 
+//         value : ^S option    
+//     }
+//     static member inline Value state =
+//         let id = lookupId<^S>()
+//         Orm.SelectWhere<^S> $"{id} = '{state.id}'"  
 
     // ormstate
     // |> Relation.Value transaction.employee 
