@@ -48,7 +48,8 @@ type Fact =
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.SQLite)>]
         timeStamp: string    
         specialChar : string
-        maybeSomething : string
+        [<SQLType("boolean", Contexts.PSQL)>]
+        maybeSomething : string 
         sometimesNothing : int option
         biteSize : string
     }

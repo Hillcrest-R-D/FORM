@@ -313,12 +313,14 @@ module Orm =
     let inline private Select< ^T > query ( this : OrmState ) = 
         match connect this with 
         | Ok conn -> 
-            conn.Open( )
-            use cmd = makeCommand query conn this
-            use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-            
-            let result = exceptionHandler ( fun ( ) -> generateReader< ^T > reader this )
-            result
+            exceptionHandler ( fun ( ) ->     
+                seq {
+                    conn.Open( )
+                    use cmd = makeCommand query conn this
+                    use reader = cmd.ExecuteReader( ) // CommandBehavior.CloseConnection
+                    yield! generateReader< ^T > reader this 
+                }
+            )
         | Error e -> Error e
 
 
@@ -328,13 +330,13 @@ module Orm =
         |> fun x -> Select< ^T > x this
     
     let inline SelectLimit< ^T > lim  ( this : OrmState ) = 
-        SelectHelper< ^T > ( fun x -> $"Select Top {lim} {x}" ) this
+        SelectHelper< ^T > ( fun x -> $"select top {lim} {x}" ) this
 
     let inline SelectWhere< ^T > where  ( this : OrmState ) = 
-        SelectHelper< ^T > ( fun x -> $"Select {x} Where {where}" ) this
+        SelectHelper< ^T > ( fun x -> $"select {x} where {where}" ) this
         
     let inline SelectAll< ^T >  ( this : OrmState ) = 
-        SelectHelper< ^T > ( fun x -> $"Select {x}" ) this
+        SelectHelper< ^T > ( fun x -> $"select {x}" ) this
 
         
     let inline makeParameter ( this : OrmState ) : DbParameter =
