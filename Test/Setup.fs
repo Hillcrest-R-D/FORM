@@ -26,8 +26,11 @@ let sqliteState  =   SQLite( sqliteConnectionString, Contexts.SQLite )
 [<Table("Fact", Contexts.MySQL)>]
 [<Table("Fact", Contexts.MSSQL)>]
 [<Table("Fact", Contexts.SQLite)>]
+[<Id("indexId", Contexts.PSQL)>]
+[<Id("indexId", Contexts.SQLite)>]
 type Fact =
     {
+        indexId: int64
         [<Key(Key.PrimaryKey, Contexts.PSQL)>]
         [<Key(Key.PrimaryKey, Contexts.MySQL)>]
         [<Key(Key.PrimaryKey, Contexts.MSSQL)>]
@@ -57,6 +60,7 @@ type Fact =
 module Fact = 
     let init () = 
         {
+            indexId = 1
             id = System.Guid.NewGuid().ToString()
             name = "Gerry McGuire"
             timeStamp = System.DateTime.Now.ToString()

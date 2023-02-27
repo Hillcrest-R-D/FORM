@@ -32,6 +32,7 @@ type Orm (_testingState) =
         let createTable = 
             $"DROP TABLE IF EXISTS {tableName};
             CREATE TABLE {tableName} (
+                \"indexId\" int not null,
                 \"id\" text primary key,
                 \"{nameCol}\" text null,
                 \"timeStamp\" text,
@@ -96,7 +97,17 @@ type Orm (_testingState) =
         | Ok facts ->
             Assert.Pass(sprintf "facts: %A" (Seq.head <| facts)) 
         | Error e -> Assert.Fail(e.ToString())
-
+    
+    [<Test>]
+    [<NonParallelizable>]
+    member _.RelationTest () =
+        printfn "Selecting All..."
+        let rel : Orm.Relation<int64, Fact>  = { id = 1; value = None}
+        let test = (Orm.Relation.Value rel testingState).value
+        printfn "Relation test: %A" test
+        match test with 
+        | Some ent -> Assert.Pass( sprintf "Entity succesfully obtained via Relation: %A" ent)
+        | None -> Assert.Fail()
 
 // [<TestFixture>]
 // type Postgres() =

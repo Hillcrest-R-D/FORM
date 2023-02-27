@@ -73,6 +73,11 @@ type ConstraintAttribute( definition : string, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
 
+[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
+type IdAttribute( definition : string, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
+
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
 type SQLTypeAttribute( definition : string, context : obj ) = 
     inherit DbAttribute( )
@@ -97,14 +102,6 @@ type OrmState =
     | PSQL      of ( string * Enum )
     | SQLite    of ( string * Enum )
 
-// type Relation<^T,^S> =
-//     {
-//         id : ^T 
-//         value : ^S option    
-//     }
-//     static member inline Value state =
-//         let id = lookupId<^S>()
-//         Orm.SelectWhere<^S> $"{id} = '{state.id}'"  
 
     // ormstate
     // |> Relation.Value transaction.employee 
@@ -426,7 +423,37 @@ module Orm =
             conn.Close( )
             result
         | Error e -> Error e
-
+    
+    let inline lookupId<^S> state =
+        let attrs =
+            typedefof< ^S >.GetCustomAttributes( typeof< IdAttribute >, false )
+            |> Array.map ( fun x -> x :?> DbAttribute )
+        let name = 
+            if attrs = Array.empty then
+                None
+            else 
+                
+                Some <| attrFold attrs ( context< ^S > state )
+        name
+    type Relation<^T,^S> =
+        {
+            id : ^T 
+            value : ^S option    
+        }
+        static member inline Value inst state =
+            let id = lookupId<^S> state
+#if DEBUG 
+            printfn "lookupId Id Column Name: %A" id 
+#endif 
+            match id with 
+            | Some id ->
+                SelectWhere<^S> $"{sqlQuote(id) state} = {inst.id}" state 
+                |> function 
+                | Ok vals ->
+                    {inst with value = Seq.tryHead vals }    
+                | Error e -> 
+                    {inst with value = None}
+            | None -> {inst with value = None}
 module DSL = 
     open Orm
 
