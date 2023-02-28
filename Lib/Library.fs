@@ -73,10 +73,10 @@ type ConstraintAttribute( definition : string, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
 
-[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type IdAttribute( definition : string, context : obj ) = 
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type IdAttribute(context : obj ) = 
     inherit DbAttribute( )
-    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
+    override _.Value = ( "index",  ( context :?> DbContext )  |> EnumToValue )
 
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
 type SQLTypeAttribute( definition : string, context : obj ) = 
@@ -88,6 +88,7 @@ type SQLTypeAttribute( definition : string, context : obj ) =
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
     Index : int
+    IsKey : bool
     SqlName : string 
     QuotedSqlName : string
     FSharpName : string
@@ -163,10 +164,16 @@ module Orm =
                 |> Array.map ( fun y -> y :?> DbAttribute )
                 |> fun y -> attrFold y ( context< ^T > this )  //attributes< ^T, ColumnAttribute> this
                 |> fun y -> if y = "" then x.Name else y 
+            let isKey =
+                x.GetCustomAttributes( typeof< IdAttribute >, false ) 
+                |> Array.map ( fun y -> y :?> DbAttribute )
+                |> fun y -> attrFold y ( context< ^T > this )  //attributes< ^T, ColumnAttribute> this
+                |> fun y -> if y = "" then false else true 
             let fsharpName = x.Name
             let quotedName = sqlQuote sqlName this
             { 
                 Index = i
+                IsKey = isKey
                 SqlName = sqlName
                 QuotedSqlName = quotedName
                 FSharpName = fsharpName
@@ -310,9 +317,9 @@ module Orm =
     let inline private Select< ^T > query ( this : OrmState ) = 
         match connect this with 
         | Ok conn -> 
-            exceptionHandler ( fun ( ) ->     
+            exceptionHandler ( fun ( ) ->  
+                conn.Open( )   
                 seq {
-                    conn.Open( )
                     use cmd = makeCommand query conn this
                     use reader = cmd.ExecuteReader( ) // CommandBehavior.CloseConnection
                     yield! generateReader< ^T > reader this 
@@ -424,36 +431,69 @@ module Orm =
             result
         | Error e -> Error e
     
-    let inline lookupId<^S> state =
-        let attrs =
-            typedefof< ^S >.GetCustomAttributes( typeof< IdAttribute >, false )
-            |> Array.map ( fun x -> x :?> DbAttribute )
-        let name = 
-            if attrs = Array.empty then
-                None
-            else 
-                
-                Some <| attrFold attrs ( context< ^S > state )
-        name
-    type Relation<^T,^S> =
+    let inline lookupId<^S> state : string seq =
+        ColumnMapping<^S> state
+        |> Seq.filter (fun col -> col.IsKey) 
+        |> Seq.map (fun keyCol -> keyCol.QuotedSqlName)
+
+    type SqlValueDescriptor = 
         {
-            id : ^T 
+            _type : Type
+            value : obj
+        }
+    
+    let inline sqlWrap (item : SqlValueDescriptor) : string =
+        if item._type = typedefof<string> 
+        then $"'{item.value}'"
+        else $"{item.value}"
+    
+    type RelationshipCell = 
+        | Leaf of SqlValueDescriptor
+        | Node of SqlValueDescriptor * RelationshipCell
+    module RelationshipCell = 
+        let rec fold ( f : 'a -> SqlValueDescriptor -> 'a ) ( acc : 'a ) state =  
+            match state with 
+            | Leaf l -> f acc l
+            | Node ( l, n ) -> f ( fold f acc n ) l
+       
+    type Relation<^S> =
+        {
+            id : RelationshipCell 
+            // Relation<Fact> {id = Node ( {_type = typeof<int>; value = 0 }, Leaf { _type= typeof<string>; value = "42" } ); None}
             value : ^S option    
         }
-        static member inline Value inst state =
+        static member inline Value (inst) state =
             let id = lookupId<^S> state
+            printfn "Got ids: %A" id 
+            let idValueSeq = 
+                RelationshipCell.fold ( 
+                    fun acc item -> 
+                        Seq.append acc <| seq { sqlWrap item } 
+                    ) 
+                    Seq.empty 
+                    inst.id
+                |> Seq.rev
+
+            let whereClause = 
+                Seq.zip id idValueSeq
+                |> Seq.map (fun (keyCol, value) -> $"{keyCol} = {value}") 
+                |> String.concat " and " 
 #if DEBUG 
             printfn "lookupId Id Column Name: %A" id 
+            printfn "Where Clause: %A" whereClause 
 #endif 
-            match id with 
-            | Some id ->
-                SelectWhere<^S> $"{sqlQuote(id) state} = {inst.id}" state 
+            if Seq.isEmpty id then {inst with value = None}
+            else 
+                printfn "Trying select where: "
+                SelectWhere<^S> whereClause state 
                 |> function 
-                | Ok vals ->
-                    {inst with value = Seq.tryHead vals }    
-                | Error e -> 
-                    {inst with value = None}
-            | None -> {inst with value = None}
+                | Ok vals when Seq.length vals > 0 ->
+                    printfn "Got result, grabbing sequence head:"
+                    Some <| Seq.head vals    
+                | _ -> 
+                    Option.None 
+                |> fun (v : option<'S>) -> { inst with value = v}
+
 module DSL = 
     open Orm
 

@@ -1,6 +1,7 @@
 namespace HCRD.FORM.Tests
 open Form
 open Form.Orm
+open Setup
 module Main = 
     type Contexts =
         | Test1 = 0
@@ -14,9 +15,20 @@ module Main =
 
     [<EntryPoint>]
     let main _ = 
-        let test1 = [{ Col1 = 2; Col2 = 3 }; {Col1 = 1; Col2 = 4}]
-        Orm.makeInsertMany ( Table< Test > mssql )  ( Columns< Test > mssql )  test1 mssql 
-        |> printfn "%A"
+        DotNetEnv.Env.Load() |> ignore
+        let testId = 1
+        let testIdSeq = seq{1}
+        // printfn "int to seq: %A\n int to seq to seq: %A" (Seq.concat [[testId]]) (Seq.red [[testIdSeq]]) 
+
+        let psqlConnectionString = 
+            System.Environment.GetEnvironmentVariable("postgres_connection_string")
+        let psqlState =     PSQL( psqlConnectionString, Contexts.PSQL )
+        if typedefof<int64> <> typedefof<seq<obj>> then printfn "match"
+
+        // let rel : Orm.Relation<int64, Fact>  = { id = 1; value = None}
+        // let test = (Orm.Relation<int64,Fact>.Value rel psqlState).value
+
+
         0
 
 

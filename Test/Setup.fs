@@ -1,6 +1,7 @@
 module HCRD.FORM.Tests.Setup 
 
 open Form
+open Form.Orm 
 
 DotNetEnv.Env.Load() |> ignore
 
@@ -26,15 +27,17 @@ let sqliteState  =   SQLite( sqliteConnectionString, Contexts.SQLite )
 [<Table("Fact", Contexts.MySQL)>]
 [<Table("Fact", Contexts.MSSQL)>]
 [<Table("Fact", Contexts.SQLite)>]
-[<Id("indexId", Contexts.PSQL)>]
-[<Id("indexId", Contexts.SQLite)>]
 type Fact =
     {
+        [<Id(Contexts.PSQL)>]
+        [<Id(Contexts.SQLite)>]
         indexId: int64
         [<Key(Key.PrimaryKey, Contexts.PSQL)>]
         [<Key(Key.PrimaryKey, Contexts.MySQL)>]
         [<Key(Key.PrimaryKey, Contexts.MSSQL)>]
         [<Key(Key.PrimaryKey, Contexts.SQLite)>]
+        [<Id(Contexts.PSQL)>]
+        [<Id(Contexts.SQLite)>]
         id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]
@@ -56,6 +59,13 @@ type Fact =
         sometimesNothing : int option
         biteSize : string
     }
+
+    //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
+    // member Relationship (lookup) = 
+    //     ^A 
+
+    static member Relation (id, indexId) =
+        { id =  Orm.Node (  {_type = typeof<int>; value = id }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
 
 module Fact = 
     let init () = 

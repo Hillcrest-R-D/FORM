@@ -20,6 +20,7 @@ type OrmSetup () =
 type Orm (_testingState) =
     let testingState = _testingState
     let tableName = "\"Fact\""
+    let testGuid = System.Guid.NewGuid().ToString()
 
     let nameCol = 
         match testingState with
@@ -60,7 +61,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertTest () =
-        match Orm.Insert< Fact > ( Fact.init() ) testingState with 
+        match Orm.Insert< Fact > ( {Fact.init() with id = testGuid} ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
 
@@ -88,6 +89,17 @@ type Orm (_testingState) =
             Seq.iter ( printfn  "%A") facts
             Assert.Pass(sprintf "facts: %A" facts) 
         | Error e -> Assert.Fail(e.ToString())
+    [<Test>]
+    [<NonParallelizable>]
+    member _.RelationTest () =
+        printfn "Selecting All..."
+        let rel : Orm.Relation<Fact>  = Fact.Relation (1, testGuid)
+        // rel.Value testingState -> {rel with value = Some|None} 
+        let test = (Orm.Relation<Fact>.Value rel testingState).value
+        printfn "Relation test: %A" test
+        match test with 
+        | Some ent -> Assert.Pass( sprintf "Entity succesfully obtained via Relation: %A" ent)
+        | None -> Assert.Fail()
 
     [<Test>]
     [<NonParallelizable>]
@@ -98,16 +110,6 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" (Seq.head <| facts)) 
         | Error e -> Assert.Fail(e.ToString())
     
-    [<Test>]
-    [<NonParallelizable>]
-    member _.RelationTest () =
-        printfn "Selecting All..."
-        let rel : Orm.Relation<int64, Fact>  = { id = 1; value = None}
-        let test = (Orm.Relation.Value rel testingState).value
-        printfn "Relation test: %A" test
-        match test with 
-        | Some ent -> Assert.Pass( sprintf "Entity succesfully obtained via Relation: %A" ent)
-        | None -> Assert.Fail()
 
 // [<TestFixture>]
 // type Postgres() =
