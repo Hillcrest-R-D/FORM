@@ -5,11 +5,11 @@ open Form.Orm
 
 DotNetEnv.Env.Load() |> ignore
 
-let psqlConnectionString = 
+let psqlConnectionString () = 
     System.Environment.GetEnvironmentVariable("postgres_connection_string")
-let mysqlConnectionString = ""
-let mssqlConnectionString = ""
-let sqliteConnectionString = 
+let mysqlConnectionString () = ""
+let mssqlConnectionString () = ""
+let sqliteConnectionString () = 
     System.Environment.GetEnvironmentVariable("sqlite_connection_string")
 
 type Contexts =
@@ -18,10 +18,10 @@ type Contexts =
     | MSSQL = 4
     | SQLite = 8
 
-let psqlState =     PSQL( psqlConnectionString, Contexts.PSQL )
-let mysqlState =    MySQL( mysqlConnectionString, Contexts.MySQL )
-let mssqlState =    MSSQL( mssqlConnectionString, Contexts.MSSQL )
-let sqliteState  =   SQLite( sqliteConnectionString, Contexts.SQLite )
+let psqlState ()=     PSQL( psqlConnectionString (), Contexts.PSQL )
+let mysqlState ()=    MySQL( mysqlConnectionString (), Contexts.MySQL )
+let mssqlState ()=    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
+let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
 
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]

@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net6.0": {
+    "net7.0": {
       "Azure.Core/1.25.0": {
         "type": "package",
         "dependencies": {
@@ -46,7 +46,7 @@
           }
         }
       },
-      "FSharp.Core/7.0.0": {
+      "FSharp.Core/7.0.200": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/FSharp.Core.dll": {
@@ -412,12 +412,12 @@
       "MySqlConnector/2.2.5": {
         "type": "package",
         "compile": {
-          "lib/net6.0/MySqlConnector.dll": {
+          "lib/net7.0/MySqlConnector.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/MySqlConnector.dll": {
+          "lib/net7.0/MySqlConnector.dll": {
             "related": ".xml"
           }
         }
@@ -425,16 +425,15 @@
       "Npgsql/7.0.2": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
-          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.0"
         },
         "compile": {
-          "lib/net6.0/Npgsql.dll": {
+          "lib/net7.0/Npgsql.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/Npgsql.dll": {
+          "lib/net7.0/Npgsql.dll": {
             "related": ".xml"
           }
         }
@@ -473,7 +472,7 @@
           "lib/netstandard2.0/_._": {}
         },
         "build": {
-          "buildTransitive/net6.0/SQLitePCLRaw.lib.e_sqlite3.targets": {}
+          "buildTransitive/net7.0/SQLitePCLRaw.lib.e_sqlite3.targets": {}
         },
         "runtimeTargets": {
           "runtimes/alpine-arm/native/libe_sqlite3.so": {
@@ -488,7 +487,7 @@
             "assetType": "native",
             "rid": "alpine-x64"
           },
-          "runtimes/browser-wasm/nativeassets/net6.0/e_sqlite3.a": {
+          "runtimes/browser-wasm/nativeassets/net7.0/e_sqlite3.a": {
             "assetType": "native",
             "rid": "browser-wasm"
           },
@@ -1025,15 +1024,15 @@
         "lib/netstandard2.0/Azure.Identity.xml"
       ]
     },
-    "FSharp.Core/7.0.0": {
-      "sha512": "8hzwUheAViWMAHWQTr6kR/19C4LhjZ4TlftKfNeZO9y7XnRUzLTK6FJS1C+0oObuUe0e4KndYxjWE+Zgea9YXQ==",
+    "FSharp.Core/7.0.200": {
+      "sha512": "NmgUnpNH6Zu9B0SPIhojyo38gnPdkdYFYQfbd6zosEH32kbGY/g/Klk7PfOWe1NAe/O1YOMmK9KhwQ2OWsWEbg==",
       "type": "package",
-      "path": "fsharp.core/7.0.0",
+      "path": "fsharp.core/7.0.200",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
-        "fsharp.core.7.0.0.nupkg.sha512",
+        "fsharp.core.7.0.200.nupkg.sha512",
         "fsharp.core.nuspec",
         "lib/netstandard2.0/FSharp.Core.dll",
         "lib/netstandard2.0/FSharp.Core.xml",
@@ -1940,6 +1939,7 @@
       "path": "system.runtime/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -2322,6 +2322,7 @@
       "path": "system.text.encoding/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -2533,8 +2534,8 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net6.0": [
-      "FSharp.Core >= 7.0.0",
+    "net7.0": [
+      "FSharp.Core >= 7.0.200",
       "microsoft.data.sqlclient >= 5.1.0",
       "microsoft.data.sqlite >= 7.0.3",
       "mysqlconnector >= 2.2.5",
@@ -2542,49 +2543,42 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Fenton\\.nuget\\packages\\": {},
-    "C:\\Microsoft\\Xamarin\\NuGet\\": {}
+    "C:\\Users\\Evan\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "0.9.28",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "projectUniqueName": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
       "projectName": "Form",
-      "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
-      "packagesPath": "C:\\Users\\Fenton\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\obj\\",
+      "projectPath": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
+      "outputPath": "C:\\hcrd\\FORM\\Lib\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Microsoft\\Xamarin\\NuGet\\"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Fenton\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
-        "net6.0"
+        "net7.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\sdk\\7.0.102\\FSharp\\library-packs": {},
+        "C:\\Program Files\\dotnet\\sdk\\7.0.203\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net6.0": {
-          "targetAlias": "net6.0",
+        "net7.0": {
+          "targetAlias": "net7.0",
           "projectReferences": {}
         }
       }
     },
     "frameworks": {
-      "net6.0": {
-        "targetAlias": "net6.0",
+      "net7.0": {
+        "targetAlias": "net7.0",
         "dependencies": {
           "FSharp.Core": {
             "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
             "target": "Package",
-            "version": "[7.0.0, )",
+            "version": "[7.0.200, )",
             "generatePathProperty": true
           },
           "microsoft.data.sqlclient": {
@@ -2619,26 +2613,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[6.0.13, 6.0.13]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[6.0.13, 6.0.13]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[6.0.13, 6.0.13]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
       }
     }
   }
