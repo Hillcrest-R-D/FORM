@@ -238,7 +238,7 @@ module Orm =
         | MSSQL _ -> "@"
         | MySQL _ -> "$"
         | PSQL _ -> "@"
-        | SQLite _ -> "@a"   
+        | SQLite _ -> "@"   
 
     let inline makeInsert< ^T > tableName columns ( this : OrmState ) =
         let paramChar = makeParamChar this
@@ -445,10 +445,15 @@ module Orm =
     *)
     let inline updateBase< ^T > ( this : OrmState ) = 
         let pchar = makeParamChar this
-        let cols = mapping< ^T > this 
+        let cols = 
+            mapping< ^T > this
+            |> Seq.filter (fun col -> not col.IsKey) //Can't update keys
         let queryParams = 
             cols 
-            |> Seq.filter (fun col -> not col.IsKey) //Can't update keys
+#if DEBUG
+            |> fun cols -> 
+                printfn "Columns to update: %A" cols; cols 
+#endif
             |> Seq.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3
 
         let table = Table< ^T > this 
@@ -488,16 +493,16 @@ module Orm =
         |> Result.bind ( fun ( conn, sqlMapping ) -> 
             exceptionHandler ( fun ( ) ->  
                 let table = Table< ^T > this 
+                let paramChar = makeParamChar this
                 let idConditional = 
                     sqlMapping 
-                    |> Seq.map ( fun x -> sprintf "%s.%s = @%s" table x.QuotedSqlName x.FSharpName )
+                    |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
                     |> String.concat " and "
                 let query = 
                     updateBase< ^T > this + " where " + idConditional
                     
                 conn.Open( )
                 use cmd = makeCommand query conn this
-                let paramChar = makeParamChar this
                 
                 mapping< ^T > this
                 |> Seq.iter ( fun x -> 
