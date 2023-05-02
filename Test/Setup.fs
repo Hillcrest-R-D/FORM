@@ -5,12 +5,10 @@ open Form.Orm
 
 DotNetEnv.Env.Load() |> ignore
 
-let psqlConnectionString = 
-    System.Environment.GetEnvironmentVariable("postgres_connection_string")
-let mysqlConnectionString = ""
-let mssqlConnectionString = ""
-let sqliteConnectionString = 
-    System.Environment.GetEnvironmentVariable("sqlite_connection_string")
+let psqlConnectionString () = System.Environment.GetEnvironmentVariable("postgres_connection_string")
+let mysqlConnectionString () = ""
+let mssqlConnectionString () = ""
+let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
 
 type Contexts =
     | PSQL = 1
@@ -18,10 +16,10 @@ type Contexts =
     | MSSQL = 4
     | SQLite = 8
 
-let psqlState =     PSQL( psqlConnectionString, Contexts.PSQL )
-let mysqlState =    MySQL( mysqlConnectionString, Contexts.MySQL )
-let mssqlState =    MSSQL( mssqlConnectionString, Contexts.MSSQL )
-let sqliteState  =   SQLite( sqliteConnectionString, Contexts.SQLite )
+let psqlState ()=     PSQL( psqlConnectionString (), Contexts.PSQL )
+let mysqlState ()=    MySQL( mysqlConnectionString (), Contexts.MySQL )
+let mssqlState ()=    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
+let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
 
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
@@ -31,6 +29,8 @@ type Fact =
     {
         [<Id(Contexts.PSQL)>]
         [<Id(Contexts.SQLite)>]
+        [<Id(Contexts.MySQL)>]
+        [<Id(Contexts.MSSQL)>]
         indexId: int64
         [<Key(Key.PrimaryKey, Contexts.PSQL)>]
         [<Key(Key.PrimaryKey, Contexts.MySQL)>]
@@ -38,6 +38,8 @@ type Fact =
         [<Key(Key.PrimaryKey, Contexts.SQLite)>]
         [<Id(Contexts.PSQL)>]
         [<Id(Contexts.SQLite)>]
+        [<Id(Contexts.MySQL)>]
+        [<Id(Contexts.MSSQL)>]
         id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]

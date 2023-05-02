@@ -4,14 +4,15 @@
     <Version>0.9.28</Version>
     <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
     <Company>Hillcrest Research and Development</Company>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="ORM.fs" />
+    <Compile Include="DSL.fs" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>

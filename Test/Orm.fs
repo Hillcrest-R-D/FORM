@@ -15,10 +15,11 @@ type OrmSetup () =
     [<OneTimeSetUp>]
     member _.Setup () = 
         DotNetEnv.Env.Load() |> printf "Loaded variables %A" 
+        printfn "%A\n\n\n\n\n" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
 
 [<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
 type Orm (_testingState) =
-    let testingState = _testingState
+    let testingState = _testingState ()
     let tableName = "\"Fact\""
     let testGuid = System.Guid.NewGuid().ToString()
 
@@ -53,6 +54,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.ConnTest () =
+        printfn "Contest: %A\n\n\n\n\n" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
         match Orm.connect testingState with 
         | Ok _ -> Assert.Pass()
         | Error e -> Assert.Fail(e.ToString())
@@ -110,7 +112,16 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" (Seq.head <| facts)) 
         | Error e -> Assert.Fail(e.ToString())
     
-
+    [<Test>]
+    [<NonParallelizable>]
+    member _.UpdateTest () =
+        printfn "Updating..."
+        let initial = Fact.init () 
+        let changed = { initial with name = "Evan Towlett"}
+        match Orm.Update< Fact > changed testingState with 
+        | Ok inserted ->
+            Assert.Pass(sprintf "facts: %A" inserted)
+        | Error e -> Assert.Fail(e.ToString())
 // [<TestFixture>]
 // type Postgres() =
 //     let state = psqlState 
