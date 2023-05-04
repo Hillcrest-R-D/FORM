@@ -21,7 +21,10 @@ type OrmSetup () =
 type Orm (_testingState) =
     let testingState = _testingState ()
     let tableName = "\"Fact\""
-    let testGuid = System.Guid.NewGuid().ToString()
+    let testGuid1 = System.Guid.NewGuid().ToString()
+    let testGuid2 = System.Guid.NewGuid().ToString()
+    let testGuid3 = System.Guid.NewGuid().ToString()
+    let testGuid4 = System.Guid.NewGuid().ToString()
 
     let nameCol = 
         match testingState with
@@ -63,14 +66,14 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertTest () =
-        match Orm.Insert< Fact > ( {Fact.init() with id = testGuid} ) testingState with 
+        match Orm.Insert< Fact > ( Fact.init() ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
 
     [<Test>]
     [<NonParallelizable>]
     member _.InsertManyTest () =
-        let str8Facts = [Fact.init(); Fact.init(); Fact.init(); Fact.init()]
+        let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2}; { Fact.init() with id = testGuid3}; Fact.init()]
         match Orm.InsertAll< Fact > ( str8Facts ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
@@ -95,7 +98,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.RelationTest () =
         printfn "Selecting All..."
-        let rel : Orm.Relation<Fact>  = Fact.Relation (1, testGuid)
+        let rel : Orm.Relation<Fact>  = Fact.Relation (1, testGuid1)
         // rel.Value testingState -> {rel with value = Some|None} 
         let test = (Orm.Relation<Fact>.Value rel testingState).value
         printfn "Relation test: %A" test
@@ -116,9 +119,37 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.UpdateTest () =
         printfn "Updating..."
-        let initial = Fact.init () 
+        let initial = { Fact.init() with id = testGuid1 }
         let changed = { initial with name = "Evan Towlett"}
         match Orm.Update< Fact > changed testingState with 
+        | Ok inserted ->
+            Assert.Pass(sprintf "facts: %A" inserted)
+        | Error e -> Assert.Fail(e.ToString())
+    
+    [<Test>]
+    [<NonParallelizable>]
+    member _.UpdateAllTest () =
+        printfn "Updating..."
+        let initial = Fact.init() 
+        let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
+        let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
+        Orm.UpdateAll< Fact > [changed;changed2] testingState
+        |> printf "%A"
+        
+        Assert.Pass()
+
+        // match  with 
+        // | Ok inserted ->
+        //     Assert.Pass(sprintf "facts: %A" inserted)
+        // | Error e -> Assert.Fail(e.ToString())
+    
+    [<Test>]
+    [<NonParallelizable>]
+    member _.UpdateWhereTest () =
+        printfn "Updating..."
+        let initial = Fact.init () 
+        let changed = { initial with name = "Evan Towlett"}
+        match Orm.UpdateWhere< Fact > "\"indexId\" = 1" changed testingState with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())

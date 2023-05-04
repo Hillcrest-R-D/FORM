@@ -473,34 +473,13 @@ module Orm =
         |> Array.filter ( fun x -> x.IsKey )
         |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
     
-
-    let inline Update< ^T > ( instance: ^T ) ( this : OrmState ) = 
-        (*
-            UPDATE tableT
-                SET 
-                    col1 = instance.col1, 
-                    col2 = instance.col2 
-                    ... 
-                    coln = instance.coln
-                WHERE
-                    (id_col) = instance.(id_field)
-        *)
-        
-        ensureId< ^T > this 
-        |> Result.bind ( fun sqlMapping ->  
-            connect this |> Result.bind ( fun y -> Ok (y, sqlMapping) )
-        )
-        |> Result.bind ( fun ( conn, sqlMapping ) -> 
+    let inline UpdateHelper<^T> ( whereClause : string ) ( instance : ^T ) ( this : OrmState ) = 
+        connect this
+        |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
-                let table = Table< ^T > this 
+                let query =  updateBase< ^T > this + whereClause //" where " + idConditional    
                 let paramChar = makeParamChar this
-                let idConditional = 
-                    sqlMapping 
-                    |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
-                    |> String.concat " and "
-                let query = 
-                    updateBase< ^T > this + " where " + idConditional
-                    
+
                 conn.Open( )
                 use cmd = makeCommand query conn this
                 
@@ -531,16 +510,35 @@ module Orm =
                     printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
 #endif
                 cmd.ExecuteNonQuery ( )
-            ) 
-                
+            )        
         )
         
+    let inline Update< ^T > ( instance: ^T ) ( this : OrmState ) = 
+        (*
+            UPDATE tableT
+                SET 
+                    col1 = instance.col1, 
+                    col2 = instance.col2 
+                    ... 
+                    coln = instance.coln
+                WHERE
+                    (id_col) = instance.(id_field)
+        *)
+        let table = Table< ^T > this 
+        let paramChar = makeParamChar this
         
-
-    // let inline UpdateAll< ^T > ( item: ^T seq ) ( this : OrmState ) = 
-              
+        ensureId< ^T > this 
+        |> Result.bind (fun sqlMapping ->
+            sqlMapping
+            |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> String.concat " and "
+            |> fun idConditional -> UpdateHelper< ^T > ( sprintf " where %s" idConditional ) instance this
+        )
         
-    // let inline UpdateWhere< ^T > ( where : string ) ( item: ^T ) ( this : OrmState ) = 
+    let inline UpdateAll< ^T > ( instances: ^T seq ) ( this : OrmState ) = 
+        Seq.map ( fun instance -> Update<^T> instance this ) instances 
+        
+    let inline UpdateWhere< ^T > ( where : string ) ( instance: ^T ) ( this : OrmState ) = 
         (*
             UPDATE tableT
                 SET 
@@ -551,6 +549,7 @@ module Orm =
                 WHERE
                     
         *)
+        UpdateHelper< ^T > ( sprintf " where %s" where )  instance this    
         
     // let inline UpdateColumns< ^T > ( cols: PropertyInfo seq ) ( item: ^T ) ( this : OrmState ) = 
         

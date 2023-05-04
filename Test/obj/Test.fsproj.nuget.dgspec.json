@@ -1,32 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Test\\Test.fsproj": {}
+    "c:\\hcrd\\FORM\\Test\\Test.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+    "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
       "version": "0.9.28",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
-        "packagesPath": "C:\\Users\\Fenton\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\obj\\",
+        "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
+        "outputPath": "c:\\hcrd\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Fenton\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\7.0.102\\FSharp\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\7.0.203\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,7 +37,7 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[7.0.0, )",
+              "version": "[7.0.200, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {
@@ -83,41 +77,35 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Test\\Test.fsproj": {
+    "c:\\hcrd\\FORM\\Test\\Test.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Test\\Test.fsproj",
+        "projectUniqueName": "c:\\hcrd\\FORM\\Test\\Test.fsproj",
         "projectName": "Test",
-        "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Test\\Test.fsproj",
-        "packagesPath": "C:\\Users\\Fenton\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Test\\obj\\",
+        "projectPath": "c:\\hcrd\\FORM\\Test\\Test.fsproj",
+        "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
+        "outputPath": "c:\\hcrd\\FORM\\Test\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Fenton\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\7.0.102\\FSharp\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\7.0.203\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj": {
-                "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj"
+              "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+                "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj"
               }
             }
           }
@@ -130,17 +118,17 @@
             "FSharp.Core": {
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[7.0.0, )",
+              "version": "[7.0.200, )",
               "generatePathProperty": true
             },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
-              "version": "[17.1.0, )",
+              "version": "[16.5.0, )",
               "generatePathProperty": true
             },
             "Microsoft.TestPlatform": {
               "target": "Package",
-              "version": "[17.5.0, )",
+              "version": "[16.5.0, )",
               "generatePathProperty": true
             },
             "NUnit": {
@@ -174,7 +162,7 @@
             },
             "microsoft.testplatform.objectmodel": {
               "target": "Package",
-              "version": "[17.5.0, )",
+              "version": "[16.5.0, )",
               "generatePathProperty": true
             }
           },
@@ -194,7 +182,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }
