@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <IsPackable>false</IsPackable>
+    <!-- <IsPackable>false</IsPackable> -->
     <GenerateProgramFile>false</GenerateProgramFile>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,9 +16,9 @@
 
   <ItemGroup>
     <PackageReference Include="dotnetenv" Version="2.5.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-    <PackageReference Include="Microsoft.TestPlatform" Version="17.5.0" />
-    <PackageReference Include="microsoft.testplatform.objectmodel" Version="17.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="Microsoft.TestPlatform" Version="16.5.0" />
+    <PackageReference Include="microsoft.testplatform.objectmodel" Version="16.5.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="NUnit.Analyzers" Version="3.6.1">

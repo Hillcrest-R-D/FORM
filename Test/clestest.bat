@@ -1,1 +1,1 @@
-dotnet clean && dotnet restore && dotnet test
+dotnet clean && dotnet restore && dotnet test --logger "trx;logfilename=mytests.trx"
