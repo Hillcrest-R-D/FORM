@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
+    "C:\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
   },
   "projects": {
-    "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+    "C:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
       "version": "0.9.28",
       "restore": {
-        "projectUniqueName": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "projectPath": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
-        "outputPath": "c:\\hcrd\\FORM\\Lib\\obj\\",
+        "outputPath": "C:\\hcrd\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"

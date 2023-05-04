@@ -105,13 +105,13 @@ module DSL =
         |> String.concat " "
 
     let inline Select< ^T > ( state : OrmState ) = 
-        Select ( "Select " + ( String.concat ", " ( Columns< ^T > state ) ) )
+        Select ( "Select " + ( String.concat ", " ( columns< ^T > state ) ) )
     
     let inline From< ^T > ( state : OrmState ) = 
-        From ( "From " + ( Table< ^T > state ) )
+        From ( "From " + ( table< ^T > state ) )
 
     let inline Join< ^T > ( conjunctions : Conjunction seq ) ( state : OrmState ) = //Join "Payments.User" ON Col1 = Col2 And Col3 = 5
-        Join ( "Join " + ( Table< ^T > state ) + " ON " + compile conjunctions state )
+        Join ( "Join " + ( table< ^T > state ) + " ON " + compile conjunctions state )
     
     let inline Where ( conjunctions : Conjunction seq ) ( state : OrmState ) = 
         Where ( "Where " + compile conjunctions state )

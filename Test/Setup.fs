@@ -21,6 +21,16 @@ let mysqlState ()=    MySQL( mysqlConnectionString (), Contexts.MySQL )
 let mssqlState ()=    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
 let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
 
+type Unique = 
+    | Group1 = "BigNig69"
+    | Group2 = "YaMothasAHoe"
+    | Group3 = "ak3"
+    | Group4 = "ak4"
+
+type FactUnique = 
+    | BigNig69 = "BigNig64"
+
+    Table<Fact> + EnumToValue Unique.Group1 
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
 [<Table("Fact", Contexts.MSSQL)>]
@@ -54,13 +64,20 @@ type Fact =
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.PSQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP()", Contexts.MySQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.SQLite)>]
-        timeStamp: string    
+        timeStamp: string
+        [<Unique(Unique.Group1, Contexts.PSQL)>]    
         specialChar : string
         [<SQLType("boolean", Contexts.PSQL)>]
         maybeSomething : string 
+        [<Unique(FactUnique.Group1, Contexts.PSQL)>]
         sometimesNothing : int option
+        [<Unique(FactUnique.Group2, Contexts.PSQL)>]
         biteSize : string
     }
+        CREATE TABLE
+        ....
+        CONsTRAINT "group1" UNIQUE (csometimesNothing),
+        CONsTRAINT "group2" UNIQUE (specialChar, biteSize)
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
     // member Relationship (lookup) = 

@@ -42,24 +42,24 @@ type DbAttribute( ) =
     
 // ///<Description>An attribute type which specifies a schema name</Description>
 // [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-// type SchemaAttribute( aliAs : string, context : obj ) = 
+// type SchemaAttribute( alias : string, context : obj ) = 
 //     inherit DbAttribute( )
-//     override _.Value = ( aliAs, ( box( context ) :?> DbContext )  |> EnumToValue )
+//     override _.Value = ( alias, ( box( context ) :?> DbContext )  |> EnumToValue )
     
 
 ///<Description>An attribute type which specifies a Table name</Description>
 [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type TableAttribute( aliAs : string , context : obj ) = 
+type TableAttribute( alias : string , context : obj ) = 
     inherit DbAttribute( )
-    override _.Value = ( aliAs, ( context :?> DbContext )  |> EnumToValue )
+    override _.Value = ( alias, ( context :?> DbContext )  |> EnumToValue )
     member _.Context = ( context :?> DbContext )  |> EnumToValue
 
 
 ///<Description>An attribute type which specifies a Column name</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ColumnAttribute( aliAs : string, context : obj ) = 
+type ColumnAttribute( alias : string, context : obj ) = 
     inherit DbAttribute( )
-    override _.Value = ( aliAs,  ( context :?> DbContext )  |> EnumToValue )
+    override _.Value = ( alias,  ( context :?> DbContext )  |> EnumToValue )
 
 ///<Description>An attribute type which specifies a Column name</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
@@ -83,7 +83,11 @@ type SQLTypeAttribute( definition : string, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
     
-
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type UniqueAttribute( grouping : string, context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( grouping,  ( context :?> DbContext )  |> EnumToValue )
+    member _.Group = grouping
     
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
