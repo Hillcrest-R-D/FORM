@@ -2,6 +2,7 @@ module HCRD.FORM.Tests.Setup
 
 open Form
 open Form.Orm 
+open Form.Attributes
 
 DotNetEnv.Env.Load() |> ignore
 
@@ -21,6 +22,7 @@ let mysqlState ()=    MySQL( mysqlConnectionString (), Contexts.MySQL )
 let mssqlState ()=    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
 let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
 
+
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
 [<Table("Fact", Contexts.MSSQL)>]
@@ -32,10 +34,6 @@ type Fact =
         [<Id(Contexts.MySQL)>]
         [<Id(Contexts.MSSQL)>]
         indexId: int64
-        [<Key(Key.PrimaryKey, Contexts.PSQL)>]
-        [<Key(Key.PrimaryKey, Contexts.MySQL)>]
-        [<Key(Key.PrimaryKey, Contexts.MSSQL)>]
-        [<Key(Key.PrimaryKey, Contexts.SQLite)>]
         [<Id(Contexts.PSQL)>]
         [<Id(Contexts.SQLite)>]
         [<Id(Contexts.MySQL)>]
@@ -54,11 +52,14 @@ type Fact =
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.PSQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP()", Contexts.MySQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.SQLite)>]
-        timeStamp: string    
+        timeStamp: string
+        [<Unique("group1", Contexts.PSQL)>]    
         specialChar : string
         [<SQLType("boolean", Contexts.PSQL)>]
         maybeSomething : string 
+        [<Unique("group1", Contexts.PSQL)>] 
         sometimesNothing : int option
+        [<Unique("group2", Contexts.PSQL)>]
         biteSize : string
     }
 

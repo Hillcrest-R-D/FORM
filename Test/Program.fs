@@ -1,6 +1,7 @@
 namespace HCRD.FORM.Tests
 open Form
 open Form.Orm
+open Form.Attributes
 open Setup
 module Main = 
     type Contexts =
