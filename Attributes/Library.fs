@@ -1,37 +1,21 @@
-namespace Form 
+namespace Form.Attributes
+
 open System
-open System.Data
 open System.Reflection
 open FSharp.Reflection
-open Npgsql
-open NpgsqlTypes
-open Microsoft.Data.SqlClient
-open Microsoft.Data.Sqlite
-open MySqlConnector
-open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
-
 
 type DbContext =
     | Default = 99
  
-type Key =
-    | PrimaryKey = 1
-    // | Foreign = 2
-    | Alternate = 3
-    | Composite = 4
-    | Super = 5
-    | CAndidate = 6
-    | Unique = 7 
-    // static member Value =
-    //     function
-    //     | PrimaryKey "1"
-    //     | Foreign -> "2"
-    //     | Alternate -> "3"
-    //     | Composite -> "4"
-    //     | Super -> "5"
-    //     | CAndidate -> "6"
-    //     | Unique -> "7"
+type FKProperty =
+    | Cascade
+    | SetNull
+    | SetValue of string 
+
+type FKType = 
+    | Update of FKProperty
+    | Delete of FKProperty
 
 type ContextInfo = ( string * DbContext ) array
 
@@ -40,33 +24,32 @@ type DbAttribute( ) =
     inherit Attribute( )
     abstract Value : ( string * int )
     
-// ///<Description>An attribute type which specifies a schema name</Description>
-// [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-// type SchemaAttribute( aliAs : string, context : obj ) = 
-//     inherit DbAttribute( )
-//     override _.Value = ( aliAs, ( box( context ) :?> DbContext )  |> EnumToValue )
-    
-
-///<Description>An attribute type which specifies a Table name</Description>
+///<Description>An attribute type which specifies a schema name</Description>
+///<Warning>Not Implemented, don't bother using yet...</Warning>
 [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type TableAttribute( aliAs : string , context : obj ) = 
+type SchemaAttribute( alias : string, context : obj ) = 
     inherit DbAttribute( )
-    override _.Value = ( aliAs, ( context :?> DbContext )  |> EnumToValue )
+    override _.Value = ( alias, ( box( context ) :?> DbContext )  |> EnumToValue )
+
+///<Description>An attribute type which specifies a table name</Description>
+[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
+type TableAttribute( alias : string , context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( alias, ( context :?> DbContext )  |> EnumToValue )
     member _.Context = ( context :?> DbContext )  |> EnumToValue
 
 
 ///<Description>An attribute type which specifies a Column name</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ColumnAttribute( aliAs : string, context : obj ) = 
+type ColumnAttribute( alias : string, context : obj ) = 
     inherit DbAttribute( )
-    override _.Value = ( aliAs,  ( context :?> DbContext )  |> EnumToValue )
+    override _.Value = ( alias,  ( context :?> DbContext )  |> EnumToValue )
 
 ///<Description>An attribute type which specifies a Column name</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type KeyAttribute( key : obj, context : obj ) = 
+type PrimaryKeyAttribute( name : string, context : obj ) = 
     inherit DbAttribute( )
-    override _.Value = ( unbox<string> key,  ( context :?> DbContext )  |> EnumToValue )
-    member _.Key = key
+    override _.Value = name, ( context :?> DbContext )  |> EnumToValue 
     
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
 type ConstraintAttribute( definition : string, context : obj ) = 
@@ -82,9 +65,20 @@ type IdAttribute(context : obj ) =
 type SQLTypeAttribute( definition : string, context : obj ) = 
     inherit DbAttribute( )
     override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
-    
 
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type UniqueAttribute( group : string,context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = (group,  ( context :?> DbContext )  |> EnumToValue)
     
+///<Description>An attribute type which specifies a Column name</Description>
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type ForeignKeyAttribute( table : obj, column : string, properties : obj, field: string,  context : obj ) = 
+    inherit DbAttribute( )
+    override _.Value = ( column,  ( box( context ) :?> DbContext )  |> EnumToValue )
+    member _.table = table
+    member _.column = column   
+
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
     Index : int
@@ -102,5 +96,6 @@ type OrmState =
     | MySQL     of ( string * Enum )
     | PSQL      of ( string * Enum )
     | SQLite    of ( string * Enum )
-    | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
+    // | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
+    
   

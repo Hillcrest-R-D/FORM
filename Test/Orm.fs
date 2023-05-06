@@ -1,6 +1,7 @@
 module Test.Orm
 
 open Form
+open Form.Attributes
 open HCRD.FORM.Tests.Setup 
 open NUnit.Framework
 
@@ -66,7 +67,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertTest () =
-        match Orm.Insert< Fact > ( Fact.init() ) testingState with 
+        match Orm.insert< Fact > ( Fact.init() ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
 
@@ -74,7 +75,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.InsertManyTest () =
         let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2}; { Fact.init() with id = testGuid3}; Fact.init()]
-        match Orm.InsertAll< Fact > ( str8Facts ) testingState with 
+        match Orm.insertAll< Fact > ( str8Facts ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
         
@@ -89,7 +90,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.SelectTest () =
         printfn "Selecting All..."
-        match Orm.SelectAll< Fact > testingState with 
+        match Orm.selectAll< Fact > testingState with 
         | Ok facts -> 
             Seq.iter ( printfn  "%A") facts
             Assert.Pass(sprintf "facts: %A" facts) 
@@ -110,7 +111,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.SelectWhereTest () =
         printfn "Selecting All..."
-        match Orm.SelectWhere< Fact > "\"maybeSomething\" = 'true'" testingState with 
+        match Orm.selectWhere< Fact > "\"maybeSomething\" = 'true'" testingState with 
         | Ok facts ->
             Assert.Pass(sprintf "facts: %A" (Seq.head <| facts)) 
         | Error e -> Assert.Fail(e.ToString())
@@ -121,7 +122,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = { Fact.init() with id = testGuid1 }
         let changed = { initial with name = "Evan Towlett"}
-        match Orm.Update< Fact > changed testingState with 
+        match Orm.update< Fact > changed testingState with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -133,7 +134,7 @@ type Orm (_testingState) =
         let initial = Fact.init() 
         let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
         let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.UpdateAll< Fact > [changed;changed2] testingState
+        Orm.updateAll< Fact > [changed;changed2] testingState
         |> printf "%A"
         
         Assert.Pass()
@@ -149,7 +150,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = Fact.init () 
         let changed = { initial with name = "Evan Towlett"}
-        match Orm.UpdateWhere< Fact > "\"indexId\" = 1" changed testingState with 
+        match Orm.updateWhere< Fact > "\"indexId\" = 1" changed testingState with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())

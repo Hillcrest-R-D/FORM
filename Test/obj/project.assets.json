@@ -67,6 +67,19 @@
           "lib/netstandard1.3/DotNetEnv.dll": {}
         }
       },
+      "Form.Attributes/0.0.1": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "dependencies": {
+          "FSharp.Core": "7.0.200"
+        },
+        "compile": {
+          "bin/placeholder/Form.Attributes.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Form.Attributes.dll": {}
+        }
+      },
       "FSharp.Core/7.0.200": {
         "type": "package",
         "compile": {
@@ -1936,6 +1949,7 @@
         "framework": ".NETCoreApp,Version=v7.0",
         "dependencies": {
           "FSharp.Core": "7.0.200",
+          "Form.Attributes": "0.0.1",
           "microsoft.data.sqlclient": "5.1.0",
           "microsoft.data.sqlite": "7.0.3",
           "mysqlconnector": "2.2.5",
@@ -2054,6 +2068,11 @@
         "dotnetenv.nuspec",
         "lib/netstandard1.3/DotNetEnv.dll"
       ]
+    },
+    "Form.Attributes/0.0.1": {
+      "type": "project",
+      "path": "../Attributes/Attributes.fsproj",
+      "msbuildProject": "../Attributes/Attributes.fsproj"
     },
     "FSharp.Core/7.0.200": {
       "sha512": "NmgUnpNH6Zu9B0SPIhojyo38gnPdkdYFYQfbd6zosEH32kbGY/g/Klk7PfOWe1NAe/O1YOMmK9KhwQ2OWsWEbg==",
@@ -6449,6 +6468,7 @@
     "net7.0": [
       "FSharp.Core >= 7.0.200",
       "Form >= 0.9.28",
+      "Form.Attributes >= 0.0.1",
       "Microsoft.NET.Test.Sdk >= 16.5.0",
       "Microsoft.TestPlatform >= 16.5.0",
       "NUnit >= 3.13.3",
@@ -6485,6 +6505,9 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
+            "c:\\hcrd\\FORM\\Attributes\\Attributes.fsproj": {
+              "projectPath": "c:\\hcrd\\FORM\\Attributes\\Attributes.fsproj"
+            },
             "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
               "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj"
             }

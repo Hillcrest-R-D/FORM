@@ -11,107 +11,9 @@ open Microsoft.Data.Sqlite
 open MySqlConnector
 open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
+open Form.Attributes
 
 
-type DbContext =
-    | Default = 99
- 
-type Key =
-    | PrimaryKey = 1
-    // | Foreign = 2
-    | Alternate = 3
-    | Composite = 4
-    | Super = 5
-    | CAndidate = 6
-    | Unique = 7 
-    // static member Value =
-    //     function
-    //     | PrimaryKey "1"
-    //     | Foreign -> "2"
-    //     | Alternate -> "3"
-    //     | Composite -> "4"
-    //     | Super -> "5"
-    //     | CAndidate -> "6"
-    //     | Unique -> "7"
-
-type ContextInfo = ( string * DbContext ) array
-
-[<AbstractClass>]
-type DbAttribute( ) = 
-    inherit Attribute( )
-    abstract Value : ( string * int )
-    
-// ///<Description>An attribute type which specifies a schema name</Description>
-// [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-// type SchemaAttribute( aliAs : string, context : obj ) = 
-//     inherit DbAttribute( )
-//     override _.Value = ( aliAs, ( box( context ) :?> DbContext )  |> EnumToValue )
-    
-
-///<Description>An attribute type which specifies a Table name</Description>
-[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type TableAttribute( aliAs : string , context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( aliAs, ( context :?> DbContext )  |> EnumToValue )
-    member _.Context = ( context :?> DbContext )  |> EnumToValue
-
-
-///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ColumnAttribute( aliAs : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( aliAs,  ( context :?> DbContext )  |> EnumToValue )
-
-///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type KeyAttribute( key : obj, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( unbox<string> key,  ( context :?> DbContext )  |> EnumToValue )
-    member _.Key = key
-    
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ConstraintAttribute( definition : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
-
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type IdAttribute(context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( "index",  ( context :?> DbContext )  |> EnumToValue )
-
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type SQLTypeAttribute( definition : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
-
-///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ForeignKeyAttribute( Table : obj, Column : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( Column,  ( box( context ) :?> DbContext )  |> EnumToValue )
-    member _.Table = Table
-    member _.Column = Table   
-
-    
-///<Description>A record type which holds the information required to map across BE And DB. </Description>
-type SqlMapping = { 
-    Index : int
-    IsKey : bool
-    SqlName : string 
-    QuotedSqlName : string
-    FSharpName : string
-    Type : Type
-    PropertyInfo: PropertyInfo
-}
-
-///<Description>Stores the flavor And context used for a particular connection.</Description>
-type OrmState = 
-    | MSSQL     of ( string * Enum )
-    | MySQL     of ( string * Enum )
-    | PSQL      of ( string * Enum )
-    | SQLite    of ( string * Enum )
-    // | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
-    
 module Orm = 
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( this : OrmState ) : Result< DbConnection, exn > = 
@@ -145,7 +47,7 @@ module Orm =
                 else s
             ) "" attrs
         
-    let inline TableName< ^T > ( this : OrmState ) = 
+    let inline tableName< ^T > ( this : OrmState ) = 
         let attrs =
             typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
             |> Array.map ( fun x -> x :?> DbAttribute )
@@ -161,7 +63,7 @@ module Orm =
         |> String.concat "."
         
 
-    let inline ColumnMapping< ^T > ( this : OrmState ) = 
+    let inline columnMapping< ^T > ( this : OrmState ) = 
         FSharpType.GetRecordFields typedefof< ^T > 
         |> Array.mapi ( fun i x -> 
             let sqlName =  
@@ -187,13 +89,13 @@ module Orm =
             } 
         )
 
-    let inline Table< ^T > ( this : OrmState ) = 
-        TableName< ^T > this
+    let inline table< ^T > ( this : OrmState ) = 
+        tableName< ^T > this
     
     let inline mapping< ^T > ( this : OrmState ) = 
-        ColumnMapping< ^T > this
+        columnMapping< ^T > this
 
-    let inline Columns< ^T > ( this : OrmState ) = 
+    let inline columns< ^T > ( this : OrmState ) = 
         mapping< ^T > this
         |> Array.map ( fun x -> x.QuotedSqlName )
         
@@ -216,7 +118,7 @@ module Orm =
         let rty = typeof< ^T >
         let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
         let fields = 
-            seq { for fld in ( ColumnMapping< ^T > this ) -> fld.SqlName, fld } 
+            seq { for fld in ( columnMapping< ^T > this ) -> fld.SqlName, fld } 
             |> dict 
         seq { 
             while reader.Read( ) do
@@ -253,7 +155,7 @@ module Orm =
         
         $"Insert Into {tableName}( {columnNames} ) Values ( {placeHolders} )"
 
-    //Insert Into Table1 Values
+    //Insert Into table1 Values
     // ( $1, $2, $3 ),
     // ( $4, $5, $6 ),
     let inline makeInsertMany< ^T > tableName columns ( instances : ^T seq ) ( this : OrmState ) =
@@ -310,8 +212,8 @@ module Orm =
         
     
     let inline queryBase< ^T >  ( this : OrmState ) = 
-        let cols = Columns< ^T > this 
-        ( String.concat ", " cols ) + " From " + Table< ^T > this
+        let cols = columns< ^T > this 
+        ( String.concat ", " cols ) + " From " + table< ^T > this
 
     let inline exceptionHandler f =
         try 
@@ -319,7 +221,7 @@ module Orm =
         with 
         | exn -> Error exn
 
-    let inline private Select< ^T > query ( this : OrmState ) = 
+    let inline private select< ^T > query ( this : OrmState ) = 
         match connect this with 
         | Ok conn -> 
             exceptionHandler ( fun ( ) ->  
@@ -333,19 +235,19 @@ module Orm =
         | Error e -> Error e
 
 
-    let inline SelectHelper< ^T > f ( this : OrmState ) = 
+    let inline selectHelper< ^T > f ( this : OrmState ) = 
         queryBase< ^T > this
         |> f
-        |> fun x -> Select< ^T > x this
+        |> fun x -> select< ^T > x this
     
-    let inline SelectLimit< ^T > lim  ( this : OrmState ) = 
-        SelectHelper< ^T > ( fun x -> $"select top {lim} {x}" ) this
+    let inline selectLimit< ^T > lim  ( this : OrmState ) = 
+        selectHelper< ^T > ( fun x -> $"select top {lim} {x}" ) this
 
-    let inline SelectWhere< ^T > where  ( this : OrmState ) = 
-        SelectHelper< ^T > ( fun x -> $"select {x} where {where}" ) this
+    let inline selectWhere< ^T > where  ( this : OrmState ) = 
+        selectHelper< ^T > ( fun x -> $"select {x} where {where}" ) this
         
-    let inline SelectAll< ^T >  ( this : OrmState ) = 
-        SelectHelper< ^T > ( fun x -> $"select {x}" ) this
+    let inline selectAll< ^T >  ( this : OrmState ) = 
+        selectHelper< ^T > ( fun x -> $"select {x}" ) this
 
         
     let inline makeParameter ( this : OrmState ) : DbParameter =
@@ -356,11 +258,11 @@ module Orm =
         | SQLite _ -> SqliteParameter( )
     
     
-    let inline Insert< ^T > ( instance : ^T )  ( this : OrmState ) =
+    let inline insert< ^T > ( instance : ^T )  ( this : OrmState ) =
         match connect this with
         | Ok conn ->
             conn.Open( )
-            let query = makeInsert ( Table< ^T > this ) ( Columns< ^T > this ) this
+            let query = makeInsert ( table< ^T > this ) ( columns< ^T > this ) this
             use cmd = makeCommand query conn this
             
             let paramChar = makeParamChar this 
@@ -394,14 +296,14 @@ module Orm =
             result
         | Error e -> Error e
 
-    let inline InsertAll< ^T > ( instances : ^T seq )  ( this : OrmState ) =
+    let inline insertAll< ^T > ( instances : ^T seq )  ( this : OrmState ) =
         match connect this with
         | Ok conn -> 
             conn.Open( )
-            let query = makeInsertMany ( Table< ^T > this )  ( Columns< ^T > this )  instances this
+            let query = makeInsertMany ( table< ^T > this )  ( columns< ^T > this )  instances this
             use cmd = makeCommand query conn this
             let paramChar = ( makeParamChar this )
-            let numCols = Columns< ^T > this |> Seq.length
+            let numCols = columns< ^T > this |> Seq.length
             instances
             |> Seq.iteri ( fun jindex instance  -> 
                 mapping< ^T > this
@@ -438,7 +340,7 @@ module Orm =
         | Error e -> Error e
     
     (*
-    UPDATE a
+    uPDATE a
         ...
         FROM my_table a
         ...    
@@ -452,11 +354,11 @@ module Orm =
             cols 
 #if DEBUG
             |> fun cols -> 
-                printfn "Columns to update: %A" cols; cols 
+                printfn "columns to update: %A" cols; cols 
 #endif
             |> Seq.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3
 
-        let table = Table< ^T > this 
+        let table = table< ^T > this 
         let set = 
             Seq.zip cols queryParams
             |> Seq.map ( fun x -> sprintf "%s = %s" (fst x).QuotedSqlName (snd x) ) 
@@ -466,14 +368,14 @@ module Orm =
 
     // SET col1 = a, col2=b WHERE this = that
     // SET col1 = a;
-    // Update<User> User.last_access.name now() ormState
+    // update<User> User.last_access.name now() ormState
 
     let inline ensureId< ^T > ( this: OrmState ) = 
         mapping< ^T > this 
         |> Array.filter ( fun x -> x.IsKey )
         |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
     
-    let inline UpdateHelper<^T> ( whereClause : string ) ( instance : ^T ) ( this : OrmState ) = 
+    let inline updateHelper<^T> ( whereClause : string ) ( instance : ^T ) ( this : OrmState ) = 
         connect this
         |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
@@ -513,9 +415,9 @@ module Orm =
             )        
         )
         
-    let inline Update< ^T > ( instance: ^T ) ( this : OrmState ) = 
+    let inline update< ^T > ( instance: ^T ) ( this : OrmState ) = 
         (*
-            UPDATE tableT
+            uPDATE tableT
                 SET 
                     col1 = instance.col1, 
                     col2 = instance.col2 
@@ -524,7 +426,7 @@ module Orm =
                 WHERE
                     (id_col) = instance.(id_field)
         *)
-        let table = Table< ^T > this 
+        let table = table< ^T > this 
         let paramChar = makeParamChar this
         
         ensureId< ^T > this 
@@ -532,15 +434,15 @@ module Orm =
             sqlMapping
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
-            |> fun idConditional -> UpdateHelper< ^T > ( sprintf " where %s" idConditional ) instance this
+            |> fun idConditional -> updateHelper< ^T > ( sprintf " where %s" idConditional ) instance this
         )
         
-    let inline UpdateAll< ^T > ( instances: ^T seq ) ( this : OrmState ) = 
-        Seq.map ( fun instance -> Update<^T> instance this ) instances 
+    let inline updateAll< ^T > ( instances: ^T seq ) ( this : OrmState ) = 
+        Seq.map ( fun instance -> update<^T> instance this ) instances 
         
-    let inline UpdateWhere< ^T > ( where : string ) ( instance: ^T ) ( this : OrmState ) = 
+    let inline updateWhere< ^T > ( where : string ) ( instance: ^T ) ( this : OrmState ) = 
         (*
-            UPDATE tableT
+            uPDATE tableT
                 SET 
                     col1 = item.col1, 
                     col2 = item.col2 
@@ -549,14 +451,14 @@ module Orm =
                 WHERE
                     
         *)
-        UpdateHelper< ^T > ( sprintf " where %s" where )  instance this    
+        updateHelper< ^T > ( sprintf " where %s" where )  instance this    
         
-    // let inline UpdateColumns< ^T > ( cols: PropertyInfo seq ) ( item: ^T ) ( this : OrmState ) = 
+    // let inline updatecolumns< ^T > ( cols: PropertyInfo seq ) ( item: ^T ) ( this : OrmState ) = 
         
 
 
     let inline lookupId<^S> state : string seq =
-        ColumnMapping<^S> state
+        columnMapping<^S> state
         |> Seq.filter (fun col -> col.IsKey) 
         |> Seq.map (fun keyCol -> keyCol.QuotedSqlName)
 
@@ -609,7 +511,7 @@ module Orm =
             if Seq.isEmpty id then {inst with value = None}
             else 
                 printfn "Trying select where: "
-                SelectWhere<^S> whereClause state 
+                selectWhere<^S> whereClause state 
                 |> function 
                 | Ok vals when Seq.length vals > 0 ->
                     printfn "Got result, grabbing sequence head:"
