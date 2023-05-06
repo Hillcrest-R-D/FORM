@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "v3rPOInQ7ft3fHNUd6FEqsx5leeypeujPu1/wYc/Jk588AL1eODWW0Ot2GW6+xlKE+0kjW0SXs1GCHzdaZbT+Q==",
+  "dgSpecHash": "RscRcCbrrZVQ0rJ4ZFl/45CgVan+7WZkXcfgUazJCa+/qJI086/ZkWty7paa3F0ZjNRKbJEVekPV+U1sKIJchg==",
   "success": true,
   "projectFilePath": "c:\\hcrd\\FORM\\Test\\Test.fsproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "C:\\Users\\Evan\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\coverlet.collector\\3.2.0\\coverlet.collector.3.2.0.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\dotnetenv\\2.5.0\\dotnetenv.2.5.0.nupkg.sha512",
+    "C:\\Users\\Evan\\.nuget\\packages\\form.attributes\\0.0.1\\form.attributes.0.0.1.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\microsoft.codecoverage\\16.5.0\\microsoft.codecoverage.16.5.0.nupkg.sha512",

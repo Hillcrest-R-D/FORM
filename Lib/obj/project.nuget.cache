@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "b+sDWMV6PTx+mnyL9gaTM+UaUvp+8rmWseiZhXDOjGgFRl5TVFlqplOEkbsuNOQb71jJYGmXDdprzbgjL0rccg==",
+  "dgSpecHash": "0wq+GrQfQyfEGVLnx9QxYNIaoIDC4DN/qMJxUJBEBp1kQl2s/JKMamNFnj1v2B6Wg6rzxVdcT7kHiRxIBsycsg==",
   "success": true,
-  "projectFilePath": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+  "projectFilePath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\Evan\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
+    "C:\\Users\\Evan\\.nuget\\packages\\form.attributes\\0.0.1\\form.attributes.0.0.1.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\Evan\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",

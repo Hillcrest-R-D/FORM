@@ -1,6 +1,7 @@
 module Test.DSL
 
 open Form
+open Form.Attributes
 open HCRD.FORM.Tests.Setup 
 open NUnit.Framework
 

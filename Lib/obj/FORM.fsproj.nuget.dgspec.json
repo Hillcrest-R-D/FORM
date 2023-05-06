@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
+    "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {}
   },
   "projects": {
-    "C:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
-      "version": "0.9.28",
+    "c:\\hcrd\\FORM\\Lib\\FORM.fsproj": {
+      "version": "0.9.29",
       "restore": {
-        "projectUniqueName": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "projectUniqueName": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "projectName": "Form",
-        "projectPath": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+        "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
         "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
-        "outputPath": "C:\\hcrd\\FORM\\Lib\\obj\\",
+        "outputPath": "c:\\hcrd\\FORM\\Lib\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -38,6 +38,11 @@
               "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
               "version": "[7.0.200, )",
+              "generatePathProperty": true
+            },
+            "Form.Attributes": {
+              "target": "Package",
+              "version": "[0.0.1, )",
               "generatePathProperty": true
             },
             "microsoft.data.sqlclient": {

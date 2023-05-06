@@ -46,6 +46,22 @@
           }
         }
       },
+      "Form.Attributes/0.0.1": {
+        "type": "package",
+        "dependencies": {
+          "FSharp.Core": "7.0.200"
+        },
+        "compile": {
+          "lib/net7.0/Attributes.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net7.0/Attributes.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "FSharp.Core/7.0.200": {
         "type": "package",
         "compile": {
@@ -1022,6 +1038,21 @@
         "azureicon.png",
         "lib/netstandard2.0/Azure.Identity.dll",
         "lib/netstandard2.0/Azure.Identity.xml"
+      ]
+    },
+    "Form.Attributes/0.0.1": {
+      "sha512": "i7gXD4fC5jcQbUnvdgcJ8t8VhZ+Mz3+rxNnnmijT2Ee7YKfCgv5kUTtD5kIdW+3yPzXEmglNVzFCtfxGiNAwvw==",
+      "type": "package",
+      "path": "form.attributes/0.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "README.md",
+        "form.attributes.0.0.1.nupkg.sha512",
+        "form.attributes.nuspec",
+        "lib/net7.0/Attributes.dll",
+        "lib/net7.0/Attributes.xml"
       ]
     },
     "FSharp.Core/7.0.200": {
@@ -2536,6 +2567,7 @@
   "projectFileDependencyGroups": {
     "net7.0": [
       "FSharp.Core >= 7.0.200",
+      "Form.Attributes >= 0.0.1",
       "microsoft.data.sqlclient >= 5.1.0",
       "microsoft.data.sqlite >= 7.0.3",
       "mysqlconnector >= 2.2.5",
@@ -2546,13 +2578,13 @@
     "C:\\Users\\Evan\\.nuget\\packages\\": {}
   },
   "project": {
-    "version": "0.9.28",
+    "version": "0.9.29",
     "restore": {
-      "projectUniqueName": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "projectUniqueName": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
       "projectName": "Form",
-      "projectPath": "C:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
       "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
-      "outputPath": "C:\\hcrd\\FORM\\Lib\\obj\\",
+      "outputPath": "c:\\hcrd\\FORM\\Lib\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -2579,6 +2611,11 @@
             "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
             "target": "Package",
             "version": "[7.0.200, )",
+            "generatePathProperty": true
+          },
+          "Form.Attributes": {
+            "target": "Package",
+            "version": "[0.0.1, )",
             "generatePathProperty": true
           },
           "microsoft.data.sqlclient": {

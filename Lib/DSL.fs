@@ -4,6 +4,7 @@ open Orm
 open System.Reflection
 open Microsoft.FSharp.Core
 open Microsoft.FSharp.Core.LanguagePrimitives
+open Form.Attributes
 open System
 open Microsoft.FSharp.Reflection
 

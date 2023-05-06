@@ -18,5 +18,6 @@
     <PkgMicrosoft_Data_Sqlite Condition=" '$(PkgMicrosoft_Data_Sqlite)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.data.sqlite\7.0.3</PkgMicrosoft_Data_Sqlite>
     <PkgMicrosoft_Data_SqlClient Condition=" '$(PkgMicrosoft_Data_SqlClient)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.data.sqlclient\5.1.0</PkgMicrosoft_Data_SqlClient>
     <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Evan\.nuget\packages\fsharp.core\7.0.200</PkgFSharp_Core>
+    <PkgForm_Attributes Condition=" '$(PkgForm_Attributes)' == '' ">C:\Users\Evan\.nuget\packages\form.attributes\0.0.1</PkgForm_Attributes>
   </PropertyGroup>
 </Project>

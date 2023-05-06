@@ -11,129 +11,9 @@ open Microsoft.Data.Sqlite
 open MySqlConnector
 open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
+open Form.Attributes
 
 
-type DbContext =
-    | Default = 99
- 
-type Key =
-    | PrimaryKey = 1
-    // | Foreign = 2
-    | Alternate = 3
-    | Composite = 4
-    | Super = 5
-    | CAndidate = 6
-    | Unique = 7 
-    // static member Value =
-    //     function
-    //     | PrimaryKey "1"
-    //     | Foreign -> "2"
-    //     | Alternate -> "3"
-    //     | Composite -> "4"
-    //     | Super -> "5"
-    //     | CAndidate -> "6"
-    //     | Unique -> "7"
-
-type ContextInfo = ( string * DbContext ) array
-
-[<AbstractClass>]
-type DbAttribute( ) = 
-    inherit Attribute( )
-    abstract Value : ( string * int )
-    
-// ///<Description>An attribute type which specifies a schema name</Description>
-// [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-// type SchemaAttribute( aliAs : string, context : obj ) = 
-//     inherit DbAttribute( )
-//     override _.Value = ( aliAs, ( box( context ) :?> DbContext )  |> EnumToValue )
-    
-
-///<Description>An attribute type which specifies a table name</Description>
-[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type TableAttribute( aliAs : string , context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( aliAs, ( context :?> DbContext )  |> EnumToValue )
-    member _.Context = ( context :?> DbContext )  |> EnumToValue
-
-
-///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ColumnAttribute( aliAs : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( aliAs,  ( context :?> DbContext )  |> EnumToValue )
-
-///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type PrimaryKeyAttribute( context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( context :?> DbContext )  |> EnumToValue 
-    
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ConstraintAttribute( definition : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
-
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type IdAttribute(context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( "index",  ( context :?> DbContext )  |> EnumToValue )
-
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type SQLTypeAttribute( definition : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( definition,  ( context :?> DbContext )  |> EnumToValue )
-
-///<Description>An attribute type which specifies a Column name</Description>
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ForeignKeyAttribute( table : obj, column : string, properties : FKProperty,  context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( Column,  ( box( context ) :?> DbContext )  |> EnumToValue )
-    member _.table = table
-    member _.column = column   
-
-type FKType = 
-    | Update
-    | Delete
-
-type FKProperty =
-    | Cascade
-    | Set
-
-CREATE TABLE balls (
-     id int
-    ,col1 uniqueidentifer
-    ,col2 datetime
-    ,col3 bigint
-    ,CONSTRAINT FK_1 FOREIGN KEY (col1, col2) ON DELETE CASCADE ON UPDATE SET NULL (col3)
-    ,CONSTRAINT FK_2 FOREIGN KEY (col3) ON DELETE CASCADE
-);
-type balls =
-    {
-        id: int32
-        col1: Ulid
-        col2: DateTime
-        col3: int64
-    }
-    
-///<Description>A record type which holds the information required to map across BE And DB. </Description>
-type SqlMapping = { 
-    Index : int
-    IsKey : bool
-    SqlName : string 
-    QuotedSqlName : string
-    FSharpName : string
-    Type : Type
-    PropertyInfo: PropertyInfo
-}
-
-///<Description>Stores the flavor And context used for a particular connection.</Description>
-type OrmState = 
-    | MSSQL     of ( string * Enum )
-    | MySQL     of ( string * Enum )
-    | PSQL      of ( string * Enum )
-    | SQLite    of ( string * Enum )
-    // | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
-    
 module Orm = 
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( this : OrmState ) : Result< DbConnection, exn > = 
@@ -169,7 +49,7 @@ module Orm =
         
     let inline tableName< ^T > ( this : OrmState ) = 
         let attrs =
-            typedefof< ^T >.GetCustomAttributes( typeof< tableAttribute >, false )
+            typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
             |> Array.map ( fun x -> x :?> DbAttribute )
         
         let name = 
