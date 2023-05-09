@@ -5,19 +5,20 @@
     <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
     <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
     <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Evan\.nuget\packages\</NuGetPackageFolders>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Fenton\.nuget\packages\;C:\Microsoft\Xamarin\NuGet\</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
-    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.5.0</NuGetToolVersion>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.4.0</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <SourceRoot Include="C:\Users\Evan\.nuget\packages\" />
+    <SourceRoot Include="C:\Users\Fenton\.nuget\packages\" />
+    <SourceRoot Include="C:\Microsoft\Xamarin\NuGet\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgNpgsql Condition=" '$(PkgNpgsql)' == '' ">C:\Users\Evan\.nuget\packages\npgsql\7.0.2</PkgNpgsql>
-    <PkgMySqlConnector Condition=" '$(PkgMySqlConnector)' == '' ">C:\Users\Evan\.nuget\packages\mysqlconnector\2.2.5</PkgMySqlConnector>
-    <PkgMicrosoft_Data_Sqlite Condition=" '$(PkgMicrosoft_Data_Sqlite)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.data.sqlite\7.0.3</PkgMicrosoft_Data_Sqlite>
-    <PkgMicrosoft_Data_SqlClient Condition=" '$(PkgMicrosoft_Data_SqlClient)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.data.sqlclient\5.1.0</PkgMicrosoft_Data_SqlClient>
-    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Evan\.nuget\packages\fsharp.core\7.0.200</PkgFSharp_Core>
-    <PkgForm_Attributes Condition=" '$(PkgForm_Attributes)' == '' ">C:\Users\Evan\.nuget\packages\form.attributes\0.0.1</PkgForm_Attributes>
+    <PkgNpgsql Condition=" '$(PkgNpgsql)' == '' ">C:\Users\Fenton\.nuget\packages\npgsql\7.0.2</PkgNpgsql>
+    <PkgMySqlConnector Condition=" '$(PkgMySqlConnector)' == '' ">C:\Users\Fenton\.nuget\packages\mysqlconnector\2.2.5</PkgMySqlConnector>
+    <PkgMicrosoft_Data_Sqlite Condition=" '$(PkgMicrosoft_Data_Sqlite)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.data.sqlite\7.0.3</PkgMicrosoft_Data_Sqlite>
+    <PkgMicrosoft_Data_SqlClient Condition=" '$(PkgMicrosoft_Data_SqlClient)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.data.sqlclient\5.1.0</PkgMicrosoft_Data_SqlClient>
+    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Fenton\.nuget\packages\fsharp.core\7.0.0</PkgFSharp_Core>
+    <PkgForm_Attributes Condition=" '$(PkgForm_Attributes)' == '' ">C:\Users\Fenton\.nuget\packages\form.attributes\0.0.1</PkgForm_Attributes>
   </PropertyGroup>
 </Project>
