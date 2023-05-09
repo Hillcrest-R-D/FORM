@@ -80,7 +80,7 @@ module Fact =
             specialChar = "Δ"
             maybeSomething = "true"
             sometimesNothing = None
-            biteSize =  "!yourmom"
+            biteSize =  "!aBite"
         }
 
     

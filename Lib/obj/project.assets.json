@@ -62,7 +62,7 @@
           }
         }
       },
-      "FSharp.Core/7.0.200": {
+      "FSharp.Core/7.0.0": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/FSharp.Core.dll": {
@@ -1055,15 +1055,15 @@
         "lib/net7.0/Attributes.xml"
       ]
     },
-    "FSharp.Core/7.0.200": {
-      "sha512": "NmgUnpNH6Zu9B0SPIhojyo38gnPdkdYFYQfbd6zosEH32kbGY/g/Klk7PfOWe1NAe/O1YOMmK9KhwQ2OWsWEbg==",
+    "FSharp.Core/7.0.0": {
+      "sha512": "8hzwUheAViWMAHWQTr6kR/19C4LhjZ4TlftKfNeZO9y7XnRUzLTK6FJS1C+0oObuUe0e4KndYxjWE+Zgea9YXQ==",
       "type": "package",
-      "path": "fsharp.core/7.0.200",
+      "path": "fsharp.core/7.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
-        "fsharp.core.7.0.200.nupkg.sha512",
+        "fsharp.core.7.0.0.nupkg.sha512",
         "fsharp.core.nuspec",
         "lib/netstandard2.0/FSharp.Core.dll",
         "lib/netstandard2.0/FSharp.Core.xml",
@@ -2566,7 +2566,7 @@
   },
   "projectFileDependencyGroups": {
     "net7.0": [
-      "FSharp.Core >= 7.0.200",
+      "FSharp.Core >= 7.0.0",
       "Form.Attributes >= 0.0.1",
       "microsoft.data.sqlclient >= 5.1.0",
       "microsoft.data.sqlite >= 7.0.3",
@@ -2575,25 +2575,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Evan\\.nuget\\packages\\": {}
+    "C:\\Users\\Fenton\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {}
   },
   "project": {
-    "version": "0.9.29",
+    "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "projectUniqueName": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
       "projectName": "Form",
-      "projectPath": "c:\\hcrd\\FORM\\Lib\\FORM.fsproj",
-      "packagesPath": "C:\\Users\\Evan\\.nuget\\packages\\",
-      "outputPath": "c:\\hcrd\\FORM\\Lib\\obj\\",
+      "projectPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\FORM.fsproj",
+      "packagesPath": "C:\\Users\\Fenton\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Fenton\\Documents\\GitHub\\hcrd\\FORM\\Lib\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Evan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Fenton\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
       ],
       "sources": {
-        "C:\\Program Files\\dotnet\\sdk\\7.0.203\\FSharp\\library-packs": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\sdk\\7.0.102\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -2610,7 +2617,7 @@
           "FSharp.Core": {
             "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
             "target": "Package",
-            "version": "[7.0.200, )",
+            "version": "[7.0.0, )",
             "generatePathProperty": true
           },
           "Form.Attributes": {
@@ -2655,8 +2662,20 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1605",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Detected package downgrade: FSharp.Core from 7.0.200 to 7.0.0. Reference the package directly from the project to select a different version. \r\n Form -> Form.Attributes 0.0.1 -> FSharp.Core (>= 7.0.200) \r\n Form -> FSharp.Core (>= 7.0.0)",
+      "libraryId": "FSharp.Core",
+      "targetGraphs": [
+        "net7.0"
+      ]
+    }
+  ]
 }

@@ -2,7 +2,7 @@
 
 # F# Object Relational Mapper
 
-An attribute based ORM for fsharp.
+An attribute based ORM for F#.
 
 ## Usage
     
@@ -15,25 +15,33 @@ type Contexts =
 ```
 
 We use enumeration here as Unions are not supported by attributes as of yet. The number that each database is set to doesn't really matter,
-but at the moment this is the best way we have found to generalize and organize contextualized attributes.
+but at the moment this is the best way we have found to handle multi-database setups here.
 
-Next, use attributes to perform your domain modeling:
+
+Next, use attributes to perform your data modeling:
 
 ```fsharp
-[<Table("User", Contexts.Database1)>]
+[<Table("accounts.User", Contexts.Database1)>]
 [<Table("Users", Contexts.Database2)>]
 type User = 
-    { Id : int
-      [<Column("Name", Contexts.Database1)>]
-      [<Column("Login", Contexts.Database2)>]
-      Name : string
-      [<Column("Secret", Contexts.Database1)>]
-      Password : string
-      Salt : string
+    { 
+        Id : int
+        [<Column("Name", Contexts.Database1)>]
+        [<Column("Login", Contexts.Database2)>]
+        Name : string
+        [<Column("Secret", Contexts.Database1)>]
+        Password : string
+        Salt : string
     }
 ```
 
-**Table** and **Column** attributes take a name and a context. The name must match that of the relevant object in the database which is referred to by the given context; that is to say, the **User** type refers to a table called "User" in Database1, and "Users" in Database2. If no attribute is given, the underlying logic will default to the name of the type/field, so if you use the same names in your project and your database(s), no **Table**/**Column** attribute is necessary; i.e., the "Id" field will be assumed to map to an "Id" field in both the "User" table in **Database1**, and the same in the "Users" table in **Database2**.
+**Table** and **Column** attributes take a name and a context. The name must match that of the relevant object in the database which is referred to by the given context; that is to say, the **User** type refers to a table called "User" in Database1, and "Users" in Database2. If no attribute is given, the underlying logic will default to the name of the type/field, so if you use the same names in your project and your database(s), no **Table**/**Column** attribute is necessary; i.e., the "Id" field will be assumed to map to an "Id" column in both the "User" table in **Database1**, and the same in the "Users" table in **Database2**.
+
+If you want to override the default schema or database, you're able to prepend the table name with the schema name or the shema and database name and everything will translate properly, e.g.:
+```fsharp
+[<Table("SomeDatabase.aSchema.aReallyGoodTable", Contexts.Database1)>] 
+[<Table("bSchema.aReallyGoodTable", Contexts.Database1)>]
+```
 
 Before we connect, we must also declare some OrmStates. We will need one for each context:
 
@@ -42,7 +50,7 @@ let db1State = PSQL(db1ConnectionString, Contexts.Database1)
 let db2State = MSSQL(db2ConnectionString, Contexts.Database2)
 ```
 
-The connection strings should just be given as strings, deliver these however you see fit (we recommend either putting them in a .env file or setting an environmental variable the will deliver the connection string, we may add some helper functions for this later). 
+The connection strings should just be given as strings, deliver these however you see fit. 
 
 Now we can do some querying:
 
@@ -50,57 +58,40 @@ Now we can do some querying:
 selectAll<User> db1State |> printfn "%A"
 ```
 
-This should send a SELECT * query to the db1./.User table, if everything was setup correctly. Keep in mind that our querying functions return **Result<[]^T, {| Message |}>**, so be prepared to handle those accordingly.
+This should send a "select *" query to the db1./.User table, if everything was setup correctly. Keep in mind that our querying functions return **Result<[]^T, exn>**, so be prepared to handle those accordingly.
 
-We also include a custom query framework; an example:
+We also allow you to run arbitrary SQL against your database.
 
-```fsharp
-let query =
-    { clauses = 
-        [ select<User>
-        ; from<User>
-        ; join<User> [First ("Id", Equals "42"); And ("Name", NotEquals "'Jim'")]
-        ] 
-    }.Compile db1State
-```
-The compilation returns a string, and if printed the above should be:
-
-```fsharp
-"SELECT "Id", "Name", "Secret", "Salt" FROM "User" JOIN "User" On "Id" = 42 AND "Name" = 'Jim'"
+```fsharp 
+execute "create table User ( id int not null);" Contexts.Database1 //returns Result<int, exn>
 ```
 
-Obviously, you may need to specify Schema in table declarations. We are currently ruminating over the idea of a schema attribute, but for now just add the schema name to the table attribute:
+Or if you need to read the result, you can supply a funciton that takes an IDataReader and we'll consume that and pass the results back.
 
 ```fsharp
-[<Table("SchemaName.User", Contexts.Database1)>]
+let query = 
+    "select * 
+    from 
+        user u 
+        left join employees e on u.id = e.userId"
+(*
+    This consumeReader function is used internally by Form but if you don't want to implement your own reader, you can use it.
+    Make sure to align the column names in the hand-written sql with what's returned by mapping< ^T >.
+*)
+let reader = fun readerContext -> consumeReader<User> readerContext Contexts.Database1 
+let result = executeWithReader query reader Contexts.Database1 //Result<User seq, exn>
 ```
 
-and the logic will sort it all out:
+We have implemented the basic CRUD operations along with some variations on them. If you'd like to see something, try to implement it yourself and open a pull request or make a request through the issues. 
 
-```fsharp
-"SELECT "Id", "Name", "Secret", "Salt" FROM "SchemaName"."User" JOIN "SchemaName"."User" On "Id" = 42 AND "Name" = 'Jim'"
-```
+## Performance
 
-Disambiguation of columns will be necessary for joins, we will be adding that soon.
-
-
-Once you have the query you need, simply execute it:
-
-```fsharp
-let rowsAffected = execute query db1State //This is a non-query execution, does not return a result set
-let queryResults = executeReader query generatereader db1State //This DOES return a result set, in this case a Result<[]User, {| Message |}> 
-```
-
-Though this package itself awaits full testing, we have taken most of these pieces from other projects which have been thoroughly tested, so this package should work more or less out of the box.
+For our purposes, FORM's performance has been excellent. However, we recognize that we may not have been able to push FORM to its absolute limits. We would be interested in any benchmarking you're able to do with it. If you do so, providing us with your results and hardware specs used for the benchmarking will help us improve this library.
 
 
 ## Contribution Guidelines
 
-Currently no strict guidelines, just open a pull request or an issue. Feel free to shoot us an [email](mailto:contact@hillcrestrnd.com) if you have any questions!
+Currently no strict guidelines, just open a pull request or an issue. Feel free to shoot us an [email](mailto:contributions@hcrd.com) if you have any questions!
 
 
-### Note:
-
-- Contributions are welcome!
-- This has yet to be tested fully. 
-- Under active development.
+Made with 💕 by HCRD.

@@ -5,12 +5,13 @@
     <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
     <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
     <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Evan\.nuget\packages\</NuGetPackageFolders>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Fenton\.nuget\packages\;C:\Microsoft\Xamarin\NuGet\</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
-    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.5.0</NuGetToolVersion>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.4.0</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <SourceRoot Include="C:\Users\Evan\.nuget\packages\" />
+    <SourceRoot Include="C:\Users\Fenton\.nuget\packages\" />
+    <SourceRoot Include="C:\Microsoft\Xamarin\NuGet\" />
   </ItemGroup>
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)nunit3testadapter\4.4.2\build\netcoreapp3.1\NUnit3TestAdapter.props" Condition="Exists('$(NuGetPackageRoot)nunit3testadapter\4.4.2\build\netcoreapp3.1\NUnit3TestAdapter.props')" />
@@ -20,15 +21,15 @@
     <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk\16.5.0\build\netcoreapp2.1\Microsoft.NET.Test.Sdk.props" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk\16.5.0\build\netcoreapp2.1\Microsoft.NET.Test.Sdk.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgNUnit3TestAdapter Condition=" '$(PkgNUnit3TestAdapter)' == '' ">C:\Users\Evan\.nuget\packages\nunit3testadapter\4.4.2</PkgNUnit3TestAdapter>
-    <PkgNUnit_Analyzers Condition=" '$(PkgNUnit_Analyzers)' == '' ">C:\Users\Evan\.nuget\packages\nunit.analyzers\3.6.1</PkgNUnit_Analyzers>
-    <PkgNUnit Condition=" '$(PkgNUnit)' == '' ">C:\Users\Evan\.nuget\packages\nunit\3.13.3</PkgNUnit>
-    <PkgNewtonsoft_Json Condition=" '$(PkgNewtonsoft_Json)' == '' ">C:\Users\Evan\.nuget\packages\newtonsoft.json\9.0.1</PkgNewtonsoft_Json>
-    <PkgMicrosoft_TestPlatform_ObjectModel Condition=" '$(PkgMicrosoft_TestPlatform_ObjectModel)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.testplatform.objectmodel\16.5.0</PkgMicrosoft_TestPlatform_ObjectModel>
-    <PkgMicrosoft_TestPlatform Condition=" '$(PkgMicrosoft_TestPlatform)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.testplatform\16.5.0</PkgMicrosoft_TestPlatform>
-    <PkgMicrosoft_NET_Test_Sdk Condition=" '$(PkgMicrosoft_NET_Test_Sdk)' == '' ">C:\Users\Evan\.nuget\packages\microsoft.net.test.sdk\16.5.0</PkgMicrosoft_NET_Test_Sdk>
-    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Evan\.nuget\packages\fsharp.core\7.0.200</PkgFSharp_Core>
-    <PkgDotNetEnv Condition=" '$(PkgDotNetEnv)' == '' ">C:\Users\Evan\.nuget\packages\dotnetenv\2.5.0</PkgDotNetEnv>
-    <Pkgcoverlet_collector Condition=" '$(Pkgcoverlet_collector)' == '' ">C:\Users\Evan\.nuget\packages\coverlet.collector\3.2.0</Pkgcoverlet_collector>
+    <PkgNUnit3TestAdapter Condition=" '$(PkgNUnit3TestAdapter)' == '' ">C:\Users\Fenton\.nuget\packages\nunit3testadapter\4.4.2</PkgNUnit3TestAdapter>
+    <PkgNUnit_Analyzers Condition=" '$(PkgNUnit_Analyzers)' == '' ">C:\Users\Fenton\.nuget\packages\nunit.analyzers\3.6.1</PkgNUnit_Analyzers>
+    <PkgNUnit Condition=" '$(PkgNUnit)' == '' ">C:\Users\Fenton\.nuget\packages\nunit\3.13.3</PkgNUnit>
+    <PkgNewtonsoft_Json Condition=" '$(PkgNewtonsoft_Json)' == '' ">C:\Users\Fenton\.nuget\packages\newtonsoft.json\9.0.1</PkgNewtonsoft_Json>
+    <PkgMicrosoft_TestPlatform_ObjectModel Condition=" '$(PkgMicrosoft_TestPlatform_ObjectModel)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.testplatform.objectmodel\16.5.0</PkgMicrosoft_TestPlatform_ObjectModel>
+    <PkgMicrosoft_TestPlatform Condition=" '$(PkgMicrosoft_TestPlatform)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.testplatform\16.5.0</PkgMicrosoft_TestPlatform>
+    <PkgMicrosoft_NET_Test_Sdk Condition=" '$(PkgMicrosoft_NET_Test_Sdk)' == '' ">C:\Users\Fenton\.nuget\packages\microsoft.net.test.sdk\16.5.0</PkgMicrosoft_NET_Test_Sdk>
+    <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Fenton\.nuget\packages\fsharp.core\7.0.0</PkgFSharp_Core>
+    <PkgDotNetEnv Condition=" '$(PkgDotNetEnv)' == '' ">C:\Users\Fenton\.nuget\packages\dotnetenv\2.5.0</PkgDotNetEnv>
+    <Pkgcoverlet_collector Condition=" '$(Pkgcoverlet_collector)' == '' ">C:\Users\Fenton\.nuget\packages\coverlet.collector\3.2.0</Pkgcoverlet_collector>
   </PropertyGroup>
 </Project>

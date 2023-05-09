@@ -1,9 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>0.9.29</Version>
-    <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
-    <Company>Hillcrest Research and Development</Company>
+    <Version>1.0.0</Version>
+    <Authors>
+        <Author>Evan Howlett, HCRD</Author> 
+        <Author>Mackenzie F. Libby, HCRD</Author>
+    </Authors>
+    <Company>Hillcrest Research and Development LLC</Company>
     <TargetFramework>net7.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -13,13 +16,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ORM.fs" />
-    <Compile Include="DSL.fs" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.0" />
     <PackageReference Include="Form.Attributes" Version="0.0.1" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.0" />
     <PackageReference Include="microsoft.data.sqlite" Version="7.0.3" />
     <PackageReference Include="mysqlconnector" Version="2.2.5" />
     <PackageReference Include="npgsql" Version="7.0.2" />
