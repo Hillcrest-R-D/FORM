@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>
         <Author>Evan Howlett, HCRD</Author> 
         <Author>Mackenzie F. Libby, HCRD</Author>
     </Authors>
     <Company>Hillcrest Research and Development LLC</Company>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -20,7 +20,7 @@
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Form.Attributes" Version="0.0.1" />
+    <PackageReference Include="Form.Attributes" Version="0.0.2" />
     <PackageReference Include="microsoft.data.sqlclient" Version="5.1.0" />
     <PackageReference Include="microsoft.data.sqlite" Version="7.0.3" />
     <PackageReference Include="mysqlconnector" Version="2.2.5" />
