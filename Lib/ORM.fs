@@ -221,15 +221,18 @@ module Orm =
     /// transfer the results of executing the specified sql against the specified database given by state into an 
     /// arbitrary type 't, defined by you in the readerFunction.
     /// </Description>
-    let inline executeWithReader sql ( readerFunction : IDataReader -> Result< 't seq, exn > ) ( state : OrmState ) =
+    let inline executeWithReader sql ( readerFunction : IDataReader -> 't ) ( state : OrmState ) = //Result<'t, exn>
         match connect state with
         | Ok conn -> 
-            conn.Open( )
-            use cmd = makeCommand sql conn state
-            use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-            let result = readerFunction reader
-
-            result
+            try 
+                conn.Open( )
+                seq { 
+                    use cmd = makeCommand sql conn state
+                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                    while reader.Read() do yield readerFunction reader 
+                } |> Ok
+            with 
+            | exn -> Error exn
         | Error e -> Error e
     
     let inline paramaterizeCmd< ^T > query conn ( instance : ^T ) state =
