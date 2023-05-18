@@ -72,6 +72,11 @@ module Orm =
                 |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
                 |> fun y -> if y = "" then x.Name else y 
             let isKey =
+                x.GetCustomAttributes( typeof< PrimaryKeyAttribute >, false ) 
+                |> Array.map ( fun y -> y :?> DbAttribute )
+                |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
+                |> fun y -> if y = "" then false else true 
+            let isIndex =
                 x.GetCustomAttributes( typeof< IdAttribute >, false ) 
                 |> Array.map ( fun y -> y :?> DbAttribute )
                 |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
@@ -81,6 +86,7 @@ module Orm =
             { 
                 Index = i
                 IsKey = isKey
+                IsIndex = isIndex
                 SqlName = sqlName
                 QuotedSqlName = quotedName
                 FSharpName = fsharpName
@@ -98,7 +104,7 @@ module Orm =
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> x.QuotedSqlName )
-        
+       
     let inline fields< ^T >  ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
@@ -149,12 +155,17 @@ module Orm =
     let inline insertBase< ^T > ( state : OrmState ) =
         let paramChar = getParamChar state
         let tableName = ( table< ^T > state ) 
-
-        let placeHolders = 
+        let cols = 
             mapping< ^T > state 
+            |> Seq.filter (fun col -> not col.IsIndex && not col.IsKey )
+        let placeHolders = 
+            cols
             |> Seq.mapi ( fun i x -> sprintf "%s%s" paramChar x.FSharpName )
             |> String.concat ", "
-        let columnNames = String.concat ", "  ( columns< ^T > state )
+        let columnNames = 
+            cols
+            |> Seq.map ( fun x -> x.QuotedSqlName )
+            |> String.concat ", "  
         
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
 
@@ -164,18 +175,24 @@ module Orm =
     let inline insertManyBase< ^T > ( instances : ^T seq ) ( state : OrmState ) =
         let paramChar   = getParamChar     state
         let tableName   = table< ^T >       state 
+        let cols = 
+            mapping< ^T > state 
+            |> Seq.filter (fun col -> not col.IsIndex && not col.IsKey )
         let columns     = columns< ^T >     state
         let placeHolders = 
             instances 
             |> Seq.mapi ( fun index e ->
-                mapping< ^T > state 
+                cols
                 |> Seq.mapi ( fun innerIndex x -> 
                     sprintf "%s%s%i" paramChar x.FSharpName index
                 )
                 |> String.concat ", "
             )
             |> String.concat " ), ( "
-        let columnNames = String.concat ", " columns
+        let columnNames = 
+            cols 
+            |> Seq.map ( fun x -> x.QuotedSqlName )
+            |> String.concat ", " 
         //placeHolders e.g. = "@cola1,@colb1),(@cola2,@colb2),(@cola3,@colb3"
         sprintf "insert into %s( %s ) values ( %s );"  tableName columnNames placeHolders
     
@@ -211,7 +228,7 @@ module Orm =
             use cmd = makeCommand sql conn state
             use reader = cmd.ExecuteReader( )
             let result = readerFunction reader
-            conn.Close( )
+
             result
         | Error e -> Error e
     

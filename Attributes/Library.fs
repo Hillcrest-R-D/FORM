@@ -83,6 +83,7 @@ type ForeignKeyAttribute( table : obj, column : string, properties : obj, field:
 type SqlMapping = { 
     Index : int
     IsKey : bool
+    IsIndex : bool
     SqlName : string 
     QuotedSqlName : string
     FSharpName : string
