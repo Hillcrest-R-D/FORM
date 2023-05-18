@@ -226,7 +226,7 @@ module Orm =
         | Ok conn -> 
             conn.Open( )
             use cmd = makeCommand sql conn state
-            use reader = cmd.ExecuteReader( )
+            use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
             let result = readerFunction reader
 
             result
