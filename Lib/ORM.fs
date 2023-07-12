@@ -12,7 +12,7 @@ open MySqlConnector
 open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
 open Form.Attributes
-
+open FSharp.Reflection.FSharpReflectionExtensions
 
 module Orm = 
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
@@ -94,7 +94,7 @@ module Orm =
                 PropertyInfo = x
             } 
         )
-
+        
     let inline table< ^T > ( state : OrmState ) = 
         tableName< ^T > state
     
@@ -109,16 +109,36 @@ module Orm =
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
     
-    let inline toOption< ^T > ( type_: Type ) ( value: obj )  ( _ : OrmState ) =
+    let inline toOption ( type_: Type ) ( value: obj ) =
         let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
         let optionType = typedefof<Option<_>>.MakeGenericType( [|type_|] )
-        let Case = FSharpType.GetUnionCases( optionType ) |> Seq.find ( fun info -> info.Tag = tag )
-        FSharpValue.MakeUnion( Case, variable )
+        let case = FSharpType.GetUnionCases( optionType ) |> Seq.find ( fun info -> info.Tag = tag )
+        FSharpValue.MakeUnion( case, variable )
 
-    let inline optionType< ^T > ( type_ : Type )  ( _ : OrmState ) =
+    let inline optionType ( type_ : Type )  =
         if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
         then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
         else None
+
+    let toDbType ( typeCode : TypeCode ) = 
+        match typeCode with 
+            | TypeCode.Boolean -> DbType.Boolean
+            | TypeCode.Byte -> DbType.Byte
+            | TypeCode.Char -> DbType.StringFixedLength    // ???
+            | TypeCode.DateTime -> DbType.DateTime// Used for Date, DateTime and DateTime2 DbTypes DbType.DateTime
+            | TypeCode.Decimal -> DbType.Decimal
+            | TypeCode.Double -> DbType.Double
+            | TypeCode.Int16 -> DbType.Int16
+            | TypeCode.Int32 -> DbType.Int32
+            | TypeCode.Int64 -> DbType.Int64
+            | TypeCode.SByte -> DbType.SByte
+            | TypeCode.Single -> DbType.Single
+            | TypeCode.String -> DbType.String
+            | TypeCode.UInt16 -> DbType.UInt16
+            | TypeCode.UInt32 -> DbType.UInt32
+            | TypeCode.UInt64 -> DbType.UInt64
+            | _ -> DbType.Object 
+            
     
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( reader : IDataReader )  ( state : OrmState ) = 
@@ -135,8 +155,8 @@ module Orm =
                     |> Seq.map ( fun i -> reader.GetName( i ), reader.GetValue( i ) )
                     |> Seq.sortBy ( fun ( name, _ ) ->  fields[name].Index )
                     |> Seq.map ( fun ( name, value ) -> 
-                        match optionType< ^T > fields[name].Type state with
-                        | Some ``type`` -> toOption< ^T > ``type`` value state
+                        match optionType fields[name].Type with
+                        | Some ``type`` -> toOption ``type`` value
                         | None   -> value
                     )
                     |> Seq.toArray
@@ -319,9 +339,30 @@ module Orm =
             | exn -> Error exn
         | Error e -> Error e
     
+    let rec genericTypeName full ( _type : Type ) = 
+        if not _type.IsGenericType 
+        then _type.Name
+        else 
+            let typeName = 
+                let mutable tmp = _type.GetGenericTypeDefinition().Name 
+                tmp <- tmp.Substring(0, tmp.IndexOf('`'))
+                tmp
+            if not full 
+            then typeName 
+            else 
+                let args = 
+                    _type.GetGenericArguments()
+                    |> Array.map (genericTypeName full)
+                    |> String.concat ","
+                
+                sprintf "%s<%s>" typeName args
+
+
+
     let inline paramaterizeCmd< ^T > query conn ( instance : ^T ) state =
         let cmd = makeCommand query conn state
         
+        printfn "Type %A - %A" typeof<^T> (mapping< ^T > state)
         mapping< ^T > state
         |> Seq.iter ( fun x -> 
             let paramChar = getParamChar state
@@ -330,18 +371,49 @@ module Orm =
             let param = 
                 let mutable tmp = cmd.CreateParameter( )
                 tmp.ParameterName <- formattedParam 
-                
-                if x.PropertyInfo.GetValue( instance ) = null 
-                then 
-                    tmp.IsNullable <- true
-                    tmp.Value <- DBNull.Value
-                else 
-                    tmp.Value <- ( x.PropertyInfo.GetValue( instance ) )
-                
+                printfn "%A" x
+                try     
+                    if
+                        x.PropertyInfo.GetValue( instance ) = null 
+                    then
+                        printfn "The thing is null" 
+                        tmp.IsNullable <- true
+                        tmp.Value <- DBNull.Value
+                    else 
+                        let _type2 = x.PropertyInfo.GetValue(instance).GetType().Name
+                        printfn "The type of %s is: %A" x.FSharpName _type2 
+                        let _type = x.Type
+                         
+                        if genericTypeName false _type = "FSharpOption"
+                        then
+                            tmp.IsNullable <- true
+                            let innerType = 
+                                x.Type.GetGenericArguments ()
+                                |> Array.head 
+                            
+                            // printfn "and the innerType is: %A" innerType
+                            // printfn "and the DbType is: %A" (Type.GetTypeCode(innerType) |> toDbType)
+                            // printfn "and as a db type of %A" (DbType.Parse innerType.Name)
+                            // tmp.DbType <- toDbType <| Type.GetTypeCode(innerType)
+                            
+                            // x.PropertyInfo.GetValue( instance )
+                            match x.PropertyInfo.GetValue( instance ) with 
+                            | :? Option<_> as t -> 
+                                tmp.Value <- 
+                                    t |> Option.get
+                            | _ -> ()
+                            
+                        else
+                            tmp.Value <- 
+                                x.PropertyInfo.GetValue( instance ) // Some 1
+                with 
+                | exn -> printfn "BOMBASTIC SIDE EYE %A" exn
                 tmp
 
             cmd.Parameters.Add ( param ) |> ignore
         )
+        
+        printfn "\n"
         cmd
 
     let inline paramaterizeSeqCmd< ^T > query conn ( instances : ^T seq ) state =
@@ -366,7 +438,8 @@ module Orm =
                     param.IsNullable <- true
                     param.Value <- DBNull.Value
                 else 
-                    param.Value <- ( mappedInstance.PropertyInfo.GetValue( instance ) )
+                    param.Value <- 
+                        ( mappedInstance.PropertyInfo.GetValue( instance ) )
 
                 cmd.Parameters.Add ( param ) |> ignore
             )
