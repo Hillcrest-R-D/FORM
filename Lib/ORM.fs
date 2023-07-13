@@ -27,6 +27,13 @@ module Orm =
         with 
         | exn -> Error exn
 
+    let inline log f = 
+#if DEBUG 
+        f()
+#endif  
+        ()
+
+
     let inline sqlQuote str ( state : OrmState ) =
         match state with 
         | MSSQL _ -> $"[{str}]"
@@ -301,9 +308,7 @@ module Orm =
         sprintf "insert into %s( %s ) values ( %s );"  tableName columnNames placeHolders
     
     let inline makeCommand ( query : string ) ( connection : DbConnection )  ( state : OrmState ) : DbCommand = 
-#if DEBUG
-        printfn "Query being generated:\n\n%s\n\n\n" query
-#endif
+        log (fun _ -> printfn "Query being generated:\n\n%s\n\n\n" query )
         match state with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection )
@@ -357,89 +362,109 @@ module Orm =
                 
                 sprintf "%s<%s>" typeName args
 
+    let inline unwrapOption ( tmp : DbParameter ) ( opt : obj ) ( ) = 
+        match opt with 
+        | :? Option<Boolean> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Byte> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Char> as t -> tmp.Value <- t |> Option.get
+        | :? Option<DateTime> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Decimal> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Double> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int16> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int32> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int64> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int128> as t -> tmp.Value <- t |> Option.get
+        | :? Option<SByte> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Single> as t -> tmp.Value <- t |> Option.get
+        | :? Option<String> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt16> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt32> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt64> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt128> as t -> tmp.Value <- t |> Option.get
+        | _ -> ()
 
-
-    let inline paramaterizeCmd< ^T > query conn ( instance : ^T ) state =
+    let inline parameterizeCmd< ^T > query conn ( instance : ^T ) state =
         let cmd = makeCommand query conn state
         
         printfn "Type %A - %A" typeof<^T> (mapping< ^T > state)
         mapping< ^T > state
-        |> Seq.iter ( fun x -> 
+        |> Seq.iter ( fun mappedInstance -> 
             let paramChar = getParamChar state
             let formattedParam = 
-                sprintf "%s%s" paramChar x.FSharpName
+                sprintf "%s%s" paramChar mappedInstance.FSharpName
             let param = 
                 let mutable tmp = cmd.CreateParameter( )
+
                 tmp.ParameterName <- formattedParam 
-                printfn "%A" x
-                try     
-                    if
-                        x.PropertyInfo.GetValue( instance ) = null 
+                if
+                    mappedInstance.PropertyInfo.GetValue( instance ) = null 
+                then
+                    tmp.IsNullable <- true
+                    tmp.Value <- DBNull.Value
+                else 
+                    let _type = mappedInstance.Type
+                        
+                    if genericTypeName false _type = "FSharpOption"
                     then
-                        printfn "The thing is null" 
                         tmp.IsNullable <- true
-                        tmp.Value <- DBNull.Value
-                    else 
-                        let _type2 = x.PropertyInfo.GetValue(instance).GetType().Name
-                        printfn "The type of %s is: %A" x.FSharpName _type2 
-                        let _type = x.Type
-                         
-                        if genericTypeName false _type = "FSharpOption"
-                        then
-                            tmp.IsNullable <- true
-                            let innerType = 
-                                x.Type.GetGenericArguments ()
-                                |> Array.head 
-                            
-                            // printfn "and the innerType is: %A" innerType
-                            // printfn "and the DbType is: %A" (Type.GetTypeCode(innerType) |> toDbType)
-                            // printfn "and as a db type of %A" (DbType.Parse innerType.Name)
-                            // tmp.DbType <- toDbType <| Type.GetTypeCode(innerType)
-                            
-                            // x.PropertyInfo.GetValue( instance )
-                            match x.PropertyInfo.GetValue( instance ) with 
-                            | :? Option<_> as t -> 
-                                tmp.Value <- 
-                                    t |> Option.get
-                            | _ -> ()
-                            
-                        else
-                            tmp.Value <- 
-                                x.PropertyInfo.GetValue( instance ) // Some 1
-                with 
-                | exn -> printfn "BOMBASTIC SIDE EYE %A" exn
+                        unwrapOption tmp (mappedInstance.PropertyInfo.GetValue( instance )) ()
+                        
+                    else
+                        tmp.Value <- 
+                            mappedInstance.PropertyInfo.GetValue( instance ) // Some 1
                 tmp
 
             cmd.Parameters.Add ( param ) |> ignore
         )
         
-        printfn "\n"
         cmd
 
-    let inline paramaterizeSeqCmd< ^T > query conn ( instances : ^T seq ) state =
+    let inline parameterizeSeqCmd< ^T > query conn ( instances : ^T seq ) state =
         let cmd = makeCommand query conn state
         
         instances 
         |> Seq.iteri ( fun index instance ->
         
             mapping< ^T > state
-            |> Seq.iteri ( fun _ mappedInstance -> 
-            
-                let mutable param = cmd.CreateParameter( )
-                param.ParameterName <- 
-                    sprintf 
-                        "%s%s%i" 
-                        ( getParamChar state ) 
-                        mappedInstance.FSharpName 
-                        index
+            |> Seq.iter ( fun mappedInstance -> 
+                let paramChar = getParamChar state
+                let formattedParam = 
+                    sprintf "%s%s%i" paramChar mappedInstance.FSharpName index //``the instance formerly known as mappedInstance``
+                let param = 
+                    let mutable tmp = cmd.CreateParameter( ) //cmd.CreateParameter( )
+                    
+                    tmp.ParameterName <- formattedParam 
+                    if
+                        mappedInstance.PropertyInfo.GetValue( instance ) = null 
+                    then
+                        tmp.IsNullable <- true
+                        tmp.Value <- DBNull.Value
+                    else 
+                        let _type = mappedInstance.Type
+                        if genericTypeName false _type = "FSharpOption"
+                        then
+                            tmp.IsNullable <- true
+                            unwrapOption tmp (mappedInstance.PropertyInfo.GetValue( instance )) ()
+                            
+                        else
+                            tmp.Value <- 
+                                mappedInstance.PropertyInfo.GetValue( instance ) // Some 1
+                    tmp
                 
-                if mappedInstance.PropertyInfo.GetValue( instance ) = null 
-                then 
-                    param.IsNullable <- true
-                    param.Value <- DBNull.Value
-                else 
-                    param.Value <- 
-                        ( mappedInstance.PropertyInfo.GetValue( instance ) )
+                // param.ParameterName <- 
+                //     sprintf 
+                //         "%s%s%i" 
+                //         ( getParamChar state ) 
+                //         mappedInstance.FSharpName 
+                //         index
+                
+                // if mappedInstance.PropertyInfo.GetValue( instance ) = null 
+                // then 
+                //     param.IsNullable <- true
+                //     param.Value <- DBNull.Value
+                // else 
+                //     param.Value <- 
+                //         ( mappedInstance.PropertyInfo.GetValue( instance ) )
 
                 cmd.Parameters.Add ( param ) |> ignore
             )
@@ -501,15 +526,12 @@ module Orm =
             conn.Open( )
             let query = insertBase< ^T > insertKeys state
             let paramChar = getParamChar state 
-            use cmd = paramaterizeCmd query conn instance state//makeCommand query conn state
-            
-#if DEBUG
-            printfn "Param count: %A" cmd.Parameters.Count
-            
-            for i in [0..cmd.Parameters.Count-1] do 
-                printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-#endif
-
+            use cmd = parameterizeCmd query conn instance state//makeCommand query conn state
+            log (fun _ -> 
+                printfn "Param count: %A" cmd.Parameters.Count
+                for i in [0..cmd.Parameters.Count-1] do 
+                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+            )   
             let result = exceptionHandler ( fun ( ) -> cmd.ExecuteNonQuery ( ) )
             conn.Close( )
             result
@@ -522,15 +544,13 @@ module Orm =
             let query = insertManyBase< ^T > insertKeys instances state
             let paramChar = ( getParamChar state )
             let numCols = columns< ^T > state |> Seq.length
-            use cmd = paramaterizeSeqCmd query conn instances state//makeCommand query conn state
-
-#if DEBUG
-            printfn "Query generated: %s" query
-            printfn "Param count: %A" cmd.Parameters.Count
-            
-            for i in [0..cmd.Parameters.Count-1] do 
-                printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-#endif
+            use cmd = parameterizeSeqCmd query conn instances state//makeCommand query conn state
+            log (fun _ -> 
+                printfn "Query generated: %s" query
+                printfn "Param count: %A" cmd.Parameters.Count
+                for i in [0..cmd.Parameters.Count-1] do 
+                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+            )   
             let result = 
                 exceptionHandler ( fun ( ) -> cmd.ExecuteNonQuery ( ) ) 
     
@@ -549,13 +569,11 @@ module Orm =
         let cols = 
             mapping< ^T > state
             |> Seq.filter (fun col -> not col.IsKey) //Can't update keys
+        log ( fun _ -> printfn "columns to update: %A" cols )
         let queryParams = 
             cols 
-#if DEBUG
-            |> fun cols -> 
-                printfn "columns to update: %A" cols; cols 
-#endif
             |> Seq.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3
+            
 
         let table = table< ^T > state 
         let set = 
@@ -564,10 +582,6 @@ module Orm =
             |> String.concat ", "
 
         "update " + table + " set " + set 
-
-    // SET col1 = a, col2=b WHERE state = that
-    // SET col1 = a;
-    // update<User> User.last_access.name now() ormState
 
     let inline ensureId< ^T > ( state: OrmState ) = 
         mapping< ^T > state 
@@ -579,37 +593,40 @@ module Orm =
         |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
                 let query =  updateBase< ^T > state + whereClause //" where " + idConditional    
-                let paramChar = getParamChar state
+                // let paramChar = getParamChar state
 
                 conn.Open( )
-                use cmd = makeCommand query conn state
+                // use cmd = makeCommand query conn state
                 
-                mapping< ^T > state
-                |> Seq.iter ( fun x -> 
-                    let formattedParam = 
-                        sprintf "%s%s" paramChar x.FSharpName
-                    let param = 
-                        let mutable tmp = cmd.CreateParameter( )
-                        tmp.ParameterName <- formattedParam 
+                // mapping< ^T > state
+                // |> Seq.iter ( fun x -> 
+                //     let formattedParam = 
+                //         sprintf "%s%s" paramChar x.FSharpName
+                //     let param = 
+                //         let mutable tmp = cmd.CreateParameter( )
+                //         tmp.ParameterName <- formattedParam 
                         
-                        if x.PropertyInfo.GetValue( instance ) = null 
-                        then 
-                            tmp.IsNullable <- true
-                            tmp.Value <- DBNull.Value
-                        else 
-                            tmp.Value <- ( x.PropertyInfo.GetValue( instance ) )
+                //         if x.PropertyInfo.GetValue( instance ) = null 
+                //         then 
+                //             tmp.IsNullable <- true
+                //             tmp.Value <- DBNull.Value
+                //         else 
+                //             tmp.Value <- ( x.PropertyInfo.GetValue( instance ) )
                         
-                        tmp
+                //         tmp
 
-                    cmd.Parameters.Add ( param ) |> ignore
-                )
+                //     cmd.Parameters.Add ( param ) |> ignore
+                // )
                 
-#if DEBUG
-                printfn "Param count: %A" cmd.Parameters.Count
-                
-                for i in [0..cmd.Parameters.Count-1] do 
-                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-#endif
+                use cmd = parameterizeCmd< ^T > query conn instance state
+
+                // log (fun _ ->
+                //     printfn "Param count: %A" cmd.Parameters.Count
+                    
+                //     for i in [0..cmd.Parameters.Count-1] do 
+                //         printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+                // )
+
                 cmd.ExecuteNonQuery ( )
             )        
         )
@@ -664,12 +681,14 @@ module Orm =
             exceptionHandler ( fun ( ) ->  
                 let query =  deleteBase< ^T > state + whereClause //" where " + idConditional    
                 conn.Open( )
-                use cmd = paramaterizeCmd< ^T > query conn instance state
-#if DEBUG
-                printfn "Param count: %A" cmd.Parameters.Count
-                for i in [0..cmd.Parameters.Count-1] do 
-                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-#endif
+                use cmd = parameterizeCmd< ^T > query conn instance state
+                
+                log ( fun _ ->
+                    printfn "Param count: %A" cmd.Parameters.Count
+                    for i in [0..cmd.Parameters.Count-1] do 
+                        printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+                )
+                
                 cmd.ExecuteNonQuery ( )
             )        
         )
@@ -680,12 +699,14 @@ module Orm =
             exceptionHandler ( fun ( ) ->  
                 let query =  deleteBase< ^T > state + whereClause //" where " + idConditional    
                 conn.Open( )
-                use cmd = paramaterizeSeqCmd< ^T > query conn instances state
-#if DEBUG
-                printfn "Param count: %A" cmd.Parameters.Count
-                for i in [0..cmd.Parameters.Count-1] do 
-                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-#endif
+                use cmd = parameterizeSeqCmd< ^T > query conn instances state
+
+                log ( fun _ -> 
+                    printfn "Param count: %A" cmd.Parameters.Count
+                    for i in [0..cmd.Parameters.Count-1] do 
+                        printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+                )
+
                 cmd.ExecuteNonQuery ( )
             )        
         ) 
@@ -766,7 +787,6 @@ module Orm =
         }
         static member inline Value (inst) state =
             let id = lookupId<^S> state
-            printfn "Got ids: %A" id 
             let idValueSeq = 
                 RelationshipCell.fold ( 
                     fun acc item -> 
@@ -780,17 +800,16 @@ module Orm =
                 Seq.zip id idValueSeq
                 |> Seq.map (fun (keyCol, value) -> $"{keyCol} = {value}") 
                 |> String.concat " and " 
-#if DEBUG 
-            printfn "lookupId Id Column Name: %A" id 
-            printfn "Where Clause: %A" whereClause 
-#endif 
+
+            log ( fun _ -> 
+                printfn "lookupId Id Column Name: %A" id 
+                printfn "Where Clause: %A" whereClause 
+            )
             if Seq.isEmpty id then {inst with value = None}
             else 
-                printfn "Trying select where: "
                 selectWhere<^S> whereClause state 
                 |> function 
                 | Ok vals when Seq.length vals > 0 ->
-                    printfn "Got result, grabbing sequence head:"
                     Some <| Seq.head vals    
                 | _ -> 
                     Option.None 

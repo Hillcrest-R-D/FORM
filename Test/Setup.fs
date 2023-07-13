@@ -58,7 +58,7 @@ type Fact =
         [<SQLType("boolean", Contexts.PSQL)>]
         maybeSomething : string 
         [<Unique("group1", Contexts.PSQL)>] 
-        sometimesNothing : int option
+        sometimesNothing : int64 option
         [<Unique("group2", Contexts.PSQL)>]
         biteSize : string
     }
