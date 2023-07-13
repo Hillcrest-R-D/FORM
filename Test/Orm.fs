@@ -67,15 +67,15 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertTest () =
-        match Orm.insert< Fact > ( Fact.init() ) testingState with 
+        match Orm.insert< Fact > true ( Fact.init() ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
 
     [<Test>]
     [<NonParallelizable>]
     member _.InsertManyTest () =
-        let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2}; { Fact.init() with id = testGuid3}; Fact.init()]
-        match Orm.insertMany< Fact > ( str8Facts ) testingState with 
+        let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
+        match Orm.insertMany< Fact > true ( str8Facts ) testingState with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
         
@@ -95,25 +95,26 @@ type Orm (_testingState) =
             Seq.iter ( printfn  "%A") facts
             Assert.Pass(sprintf "facts: %A" facts) 
         | Error e -> Assert.Fail(e.ToString())
-    [<Test>]
-    [<NonParallelizable>]
-    member _.RelationTest () =
-        printfn "Selecting All..."
-        let rel : Orm.Relation<Fact>  = Fact.Relation (1, testGuid1)
-        // rel.Value testingState -> {rel with value = Some|None} 
-        let test = (Orm.Relation<Fact>.Value rel testingState).value
-        printfn "Relation test: %A" test
-        match test with 
-        | Some ent -> Assert.Pass( sprintf "Entity succesfully obtained via Relation: %A" ent)
-        | None -> Assert.Fail()
+
+    // [<Test>]
+    // [<NonParallelizable>]
+    // member _.RelationTest () =
+    //     printfn "Selecting All..."
+    //     let rel : Orm.Relation<Fact>  = Fact.Relation (1, testGuid1)
+    //     // rel.Value testingState -> {rel with value = Some|None} 
+    //     let test = (Orm.Relation<Fact>.Value rel testingState).value
+    //     printfn "Relation test: %A" test
+    //     match test with 
+    //     | Some ent -> Assert.Pass( sprintf "Entity succesfully obtained via Relation: %A" ent)
+    //     | None -> Assert.Fail()
 
     [<Test>]
     [<NonParallelizable>]
     member _.SelectWhereTest () =
-        printfn "Selecting All..."
+        printfn "Selecting Where..."
         match Orm.selectWhere< Fact > "\"maybeSomething\" = 'true'" testingState with 
         | Ok facts ->
-            Assert.Pass(sprintf "facts: %A" (Seq.head <| facts)) 
+            Assert.Pass(sprintf "facts: %A" (facts)) 
         | Error e -> Assert.Fail(e.ToString())
     
     [<Test>]

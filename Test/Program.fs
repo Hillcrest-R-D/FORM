@@ -28,7 +28,8 @@ module Main =
 
         // let rel : Orm.Relation<int64, Fact>  = { id = 1; value = None}
         // let test = (Orm.Relation<int64,Fact>.Value rel psqlState).value
-
+        Orm.columnMapping<Fact> <| sqliteState()
+        |> printfn "%A"
 
         0
 

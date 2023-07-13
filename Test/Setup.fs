@@ -34,10 +34,10 @@ type Fact =
         [<Id(Contexts.MySQL)>]
         [<Id(Contexts.MSSQL)>]
         indexId: int64
-        [<Id(Contexts.PSQL)>]
-        [<Id(Contexts.SQLite)>]
-        [<Id(Contexts.MySQL)>]
-        [<Id(Contexts.MSSQL)>]
+        [<PrimaryKey("pk",Contexts.PSQL)>]
+        [<PrimaryKey("pk",Contexts.MySQL)>]
+        [<PrimaryKey("pk",Contexts.MSSQL)>]
+        [<PrimaryKey("pk",Contexts.SQLite)>]
         id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]
@@ -58,7 +58,7 @@ type Fact =
         [<SQLType("boolean", Contexts.PSQL)>]
         maybeSomething : string 
         [<Unique("group1", Contexts.PSQL)>] 
-        sometimesNothing : int option
+        sometimesNothing : int64 option
         [<Unique("group2", Contexts.PSQL)>]
         biteSize : string
     }
@@ -79,7 +79,7 @@ module Fact =
             timeStamp = System.DateTime.Now.ToString()
             specialChar = "Δ"
             maybeSomething = "true"
-            sometimesNothing = None
+            sometimesNothing = Some 1
             biteSize =  "!aBite"
         }
 
