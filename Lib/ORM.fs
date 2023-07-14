@@ -146,7 +146,12 @@ module Orm =
             | TypeCode.UInt64 -> DbType.UInt64
             | _ -> DbType.Object 
             
-    
+    let inline exceptionHandler f =
+        try 
+            Ok <| f( )
+        with 
+        | exn -> Error exn
+
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
         // Heavily inspired by http://www.fssnip.net/gE -- thanks igeta!
@@ -168,7 +173,7 @@ module Orm =
                     )
                     |> Seq.toArray
                     |> makeEntity 
-        } 
+        }   
     
     let inline getParamChar state = 
         match state with
@@ -256,17 +261,18 @@ module Orm =
             | exn -> Error exn
         | Error e -> Error e
 
-    let inline executeWithReader( state : OrmState )  sql ( readerFunction : IDataReader -> 't seq ) = //Result<'t, exn>
+    let inline executeWithReader( state : OrmState )  sql ( readerFunction : IDataReader -> 't ) = //Result<'t, exn>
         match connect state with
         | Ok conn -> 
-            try 
-                conn.Open( )
-                use cmd = makeCommand state sql conn 
-                use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-                readerFunction reader 
-                |> Ok
-            with 
-            | exn -> Error exn
+            exceptionHandler (fun _ -> 
+                seq {
+                    conn.Open( )
+                    use cmd = makeCommand state sql conn 
+                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
+            
+                    yield! readerFunction reader
+                }
+            )
         | Error e -> Error e
     
     let rec genericTypeName full ( _type : Type ) = 
@@ -386,11 +392,7 @@ module Orm =
         let cols = columns< ^T > state 
         ( String.concat ", " cols ) + " From " + table< ^T > state
 
-    let inline exceptionHandler f =
-        try 
-            Ok <| f( )
-        with 
-        | exn -> Error exn
+    
 
     let inline private select< ^T > ( state : OrmState ) query = 
         match connect state with 
@@ -535,7 +537,7 @@ module Orm =
 
     let inline deleteHelper< ^T > ( state : OrmState ) ( whereClause : string ) ( instance : ^T ) =
         connect state 
-        |> Result.bind ( fun conn -> 
+        |> Result.map ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
                 let query =  deleteBase< ^T > state + whereClause 
                 conn.Open( )
