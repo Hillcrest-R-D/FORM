@@ -51,7 +51,7 @@ type Orm (_testingState) =
         match Orm.connect testingState with 
         | Ok con -> 
             con.Open()
-            Orm.execute createTable testingState |> printfn "Create Table Returns: %A"
+            Orm.execute testingState createTable  |> printfn "Create Table Returns: %A"
             con.Close()
         | Error e -> failwith (e.ToString())
 
@@ -67,7 +67,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertTest () =
-        match Orm.insert< Fact > true ( Fact.init() ) testingState with 
+        match Orm.insert< Fact > testingState true ( Fact.init() ) with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
 
@@ -75,7 +75,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.InsertManyTest () =
         let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-        match Orm.insertMany< Fact > true ( str8Facts ) testingState with 
+        match Orm.insertMany< Fact > testingState true ( str8Facts )  with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
         
@@ -112,7 +112,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.SelectWhereTest () =
         printfn "Selecting Where..."
-        match Orm.selectWhere< Fact > "\"maybeSomething\" = 'true'" testingState with 
+        match Orm.selectWhere< Fact > testingState "\"maybeSomething\" = 'true'"  with 
         | Ok facts ->
             Assert.Pass(sprintf "facts: %A" (facts)) 
         | Error e -> Assert.Fail(e.ToString())
@@ -123,7 +123,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = { Fact.init() with id = testGuid1 }
         let changed = { initial with name = "Evan Towlett"}
-        match Orm.update< Fact > changed testingState with 
+        match Orm.update< Fact > testingState changed with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -135,7 +135,7 @@ type Orm (_testingState) =
         let initial = Fact.init() 
         let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
         let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.updateMany< Fact > [changed;changed2] testingState
+        Orm.updateMany< Fact > testingState [changed;changed2] 
         |> printf "%A"
         
         Assert.Pass()
@@ -151,7 +151,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = Fact.init () 
         let changed = { initial with name = "Evan Howlett"}
-        match Orm.updateWhere< Fact > "\"indexId\" = 1" changed testingState with 
+        match Orm.updateWhere< Fact > testingState "\"indexId\" = 1" changed  with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -163,7 +163,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = Fact.init () 
         let changed = { initial with name = "Evan Howlett"}
-        match Orm.delete< Fact > changed testingState with 
+        match Orm.delete< Fact > testingState changed with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -172,7 +172,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.DeleteWhereTest () = 
         printfn "Updating..."
-        match Orm.deleteWhere< Fact > "\"indexId\" = 1" testingState with 
+        match Orm.deleteWhere< Fact > testingState "\"indexId\" = 1"  with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -184,7 +184,7 @@ type Orm (_testingState) =
         let initial = Fact.init() 
         let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
         let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.deleteMany< Fact > [changed;changed2] testingState
+        Orm.deleteMany< Fact > testingState [changed;changed2] 
         |> printf "%A"
         
         Assert.Pass()

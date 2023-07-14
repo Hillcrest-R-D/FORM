@@ -34,7 +34,7 @@ module Orm =
         ()
 
 
-    let inline sqlQuote str ( state : OrmState ) =
+    let inline sqlQuote ( state : OrmState ) str  =
         match state with 
         | MSSQL _ -> $"[{str}]"
         | MySQL _ -> $"`{str}`"
@@ -66,7 +66,7 @@ module Orm =
                 attrFold attrs ( context< ^T > state )
         
         name.Split( "." )
-        |> Array.map ( fun x -> sqlQuote x state )
+        |> Array.map ( fun x -> sqlQuote state x )
         |> String.concat "."
         
 
@@ -89,7 +89,7 @@ module Orm =
                 |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
                 |> fun y -> if y = "" then false else true 
             let fsharpName = x.Name
-            let quotedName = sqlQuote sqlName state
+            let quotedName = sqlQuote state sqlName 
             { 
                 Index = i
                 IsKey = isKey
@@ -148,7 +148,7 @@ module Orm =
             
     
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
-    let inline consumeReader< ^T > ( reader : IDataReader )  ( state : OrmState ) = 
+    let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
         // Heavily inspired by http://www.fssnip.net/gE -- thanks igeta!
         let rty = typeof< ^T >
         let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
@@ -170,92 +170,6 @@ module Orm =
                     |> makeEntity 
         } 
     
-    // [Ok Articles; Ok User;]
-
-    // type Query = Context -> DbConnection -> DbTransaction -> ( string | DbCommand ) seq -> Result<IDataReader, exn> seq
-    // type Command = Context -> DbConnection -> DbTransaction -> ( string | DbCommand ) seq -> Result<int, exn> seq
-    // type Query = DbCommand -> DbConnection -> DbTransaction -> IDataReader | int
-    // module Unbatchable =
-    //     let selectAll<^T> db =
-    //         Orm.selectAll<^T> db |> executeAndConsume<^T> // -> Result<seq<User>, exn>
-    // insert<User> user db |> execute // -> Result<int, exn> 
-
-    // batch [insert<Article> article; insert<ArticleUser> articleUser; selectWhere<> "whatever"] db // -> Result 
-    (*
-        fun context -> 
-            fun connection ->
-                fun transaction ->
-                    fun querys ->
-                        let cmds = querys |> Seq.map toCmd
-                        let mutable errored = false
-                        seq { for cmd in cmds do 
-                            if not errored 
-                            then 
-                                match cmd.Execute() with 
-                                | Ok state -> 
-                                    yield Ok state 
-                                | Error e -> 
-                                    errored <- true
-                                    transaction.Rollback()
-                                    yield Error e
-                                    
-                                [Ok 1; Ok IDataReader; Error e]
-                        }
-                        type QueryReturn =
-                            | int
-                            | IDataReader
-                        
-                        |> Seq.takeWhile
-                            match query with 
-                            | str -> buildCommand(str)
-                            | cmd -> ()
-                            |> fun cmd -> cmd.Execute
-                            |> function 
-                            | Ok _ -> true
-                            | Error _ -> 
-                                transaction.Rollback()
-                                false
-                        |> Seq.fold (
-                            fun element state ->
-                                match state with 
-                                | Ok state ->
-                                    state @ element.Execute() |> Ok
-                                | Error e -> 
-                                    transaction.Rollback
-                                    Error e
-                        [Ok 1; Ok IDataReader; Error exn; Error exn]
-                        ) (Ok 0)
-    *)                       
-
-    // consumeReaders : seq<QueryResults> -> seq<>
-    //     match input with 
-    //     | IDataReader ->
-    //         consume it
-    //     | int ->
-    //        Error exn "Can't consume int"
-    //     [Ok 1]
-    // type QueryResult =
-    //     | Int of int 
-    //     | DataReader of IDataReader * Type
-    //     | Thing of obj * Type
-    // batch seq {insert<User> user db; selectWhere<User> "id = 1" db, User; delete<User> user db} // [Int 1; (DataReader dr, User); (DataReader dr, Article); Int 1]
-    // |> map 
-    //     function
-    //     | Ok el ->
-    //         match el with 
-    //         | Int i -> Int i
-    //         | DataReader (dr,type_) -> Thing <| consumeReader<type_> dr, type_  
-    
-    // match Unbatchable.selectAll<User> db with 
-    // | Ok result -> 
-    //     match result with 
-    //     | Int i -> 
-    //     | Reader reader -> consumeReader<User> reader
-    // | Error e -> Error e
-
-    // Batchable.selectAll<User> db
-    
-
     let inline getParamChar state = 
         match state with
         | MSSQL _ -> "@"
@@ -263,7 +177,7 @@ module Orm =
         | PSQL _ -> "@"
         | SQLite _ -> "@"   
         
-    let inline insertBase< ^T > insertKeys ( state : OrmState ) =
+    let inline insertBase< ^T > ( state : OrmState ) insertKeys =
         let paramChar = getParamChar state
         let tableName = ( table< ^T > state ) 
         let cols = 
@@ -283,7 +197,7 @@ module Orm =
     //Insert Into table1 Values
     // ( $1, $2, $3 ),
     // ( $4, $5, $6 ),
-    let inline insertManyBase< ^T > insertKeys ( instances : ^T seq ) ( state : OrmState ) =
+    let inline insertManyBase< ^T > ( state : OrmState ) insertKeys ( instances : ^T seq )  =
         let paramChar   = getParamChar     state
         let tableName   = table< ^T >       state 
         let cols = 
@@ -307,7 +221,7 @@ module Orm =
         //placeHolders e.g. = "@cola1,@colb1),(@cola2,@colb2),(@cola3,@colb3"
         sprintf "insert into %s( %s ) values ( %s );"  tableName columnNames placeHolders
     
-    let inline makeCommand ( query : string ) ( connection : DbConnection )  ( state : OrmState ) : DbCommand = 
+    let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection )   : DbCommand = 
         log (fun _ -> printfn "Query being generated:\n\n%s\n\n\n" query )
         match state with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
@@ -315,11 +229,11 @@ module Orm =
         | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
         | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection )
 
-    let inline execute sql  ( state : OrmState ) =
+    let inline execute ( state : OrmState ) sql   =
         match connect state with 
         | Ok conn -> 
             conn.Open( )
-            use cmd = makeCommand sql conn state
+            use cmd = makeCommand state sql conn 
             let result = cmd.ExecuteNonQuery( )
             conn.Close( )
             Ok result
@@ -330,16 +244,27 @@ module Orm =
     /// transfer the results of executing the specified sql against the specified database given by state into an 
     /// arbitrary type 't, defined by you in the readerFunction.
     /// </Description>
-    let inline executeWithReader sql ( readerFunction : IDataReader -> 't ) ( state : OrmState ) = //Result<'t, exn>
+    let inline generateReader state sql  =
         match connect state with
         | Ok conn -> 
             try 
                 conn.Open( )
-                seq { 
-                    use cmd = makeCommand sql conn state
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-                    while reader.Read() do yield readerFunction reader 
-                } |> Ok
+                use cmd = makeCommand state sql conn 
+                cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                |> Ok
+            with 
+            | exn -> Error exn
+        | Error e -> Error e
+
+    let inline executeWithReader( state : OrmState )  sql ( readerFunction : IDataReader -> 't seq ) = //Result<'t, exn>
+        match connect state with
+        | Ok conn -> 
+            try 
+                conn.Open( )
+                use cmd = makeCommand state sql conn 
+                use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                readerFunction reader 
+                |> Ok
             with 
             | exn -> Error exn
         | Error e -> Error e
@@ -383,10 +308,9 @@ module Orm =
         | :? Option<UInt128> as t -> tmp.Value <- t |> Option.get
         | _ -> ()
 
-    let inline parameterizeCmd< ^T > query conn ( instance : ^T ) state =
-        let cmd = makeCommand query conn state
+    let inline parameterizeCmd< ^T > state query conn ( instance : ^T ) =
+        let cmd = makeCommand state query conn 
         
-        printfn "Type %A - %A" typeof<^T> (mapping< ^T > state)
         mapping< ^T > state
         |> Seq.iter ( fun mappedInstance -> 
             let paramChar = getParamChar state
@@ -419,8 +343,8 @@ module Orm =
         
         cmd
 
-    let inline parameterizeSeqCmd< ^T > query conn ( instances : ^T seq ) state =
-        let cmd = makeCommand query conn state
+    let inline parameterizeSeqCmd< ^T > state query conn ( instances : ^T seq ) =
+        let cmd = makeCommand state query conn
         
         instances 
         |> Seq.iteri ( fun index instance ->
@@ -431,7 +355,7 @@ module Orm =
                 let formattedParam = 
                     sprintf "%s%s%i" paramChar mappedInstance.FSharpName index //``the instance formerly known as mappedInstance``
                 let param = 
-                    let mutable tmp = cmd.CreateParameter( ) //cmd.CreateParameter( )
+                    let mutable tmp = cmd.CreateParameter( ) 
                     
                     tmp.ParameterName <- formattedParam 
                     if
@@ -450,21 +374,6 @@ module Orm =
                             tmp.Value <- 
                                 mappedInstance.PropertyInfo.GetValue( instance ) // Some 1
                     tmp
-                
-                // param.ParameterName <- 
-                //     sprintf 
-                //         "%s%s%i" 
-                //         ( getParamChar state ) 
-                //         mappedInstance.FSharpName 
-                //         index
-                
-                // if mappedInstance.PropertyInfo.GetValue( instance ) = null 
-                // then 
-                //     param.IsNullable <- true
-                //     param.Value <- DBNull.Value
-                // else 
-                //     param.Value <- 
-                //         ( mappedInstance.PropertyInfo.GetValue( instance ) )
 
                 cmd.Parameters.Add ( param ) |> ignore
             )
@@ -473,7 +382,7 @@ module Orm =
         cmd
         
     
-    let inline queryBase< ^T >  ( state : OrmState ) = 
+    let inline queryBase< ^T > ( state : OrmState ) = 
         let cols = columns< ^T > state 
         ( String.concat ", " cols ) + " From " + table< ^T > state
 
@@ -483,33 +392,33 @@ module Orm =
         with 
         | exn -> Error exn
 
-    let inline private select< ^T > query ( state : OrmState ) = 
+    let inline private select< ^T > ( state : OrmState ) query = 
         match connect state with 
         | Ok conn -> 
             exceptionHandler ( fun ( ) ->  
                 conn.Open( )   
                 seq {
-                    use cmd = makeCommand query conn state
+                    use cmd = makeCommand state query conn 
                     use reader = cmd.ExecuteReader( ) // CommandBehavior.CloseConnection
-                    yield! consumeReader< ^T > reader state 
+                    yield! consumeReader< ^T > state reader  
                 }
             )
         | Error e -> Error e
 
 
-    let inline selectHelper< ^T > f ( state : OrmState ) = 
+    let inline selectHelper< ^T > ( state : OrmState ) f = 
         queryBase< ^T > state
         |> f
-        |> fun x -> select< ^T > x state
+        |> fun x -> select< ^T > state x 
     
-    let inline selectLimit< ^T > lim  ( state : OrmState ) = 
-        selectHelper< ^T > ( fun x -> $"select top {lim} {x}" ) state
+    let inline selectLimit< ^T > ( state : OrmState ) lim   = 
+        selectHelper< ^T > state ( fun x -> $"select top {lim} {x}" ) 
 
-    let inline selectWhere< ^T > where  ( state : OrmState ) = 
-        selectHelper< ^T > ( fun x -> $"select {x} where {where}" ) state
+    let inline selectWhere< ^T > ( state : OrmState ) where   = 
+        selectHelper< ^T > state ( fun x -> $"select {x} where {where}" ) 
         
-    let inline selectAll< ^T >  ( state : OrmState ) = 
-        selectHelper< ^T > ( fun x -> $"select {x}" ) state
+    let inline selectAll< ^T > ( state : OrmState ) = 
+        selectHelper< ^T > state ( fun x -> $"select {x}" ) 
 
         
     let inline makeParameter ( state : OrmState ) : DbParameter =
@@ -520,13 +429,13 @@ module Orm =
         | SQLite _ -> SqliteParameter( )
     
     
-    let inline insert< ^T > insertKeys ( instance : ^T )  ( state : OrmState ) =
+    let inline insert< ^T > ( state : OrmState ) insertKeys ( instance : ^T ) =
         match connect state with
         | Ok conn ->
             conn.Open( )
-            let query = insertBase< ^T > insertKeys state
+            let query = insertBase< ^T > state insertKeys 
             let paramChar = getParamChar state 
-            use cmd = parameterizeCmd query conn instance state//makeCommand query conn state
+            use cmd = parameterizeCmd state query conn instance //makeCommand query conn state
             log (fun _ -> 
                 printfn "Param count: %A" cmd.Parameters.Count
                 for i in [0..cmd.Parameters.Count-1] do 
@@ -537,14 +446,14 @@ module Orm =
             result
         | Error e -> Error e
 
-    let inline insertMany< ^T > insertKeys ( instances : ^T seq )  ( state : OrmState ) =
+    let inline insertMany< ^T > ( state : OrmState ) insertKeys ( instances : ^T seq ) =
         match connect state with
         | Ok conn -> 
             conn.Open( )
-            let query = insertManyBase< ^T > insertKeys instances state
+            let query = insertManyBase< ^T > state insertKeys instances 
             let paramChar = ( getParamChar state )
             let numCols = columns< ^T > state |> Seq.length
-            use cmd = parameterizeSeqCmd query conn instances state//makeCommand query conn state
+            use cmd = parameterizeSeqCmd state query conn instances //makeCommand query conn state
             log (fun _ -> 
                 printfn "Query generated: %s" query
                 printfn "Param count: %A" cmd.Parameters.Count
@@ -588,60 +497,20 @@ module Orm =
         |> Array.filter ( fun x -> x.IsKey )
         |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
     
-    let inline updateHelper<^T> ( whereClause : string ) ( instance : ^T ) ( state : OrmState ) = 
+    let inline updateHelper<^T> ( state : OrmState ) ( whereClause : string ) ( instance : ^T ) = 
         connect state
         |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
-                let query =  updateBase< ^T > state + whereClause //" where " + idConditional    
-                // let paramChar = getParamChar state
-
+                let query =  ( updateBase< ^T > state ) + whereClause 
                 conn.Open( )
-                // use cmd = makeCommand query conn state
                 
-                // mapping< ^T > state
-                // |> Seq.iter ( fun x -> 
-                //     let formattedParam = 
-                //         sprintf "%s%s" paramChar x.FSharpName
-                //     let param = 
-                //         let mutable tmp = cmd.CreateParameter( )
-                //         tmp.ParameterName <- formattedParam 
-                        
-                //         if x.PropertyInfo.GetValue( instance ) = null 
-                //         then 
-                //             tmp.IsNullable <- true
-                //             tmp.Value <- DBNull.Value
-                //         else 
-                //             tmp.Value <- ( x.PropertyInfo.GetValue( instance ) )
-                        
-                //         tmp
-
-                //     cmd.Parameters.Add ( param ) |> ignore
-                // )
-                
-                use cmd = parameterizeCmd< ^T > query conn instance state
-
-                // log (fun _ ->
-                //     printfn "Param count: %A" cmd.Parameters.Count
-                    
-                //     for i in [0..cmd.Parameters.Count-1] do 
-                //         printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-                // )
+                use cmd = parameterizeCmd< ^T > state query conn instance 
 
                 cmd.ExecuteNonQuery ( )
             )        
         )
         
-    let inline update< ^T > ( instance: ^T ) ( state : OrmState ) = 
-        (*
-            uPDATE tableT
-                SET 
-                    col1 = instance.col1, 
-                    col2 = instance.col2 
-                    ... 
-                    coln = instance.coln
-                WHERE
-                    (id_col) = instance.(id_field)
-        *)
+    let inline update< ^T > ( state : OrmState ) ( instance: ^T )  = 
         let table = table< ^T > state 
         let paramChar = getParamChar state
         
@@ -650,68 +519,45 @@ module Orm =
             sqlMapping
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
-            |> fun idConditional -> updateHelper< ^T > ( sprintf " where %s" idConditional ) instance state
+            |> fun idConditional -> updateHelper< ^T > state ( sprintf " where %s" idConditional ) instance 
         )
         
-    let inline updateMany< ^T > ( instances: ^T seq ) ( state : OrmState ) = 
-        Seq.map ( fun instance -> update<^T> instance state ) instances 
+    let inline updateMany< ^T > ( state : OrmState ) ( instances: ^T seq ) = 
+        Seq.map ( fun instance -> update<^T> state instance ) instances 
         
-    let inline updateWhere< ^T > ( where : string ) ( instance: ^T ) ( state : OrmState ) = 
-        (*
-            uPDATE tableT
-                SET 
-                    col1 = item.col1, 
-                    col2 = item.col2 
-                    ... 
-                    coln = item.coln
-                WHERE
-                    
-        *)
-        updateHelper< ^T > ( sprintf " where %s" where )  instance state    
+    let inline updateWhere< ^T > ( state : OrmState ) ( where : string ) ( instance: ^T )  = 
         
-    // let inline updatecolumns< ^T > ( cols: PropertyInfo seq ) ( item: ^T ) ( state : OrmState ) = 
+        updateHelper< ^T > state ( sprintf " where %s" where )  instance     
         
     let inline deleteBase< ^T > state =
         table< ^T > state 
         |> sprintf "delete from %s where "
 
-    let inline deleteHelper< ^T > ( whereClause : string ) ( instance : ^T ) ( state : OrmState ) =
+    let inline deleteHelper< ^T > ( state : OrmState ) ( whereClause : string ) ( instance : ^T ) =
         connect state 
         |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
-                let query =  deleteBase< ^T > state + whereClause //" where " + idConditional    
+                let query =  deleteBase< ^T > state + whereClause 
                 conn.Open( )
-                use cmd = parameterizeCmd< ^T > query conn instance state
-                
-                log ( fun _ ->
-                    printfn "Param count: %A" cmd.Parameters.Count
-                    for i in [0..cmd.Parameters.Count-1] do 
-                        printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-                )
+                use cmd = parameterizeCmd< ^T > state query conn instance 
                 
                 cmd.ExecuteNonQuery ( )
             )        
         )
 
-    let inline deleteManyHelper< ^T > ( whereClause : string ) ( instances : ^T seq ) ( state : OrmState ) =
+    let inline deleteManyHelper< ^T > ( state : OrmState ) ( whereClause : string ) ( instances : ^T seq ) =
         connect state 
         |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
-                let query =  deleteBase< ^T > state + whereClause //" where " + idConditional    
+                let query =  deleteBase< ^T > state + whereClause
                 conn.Open( )
-                use cmd = parameterizeSeqCmd< ^T > query conn instances state
-
-                log ( fun _ -> 
-                    printfn "Param count: %A" cmd.Parameters.Count
-                    for i in [0..cmd.Parameters.Count-1] do 
-                        printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-                )
+                use cmd = parameterizeSeqCmd< ^T > state query conn instances 
 
                 cmd.ExecuteNonQuery ( )
             )        
         ) 
         
-    let inline delete< ^T > instance state = 
+    let inline delete< ^T > state instance = 
         ensureId< ^T > state 
         |> Result.bind ( fun sqlMapping -> 
             let tableName = table< ^T > state 
@@ -719,15 +565,14 @@ module Orm =
             sqlMapping
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
-            |> fun where -> deleteHelper< ^T > where instance state
+            |> fun where -> deleteHelper< ^T > state where instance 
         )
 
-    let inline deleteMany< ^T > instances state =
+    let inline deleteMany< ^T > state instances =
         ensureId< ^T > state 
         |> Result.bind ( fun sqlMapping -> 
             let tableName = table< ^T > state 
             let paramChar = getParamChar state
-            // WHERE (id1 = @id1 AND id2 = @id2) OR (id1 = @id12 AND id2 = @id22)
             instances 
             |> Seq.mapi ( fun i _ ->
                 sqlMapping
@@ -737,19 +582,19 @@ module Orm =
             )
             |> String.concat ") OR ("
             |> sprintf "( %s )" 
-            |> fun where -> deleteManyHelper< ^T > where instances state
+            |> fun where -> deleteManyHelper< ^T > state where instances 
         )        
         
     /// <Warning> Running this function is equivalent to DELETE 
     /// FROM table WHERE whereClause </Warning>
-    let inline deleteWhere< ^T > whereClause state = 
+    let inline deleteWhere< ^T > state whereClause  = 
         
         connect state 
         |> Result.bind ( fun conn -> 
             exceptionHandler ( fun ( ) ->  
-                let query =  deleteBase< ^T > state + whereClause     
+                let query =  (deleteBase< ^T > state) + whereClause     
                 conn.Open( )
-                use cmd = makeCommand query conn state
+                use cmd = makeCommand state query conn 
 
                 cmd.ExecuteNonQuery ( )
             )        
@@ -807,7 +652,7 @@ module Orm =
             )
             if Seq.isEmpty id then {inst with value = None}
             else 
-                selectWhere<^S> whereClause state 
+                selectWhere<^S> state whereClause  
                 |> function 
                 | Ok vals when Seq.length vals > 0 ->
                     Some <| Seq.head vals    
