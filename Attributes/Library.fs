@@ -5,6 +5,7 @@ open System.Reflection
 open FSharp.Reflection
 open Microsoft.FSharp.Core.LanguagePrimitives
 
+
 type DbContext =
     | Default = 99
  
@@ -91,7 +92,34 @@ type SqlMapping = {
     PropertyInfo: PropertyInfo
 }
 
-///<Description>Stores the flavor And context used for a particular connection.</Description>
+// type 
+// let db = {connectionString = conn; context = Contexts.Main; transaction = None }
+
+// let db = Orm.beginTransaction db
+// let selectResult = Orm.selectAll<User> db //Result<^T seq, exn>
+// let deleteResult = Orm.delete<user> db ""
+
+// db 
+// |> Orm.beginTransaction
+// |> Orm.selectAll<user>
+// |> fun (res, db) -> (Orm.delete<User> db "", res) // -> ((res,db), res)   
+// |> fun ((secondResult, db), firstResult) -> (firstResult, secondResult, Orm.commitTransaction db ) // (Result<User,exn>, Result<int, exn>, Result<int,exn>)
+
+
+// let Orm.selectAll<^T> db = fun ( transaction : IDbTransaction option) -> { computation  }; 
+
+// let tran = Orm.beginTransaction db 
+
+
+// Orm.selectAll<User> db tran
+// Orm.delete<User> "" db tran
+
+// Orm.commitTransaction tran
+
+
+///<Description>Stores the flavor And context used for a particular connection.
+/// Takes the connection string and context.
+///</Description>
 type OrmState = 
     | MSSQL     of ( string * Enum )
     | MySQL     of ( string * Enum )
@@ -99,4 +127,9 @@ type OrmState =
     | SQLite    of ( string * Enum )
     // | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
     
-  
+// type OrmState2 =
+//     {
+//         connectionString : string 
+//         context : Enum 
+//         transaction : Data.IDbTransaction option
+//     }
