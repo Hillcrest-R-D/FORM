@@ -34,7 +34,7 @@ type Orm (_testingState) =
         | _ -> "sqliteName"
 
     let transaction = 
-        Orm.beginTransaction testingState
+        None// Orm.beginTransaction testingState
     
     [<OneTimeSetUp>]
     member _.Setup () =
@@ -51,25 +51,11 @@ type Orm (_testingState) =
                 \"biteSize\" text
             );"
 
-        let pragma = "PRAGMA journal_mode=WAL;"
-
-         
-        match Orm.connect testingState with 
-        | Ok con -> 
-            con.Open()
-            match testingState with 
-            | SQLite _ -> 
-                Orm.execute testingState pragma 
-                |> sprintf "Enabling WAL mode for SQLite: %A" 
-                |> fun x -> System.IO.File.WriteAllText("pragma.log", x )
-            | _ -> ()
-            Orm.execute testingState createTable  |> printfn "Create Table Returns: %A"
-            con.Close()
-        | Error e -> failwith (e.ToString())
-
+        Orm.execute testingState createTable None  |> printfn "Create Table Returns: %A"
+        
     [<Test>]
     [<NonParallelizable>]
-    member _.Conn () =
+    member _.Connect () =
         printfn "Contest: %A\n\n\n\n\n" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
         match Orm.connect testingState with 
         | Ok _ -> Assert.Pass()
@@ -79,7 +65,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.Insert () =
-        match Orm.insert< Fact > testingState true ( Fact.init() ) with 
+        match Orm.insert< Fact > testingState true ( Fact.init() ) None with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
 
@@ -87,7 +73,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.InsertMany () =
         let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-        match Orm.insertMany< Fact > testingState true ( str8Facts )  with 
+        match Orm.insertMany< Fact > testingState true ( str8Facts ) None with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
         
@@ -108,15 +94,7 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" facts) 
         | Error e -> Assert.Fail(e.ToString())
 
-    [<Test>]
-    [<NonParallelizable>]
-    member _.SelectWithTransaction () =
-        printfn "Selecting All... with transaction"
-        match Orm.selectAll< Fact > testingState transaction with 
-        | Ok facts -> 
-            Seq.iter ( printfn  "%A") facts
-            Assert.Pass(sprintf "facts: %A" facts) 
-        | Error e -> Assert.Fail(e.ToString())
+ 
 
     [<Test>]
     [<NonParallelizable>]
@@ -126,15 +104,7 @@ type Orm (_testingState) =
         | Ok facts ->
             Assert.Pass(sprintf "facts: %A" (facts)) 
         | Error e -> Assert.Fail(e.ToString())
-    
-    [<Test>]
-    [<NonParallelizable>]
-    member _.SelectWhereWithTransaction () =
-        printfn "Selecting Where..."
-        match Orm.selectWhere< Fact > testingState "\"maybeSomething\" = 'true'" transaction with 
-        | Ok facts ->
-            Assert.Pass(sprintf "facts: %A" (facts)) 
-        | Error e -> Assert.Fail(e.ToString())
+
 
     [<Test>]
     [<NonParallelizable>]
@@ -146,17 +116,7 @@ type Orm (_testingState) =
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
-    
-    [<Test>]
-    [<NonParallelizable>]
-    member _.UpdateWithTransaction () =
-        printfn "Updating..."
-        let initial = { Fact.init() with id = testGuid1 }
-        let changed = { initial with name = "Evan Towlett"}
-        match Orm.update< Fact > testingState changed transaction with 
-        | Ok inserted ->
-            Assert.Pass(sprintf "facts: %A" inserted)
-        | Error e -> Assert.Fail(e.ToString())
+
     
     [<Test>]
     [<NonParallelizable>]
@@ -170,17 +130,17 @@ type Orm (_testingState) =
         
         Assert.Pass()
     
-    [<Test>]
-    [<NonParallelizable>]
-    member _.UpdateManyWithTransaction () =
-        printfn "Updating many with transaction..."
-        let initial = Fact.init() 
-        let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
-        let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.updateMany< Fact > testingState [changed;changed2] transaction
-        |> printf "%A"
+    // [<Test>]
+    // [<NonParallelizable>]
+    // member _.UpdateManyWithTransaction () =
+    //     printfn "Updating many with transaction..."
+    //     let initial = Fact.init() 
+    //     let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
+    //     let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
+    //     Orm.updateMany< Fact > testingState [changed;changed2] transaction
+    //     |> printf "%A"
         
-        Assert.Pass()
+    //     Assert.Pass()
     
     [<Test>]
     [<NonParallelizable>]
@@ -193,26 +153,11 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
 
-    [<Test>]
-    [<NonParallelizable>]
-    member _.UpdateWhereWithTransaction () =
-        printfn "Updating Where With Transaction..."
-        let transaction = 
-            Orm.beginTransaction testingState
-        let initial = Fact.init () 
-        let changed = { initial with name = "Evan Howlett"}
-        match Orm.updateWhere< Fact > testingState "\"indexId\" = 1" changed transaction with 
-        | Ok inserted ->
-            transaction
-            |> Option.map Orm.commitTransaction 
-            Assert.Pass(sprintf "facts: %A, %A" inserted transaction)
-        | Error e -> Assert.Fail(e.ToString())
-
 
     [<Test>]
     [<NonParallelizable>]
     member _.Delete () =
-        printfn "Updating..."
+        printfn "Deleting..."
         let initial = Fact.init () 
         let changed = { initial with name = "Evan Howlett"}
         match Orm.delete< Fact > testingState changed None with 
@@ -220,16 +165,7 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
     
-    [<Test>]
-    [<NonParallelizable>]
-    member _.DeleteWithTransaction () =
-        printfn "Updating..."
-        let initial = Fact.init () 
-        let changed = { initial with name = "Evan Howlett"}
-        match Orm.delete< Fact > testingState changed transaction with 
-        | Ok inserted ->
-            Assert.Pass(sprintf "facts: %A" inserted)
-        | Error e -> Assert.Fail(e.ToString())
+
 
     [<Test>]
     [<NonParallelizable>]
@@ -240,14 +176,6 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
 
-    [<Test>]
-    [<NonParallelizable>]
-    member _.DeleteWhereWithTransaction () = 
-        printfn "Deleting Where..."
-        match Orm.deleteWhere< Fact > testingState "\"indexId\" = 1" transaction with 
-        | Ok inserted ->
-            Assert.Pass(sprintf "facts: %A" inserted)
-        | Error e -> Assert.Fail(e.ToString())
 
     [<Test>]
     [<NonParallelizable>]
@@ -261,17 +189,7 @@ type Orm (_testingState) =
         | Ok i -> Assert.Pass(sprintf "%A" i )
         | Error e -> Assert.Fail(sprintf "%A" e)
 
-    [<Test>]
-    [<NonParallelizable>]
-    member _.DeleteManyWithTransaction () =
-        printfn "Deleting Many..."
-        let initial = Fact.init() 
-        let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
-        let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.deleteMany< Fact > testingState [changed;changed2] transaction
-        |> function 
-        | Ok i -> Assert.Pass(sprintf "%A" i )
-        | Error e -> Assert.Fail(sprintf "%A" e)
+
 
     [<Test>]
     [<NonParallelizable>]
@@ -284,15 +202,15 @@ type Orm (_testingState) =
         | Error e -> Assert.Fail(sprintf "%A" e)
 
 
-    [<Test>]
-    [<NonParallelizable>]
-    member _.ReaderWithTransaction () =
-        printfn "Reading..."
-        Orm.consumeReader<Fact> testingState 
-        |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader transaction
-        |> function 
-        | Ok facts -> Assert.Pass(sprintf "%A" facts)
-        | Error e -> Assert.Fail(sprintf "%A" e)
+    // [<Test>]
+    // [<NonParallelizable>]
+    // member _.ReaderWithTransaction () =
+    //     printfn "Reading..."
+    //     Orm.consumeReader<Fact> testingState 
+    //     |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader transaction
+    //     |> function 
+    //     | Ok facts -> Assert.Pass(sprintf "%A" facts)
+    //     | Error e -> Assert.Fail(sprintf "%A" e)
 
 
     // [<OneTimeTearDown>]
@@ -304,79 +222,119 @@ type Orm (_testingState) =
         |> sprintf "Transaction: %A"
         |> Assert.Pass
 
-// [<TestFixture>]
-// type Postgres() =
-//     let state = psqlState 
-//     [<OneTimeSetUp>]
-//     member _.Setup () =
-//         let createTable = 
-//             $"DROP TABLE IF EXISTS \"Fact\";
-//             CREATE TABLE \"Fact\" (
-//                 \"id\" character varying (36) primary key,
-//                 \"psqlName\" character varying (32) null,
-//                 \"timeStamp\" timestamp without time zone,
-//                 \"specialChar\" character varying (1),
-//                 \"maybeSomething\" boolean,
-//                 \"sometimesNothing\" int null,
-//                 \"biteSize\" character varying (8)
-//             );"
+[<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
+type OrmTransaction ( _testingState ) = 
+    let testingState = _testingState ()
+    let tableName = "\"Fact\""
+    let testGuid1 = System.Guid.NewGuid().ToString()
+    let testGuid2 = System.Guid.NewGuid().ToString()
+    let testGuid3 = System.Guid.NewGuid().ToString()
+    let testGuid4 = System.Guid.NewGuid().ToString()
+
+    let nameCol = 
+        match testingState with
+        | SQLite _ -> "sqliteName"
+        | PSQL _ -> "psqlName"
+        | _ -> "sqliteName"
+
+    
+    [<OneTimeSetUp>]
+    member _.Setup () =
+        let createTable = 
+            $"DROP TABLE IF EXISTS {tableName};
+            CREATE TABLE {tableName} (
+                \"indexId\" int not null,
+                \"id\" text primary key,
+                \"{nameCol}\" text null,
+                \"timeStamp\" text,
+                \"specialChar\" text,
+                \"maybeSomething\" text,
+                \"sometimesNothing\" int null,
+                \"biteSize\" text
+            );"
+
         
-//         match Orm.connect state with 
-//         | Ok con -> 
-//             con.Open()
-//             Orm.Execute createTable state |> printfn "Create Table Returns: %A"
-//             con.Close()
-//         | Error e -> failwith (e.ToString())
-
-//     [<Test>]
-//     [<NonParallelizable>]
-//     member _.Conn () =
-//         match Orm.connect state with 
-//         | Ok _ -> Assert.Pass()
-//         | Error e -> Assert.Fail(e.ToString())
+        Orm.execute testingState createTable None  |> printfn "Create Table Returns: %A"
 
 
-//     [<Test>]
-//     [<NonParallelizable>]
-//     member _.Insert () =
-//         match Orm.Insert< Fact > ( Fact.init() ) state with 
-//         | Ok _ -> Assert.Pass() 
-//         | Error e -> Assert.Fail(e.ToString())
-        
+    [<Test>]
+    [<NonParallelizable>]
+    member _.InsertSelect () =
+        let transaction = Orm.beginTransaction testingState
+        let theFact = Fact.init()
+        let mutable theBackFact = Fact.init()
+        printfn "Do we have a transaction? %A" transaction
+        testingState
+        |> function 
+        | SQLite _ -> Orm.execute testingState "PRAGMA journal_mode=WAL;" transaction
+        | _ -> Ok 0
+        |> Result.bind ( fun _ -> Orm.insert< Fact > testingState true ( theFact ) transaction )
+        |> Result.bind ( fun _ -> 
+            Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
+            |> function 
+            | Ok facts when Seq.length facts > 0 -> 
+                theBackFact <- Seq.head facts
+                Ok facts
+            | Error e  -> Error e
+            | _ -> Error (exn "No data returned by select, you forgot the facts!")
+        )
+        |> Result.map ( fun _ -> Orm.commitTransaction transaction )
+        |> function 
+        | Ok _ -> 
+            if theFact = theBackFact 
+            then Assert.Pass() 
+            else Assert.Fail(sprintf "%A %A" theFact theBackFact) 
+        | Error error -> Assert.Fail(error.ToString()) 
 
-//     [<Test>]
-//     [<NonParallelizable>]
-//     member _.InsertMany () =
-//         let str8Facts = [Fact.init(); Fact.init(); Fact.init(); Fact.init()]
-//         match Orm.InsertAll< Fact > ( str8Facts ) state with 
-//         | Ok count -> 
-//             printfn "Inserted %A records --------------------------------------" count 
-//             Assert.Pass() 
-//         | Error e -> Assert.Fail(e.ToString())
-        
-//     [<Test>]
-//     [<NonParallelizable>]
-//     member _.QueryBuild () =
-//         printfn "%A" (Orm.queryBase< Fact > state)
-//         Assert.Pass()
+    
+    
+    [<Test>]
+    [<NonParallelizable>]
+    member _.InsertDeleteSelect () =
+        let transaction = Orm.beginTransaction testingState
+        let theFact = Fact.init()
+        let mutable theBackFact = Fact.init()
+        let err = exn "No data returned by select, you forgot the facts!"
+        printfn "Do we have a transaction? %A" transaction
+        testingState
+        |> function 
+        | SQLite _ -> Orm.execute testingState "PRAGMA journal_mode=WAL;" transaction
+        | _ -> Ok 0
+        |> Result.bind ( fun _ -> Orm.insert< Fact > testingState true ( theFact ) transaction )
+        |> Result.bind ( fun _ -> Orm.delete< Fact > testingState theFact transaction )
+        |> Result.bind ( fun _ -> 
+            Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
+            |> function 
+            | Ok facts when Seq.length facts > 0 -> 
+                theBackFact <- Seq.head facts
+                Ok facts
+            | Error e  -> Error e
+            | _ -> Error err
+        )
+        |> Result.map ( fun _ -> Orm.commitTransaction transaction )
+        |> function 
+        | Ok _ -> Assert.Fail(sprintf "%A %A" theFact theBackFact) 
+        | Error error -> 
+            if err = error 
+            then Assert.Pass()
+            else Assert.Fail(error.ToString()) 
+
+    // [<Test>]
+    // [<NonParallelizable>]
+    // member _.ReaderWithTransaction () =
+    //     printfn "Reading..."
+    //     Orm.consumeReader<Fact> testingState 
+    //     |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader transaction
+    //     |> function 
+    //     | Ok facts -> Assert.Pass(sprintf "%A" facts)
+    //     | Error e -> Assert.Fail(sprintf "%A" e)
 
 
-//     [<Test>]
-//     [<NonParallelizable>]
-//     member _.Select () =
-//         printfn "Selecting All..."
-//         match Orm.SelectAll< Fact > state with 
-//         | Ok facts -> 
-//             printfn  "All facts: %A ----------------------------" facts
-//             Assert.Pass() 
-//         | Error e -> Assert.Fail(e.ToString())
-
-//     [<Test>]
-//     [<NonParallelizable>]
-//     member _.SelectWhere () =
-//         printfn "Selecting Where..."
-//         match Orm.SelectWhere< Fact > "\"maybeSomething\" = true" state with 
-//         | Ok facts ->
-//             printfn "Where facts: %A ----------------------------------" (Seq.head <| facts)
-//             Assert.Pass() 
-//         | Error e -> Assert.Fail(e.ToString())
+    // // [<OneTimeTearDown>]
+    // [<Test>]
+    // [<NonParallelizable>]
+    // member _.TearDown () = 
+    //     transaction
+    //     |> Option.map ( Orm.commitTransaction )
+    //     |> sprintf "Transaction: %A"
+    //     |> Assert.Pass

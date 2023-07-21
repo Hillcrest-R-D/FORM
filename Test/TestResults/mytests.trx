@@ -1,0 +1,2214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="3a5a9c26-ddc6-4885-8816-05e9ea3ee01a" name="Evan@THE-BIG-RIG 2023-07-20 21:25:15" runUser="THE-BIG-RIG\Evan" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2023-07-20T21:25:15.3133466-04:00" queuing="2023-07-20T21:25:15.3133469-04:00" start="2023-07-20T21:25:13.5313207-04:00" finish="2023-07-20T21:26:16.6665144-04:00" />
+  <TestSettings name="default" id="7435ed2c-7e2d-4846-8f63-bc3c660592e0">
+    <Deployment runDeploymentRoot="Evan_THE-BIG-RIG_2023-07-20_21_25_15" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="55b8594e-2cbf-443b-b6cc-c35c3e913021" testId="32e05ec3-148e-77cd-f32a-bea700e74b04" testName="TearDown" computerName="THE-BIG-RIG" duration="00:00:00.0007240" startTime="2023-07-20T21:25:15.9806431-04:00" endTime="2023-07-20T21:25:15.9813667-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="55b8594e-2cbf-443b-b6cc-c35c3e913021">
+      <Output>
+        <StdOut>Transaction: None</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e46c9708-ca4c-4ef9-ae47-0172cd1656ab" testId="45a1c35a-206a-680b-7adf-97b4f1220fb1" testName="Reader" computerName="THE-BIG-RIG" duration="00:00:00.0206700" startTime="2023-07-20T21:25:15.6791307-04:00" endTime="2023-07-20T21:25:15.6998003-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e46c9708-ca4c-4ef9-ae47-0172cd1656ab">
+      <Output>
+        <StdOut>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3b788968-9e87-46c0-9e3e-ed75531de862" testId="04fe663e-77f4-7638-3d23-56ab2a11f452" testName="Update" computerName="THE-BIG-RIG" duration="00:00:00.1347790" startTime="2023-07-20T21:25:15.9813883-04:00" endTime="2023-07-20T21:25:16.1161667-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3b788968-9e87-46c0-9e3e-ed75531de862">
+      <Output>
+        <StdOut>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 1</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9a750e1d-fb02-4de2-9598-4421907bcfa3" testId="3e7f6762-f253-2395-a98b-b7024bc8f76d" testName="InsertDeleteSelect" computerName="THE-BIG-RIG" duration="00:00:00.0167040" startTime="2023-07-20T21:25:16.1850502-04:00" endTime="2023-07-20T21:25:16.2017539-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9a750e1d-fb02-4de2-9598-4421907bcfa3">
+      <Output>
+        <StdOut>Do we have a transaction? Some Microsoft.Data.Sqlite.SqliteTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+PRAGMA journal_mode=WAL;&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "793b99f3-8671-4c6c-858f-5db25ee2401d"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:16 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = '793b99f3-8671-4c6c-858f-5db25ee2401d'</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7815ffa6-c265-4cfa-899f-95c7db309b3b" testId="61dcfb39-11fa-e241-4f87-9ef81d7da35f" testName="QueryBuild" computerName="THE-BIG-RIG" duration="00:00:00.0003790" startTime="2023-07-20T21:25:15.6787417-04:00" endTime="2023-07-20T21:25:15.6791213-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7815ffa6-c265-4cfa-899f-95c7db309b3b">
+      <Output>
+        <StdOut>""indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact""</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e3577aff-fcd5-466c-b12a-efda5d33ea0b" testId="15e7aaf0-1e10-0c65-15f8-df3a9c6f37ce" testName="DeleteMany" computerName="THE-BIG-RIG" duration="00:00:00.0173790" startTime="2023-07-20T21:25:15.5980542-04:00" endTime="2023-07-20T21:25:15.6154328-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e3577aff-fcd5-466c-b12a-efda5d33ea0b">
+      <Output>
+        <StdOut>Deleting Many...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where ( "Fact"."id" = @id0) OR ("Fact"."id" = @id1 )&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c0812c8e-d2f0-4dfb-833c-c924ddf3bc48" testId="56e96ce4-50b6-5365-cfd5-b3ce8ae0fd29" testName="InsertSelect" computerName="THE-BIG-RIG" duration="00:01:00.0891810" startTime="2023-07-20T21:25:16.2017760-04:00" endTime="2023-07-20T21:26:16.2909564-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0812c8e-d2f0-4dfb-833c-c924ddf3bc48">
+      <Output>
+        <StdOut>Exception when beginning transaction: Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 5: 'database is locked'.&#xD;
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)&#xD;
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader()&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteNonQuery()&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionExtensions.ExecuteNonQuery(SqliteConnection connection, String commandText, SqliteParameter[] parameters)&#xD;
+   at Microsoft.Data.Sqlite.SqliteTransaction..ctor(SqliteConnection connection, IsolationLevel isolationLevel, Boolean deferred)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.BeginTransaction(IsolationLevel isolationLevel, Boolean deferred)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.BeginTransaction(IsolationLevel isolationLevel)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.BeginDbTransaction(IsolationLevel isolationLevel)&#xD;
+   at Test.Orm.OrmTransaction.InsertSelect() in C:\hcrd\FORM\Test\Orm.fs:line 263&#xD;
+Do we have a transaction? None&#xD;
+Query being generated:&#xD;
+&#xD;
+PRAGMA journal_mode=WAL;&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "2b2dd8c7-5d53-49e7-b16d-590e6c6c6741"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:46 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"</StdOut>
+        <ErrorInfo>
+          <Message>Microsoft.Data.Sqlite.SqliteException : SQLite Error 5: 'database is locked'.</Message>
+          <StackTrace>   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)&#xD;
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader()&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteNonQuery()&#xD;
+   at Test.Orm.Pipe #1 stage #2 at line 271@271-26.Invoke(DbConnection connection)&#xD;
+   at Microsoft.FSharp.Core.ResultModule.Map[T,TResult,TError](FSharpFunc`2 mapping, FSharpResult`2 result) in D:\a\_work\1\s\src\FSharp.Core\result.fs:line 12&#xD;
+   at Test.Orm.Pipe #1 stage #2 at line 271@271-50.Invoke(FSharpOption`1 _arg1)&#xD;
+   at Test.Orm.Pipe #1 stage #2 at line 271@271.Invoke(Int32 _arg1) in C:\hcrd\FORM\Test\Orm.fs:line 271&#xD;
+   at Test.Orm.OrmTransaction.InsertSelect() in C:\hcrd\FORM\Test\Orm.fs:line 271&#xD;
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)&#xD;
+   at System.Reflection.MethodInvoker.Invoke(Object obj, IntPtr* args, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e97fb153-82c4-4160-a145-8e4461b1d3f8" testId="685fd3d2-6ac3-c066-f340-f935822e65eb" testName="Update" computerName="THE-BIG-RIG" duration="00:00:00.0110480" startTime="2023-07-20T21:25:15.2816634-04:00" endTime="2023-07-20T21:25:15.2927106-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e97fb153-82c4-4160-a145-8e4461b1d3f8">
+      <Output>
+        <StdOut>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 1</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="62a57531-4618-4de2-b367-55b0bf88028a" testId="5d408274-7e76-d306-80c5-5a9bfe39a193" testName="Connect" computerName="THE-BIG-RIG" duration="00:00:00.0003030" startTime="2023-07-20T21:25:15.5783209-04:00" endTime="2023-07-20T21:25:15.5786240-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="62a57531-4618-4de2-b367-55b0bf88028a">
+      <Output>
+        <StdOut>Contest: "Data Source=./test.db;"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="39ae0a4e-8d6e-46c6-89c9-eed17183c873" testId="d8e33ed2-9bff-03c9-e97c-4b6122b57f5f" testName="Delete" computerName="THE-BIG-RIG" duration="00:00:00.0193870" startTime="2023-07-20T21:25:15.5786381-04:00" endTime="2023-07-20T21:25:15.5980247-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="39ae0a4e-8d6e-46c6-89c9-eed17183c873">
+      <Output>
+        <StdOut>Deleting...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="21a4433a-8a27-4edb-93b1-2cfc1cb5bade" testId="637f884a-918a-8683-bb6b-2e0f84146c18" testName="UpdateMany" computerName="THE-BIG-RIG" duration="00:00:00.0499150" startTime="2023-07-20T21:25:16.1161980-04:00" endTime="2023-07-20T21:25:16.1661124-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="21a4433a-8a27-4edb-93b1-2cfc1cb5bade">
+      <Output>
+        <StdOut>Updating many...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+seq [Ok 1; Ok 1]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a8e9f840-a8d1-47c7-b700-b4dfa8407a82" testId="109960d2-3813-538d-c791-8f455002f0b6" testName="UpdateMany" computerName="THE-BIG-RIG" duration="00:00:00.0111740" startTime="2023-07-20T21:25:15.2927274-04:00" endTime="2023-07-20T21:25:15.3039012-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a8e9f840-a8d1-47c7-b700-b4dfa8407a82">
+      <Output>
+        <StdOut>Updating many...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+seq [Ok 1; Ok 1]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="35dce089-2374-4fc1-ab2e-aa3309da75e5" testId="9914cd5e-0327-22a6-d447-faa2be9ff7a1" testName="DeleteWhere" computerName="THE-BIG-RIG" duration="00:00:00.0013530" startTime="2023-07-20T21:25:15.2211746-04:00" endTime="2023-07-20T21:25:15.2225277-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="35dce089-2374-4fc1-ab2e-aa3309da75e5">
+      <Output>
+        <StdOut>Deleting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4230eedf-c396-4467-8fdb-c5fa19ad031f" testId="6f25e22c-fb80-3b16-8268-1639c4107ef2" testName="DeleteWhere" computerName="THE-BIG-RIG" duration="00:00:00.0244290" startTime="2023-07-20T21:25:15.6154627-04:00" endTime="2023-07-20T21:25:15.6398915-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4230eedf-c396-4467-8fdb-c5fa19ad031f">
+      <Output>
+        <StdOut>Deleting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3aa67c15-e4fd-44d5-a58f-94cea9daacd7" testId="85caf85c-0ea4-3061-d9ac-49e696c000d2" testName="Insert" computerName="THE-BIG-RIG" duration="00:00:00.0186560" startTime="2023-07-20T21:25:15.6399236-04:00" endTime="2023-07-20T21:25:15.6585794-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3aa67c15-e4fd-44d5-a58f-94cea9daacd7">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a3f9771c-8538-4cc1-b37c-1fd55f2f7d63" testId="703d9e23-b2da-ec05-d434-5d080ae77160" testName="SelectWhere" computerName="THE-BIG-RIG" duration="00:00:00.1574730" startTime="2023-07-20T21:25:15.8231171-04:00" endTime="2023-07-20T21:25:15.9805892-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a3f9771c-8538-4cc1-b37c-1fd55f2f7d63">
+      <Output>
+        <StdOut>Selecting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where "maybeSomething" = 'true'&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d0448fc6-3d1c-4c0a-9109-c40bb46842d5" testId="45fe581a-79a6-d39d-38f9-646e4aefd98f" testName="Insert" computerName="THE-BIG-RIG" duration="00:00:00.0108650" startTime="2023-07-20T21:25:15.2225417-04:00" endTime="2023-07-20T21:25:15.2334065-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d0448fc6-3d1c-4c0a-9109-c40bb46842d5">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5c037016-de35-40eb-b7a3-57f25f9df90e" testId="9efe28fc-5719-572e-16c6-a90cc0bb8bcd" testName="InsertMany" computerName="THE-BIG-RIG" duration="00:00:00.0099320" startTime="2023-07-20T21:25:15.2334212-04:00" endTime="2023-07-20T21:25:15.2433532-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5c037016-de35-40eb-b7a3-57f25f9df90e">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact"( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query generated: insert into "Fact"( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+Param count: 32&#xD;
+Param 0 - "@indexId0": 1L&#xD;
+Param 1 - "@id0": "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+Param 2 - "@name0": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp0": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar0": "Δ"&#xD;
+Param 5 - "@maybeSomething0": "true"&#xD;
+Param 6 - "@sometimesNothing0": 1L&#xD;
+Param 7 - "@biteSize0": "!aBite"&#xD;
+Param 8 - "@indexId1": 1L&#xD;
+Param 9 - "@id1": "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+Param 10 - "@name1": "Gerry McGuire"&#xD;
+Param 11 - "@timeStamp1": "7/20/2023 9:25:15 PM"&#xD;
+Param 12 - "@specialChar1": "Δ"&#xD;
+Param 13 - "@maybeSomething1": "true"&#xD;
+Param 14 - "@sometimesNothing1": &#xD;
+Param 15 - "@biteSize1": "!aBite"&#xD;
+Param 16 - "@indexId2": 1L&#xD;
+Param 17 - "@id2": "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+Param 18 - "@name2": "Gerry McGuire"&#xD;
+Param 19 - "@timeStamp2": "7/20/2023 9:25:15 PM"&#xD;
+Param 20 - "@specialChar2": "Δ"&#xD;
+Param 21 - "@maybeSomething2": "true"&#xD;
+Param 22 - "@sometimesNothing2": 1L&#xD;
+Param 23 - "@biteSize2": "!aBite"&#xD;
+Param 24 - "@indexId3": 1L&#xD;
+Param 25 - "@id3": "e486283c-766c-4534-916e-2fccf98d5ea3"&#xD;
+Param 26 - "@name3": "Gerry McGuire"&#xD;
+Param 27 - "@timeStamp3": "7/20/2023 9:25:15 PM"&#xD;
+Param 28 - "@specialChar3": "Δ"&#xD;
+Param 29 - "@maybeSomething3": "true"&#xD;
+Param 30 - "@sometimesNothing3": 1L&#xD;
+Param 31 - "@biteSize3": "!aBite"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="23b8380f-4b3e-4fe0-810e-bc758e0026b0" testId="cc8f9a7d-2cf1-cea4-783c-8b829390949b" testName="TearDown" computerName="THE-BIG-RIG" duration="00:00:00.0006350" startTime="2023-07-20T21:25:15.2810179-04:00" endTime="2023-07-20T21:25:15.2816523-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="23b8380f-4b3e-4fe0-810e-bc758e0026b0">
+      <Output>
+        <StdOut>Transaction: None</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="161584fb-4139-4193-91ea-f0cbd59a71cd" testId="9c5af40b-4e18-c869-7f11-c793b0cd45f9" testName="QueryBuild" computerName="THE-BIG-RIG" duration="00:00:00.0016600" startTime="2023-07-20T21:25:15.2433721-04:00" endTime="2023-07-20T21:25:15.2450320-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="161584fb-4139-4193-91ea-f0cbd59a71cd">
+      <Output>
+        <StdOut>""indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact""</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="697deef0-bf75-4b99-8d4d-0fa34b49ffce" testId="4525c845-e5a6-179a-b7d8-7666e50f57e3" testName="InsertSelect" computerName="THE-BIG-RIG" duration="00:00:00.2268600" startTime="2023-07-20T21:26:16.3908972-04:00" endTime="2023-07-20T21:26:16.6177572-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="697deef0-bf75-4b99-8d4d-0fa34b49ffce">
+      <Output>
+        <StdOut>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "acb7a106-5fe2-4591-9fa1-a0e931d330c2"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:26:16 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = 'acb7a106-5fe2-4591-9fa1-a0e931d330c2'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = 'acb7a106-5fe2-4591-9fa1-a0e931d330c2'</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ba356334-86d2-49b9-aaca-c75d30519088" testId="f9346500-1cf3-80bd-8353-bd565d17466d" testName="Reader" computerName="THE-BIG-RIG" duration="00:00:00.0167160" startTime="2023-07-20T21:25:15.2450454-04:00" endTime="2023-07-20T21:25:15.2617606-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ba356334-86d2-49b9-aaca-c75d30519088">
+      <Output>
+        <StdOut>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fa01c269-8421-4ebe-a889-b3e5f0805f3b" testId="a90e932c-1181-7947-bd3f-cd4c26ae5c6c" testName="SelectWhere" computerName="THE-BIG-RIG" duration="00:00:00.0077690" startTime="2023-07-20T21:25:15.2732336-04:00" endTime="2023-07-20T21:25:15.2810027-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fa01c269-8421-4ebe-a889-b3e5f0805f3b">
+      <Output>
+        <StdOut>Selecting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where "maybeSomething" = 'true'&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c00f2a70-82f8-4570-8936-6e5cd572a11a" testId="49a6d652-58bf-e834-bc8e-37de72d62c3c" testName="Delete" computerName="THE-BIG-RIG" duration="00:00:00.0722710" startTime="2023-07-20T21:25:15.1384286-04:00" endTime="2023-07-20T21:25:15.2106997-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c00f2a70-82f8-4570-8936-6e5cd572a11a">
+      <Output>
+        <StdOut>Deleting...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="68866e20-8680-43d4-9c0a-71481ac8e11d" testId="0fa2da76-10fd-3535-9c31-82a6b7dc1dc6" testName="Connect" computerName="THE-BIG-RIG" duration="00:00:00.0089789" startTime="2023-07-20T21:25:15.1286552-04:00" endTime="2023-07-20T21:25:15.1375948-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="68866e20-8680-43d4-9c0a-71481ac8e11d">
+      <Output>
+        <StdOut>Contest: "Data Source=./test.db;"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="958b1695-5cc6-4d4f-b748-89edc1db02b9" testId="d73ca3dd-6f0d-02ae-9b15-97da40bf6710" testName="InsertDeleteSelect" computerName="THE-BIG-RIG" duration="00:00:00.0521589" startTime="2023-07-20T21:26:16.3387179-04:00" endTime="2023-07-20T21:26:16.3908765-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="958b1695-5cc6-4d4f-b748-89edc1db02b9">
+      <Output>
+        <StdOut>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "95696b72-5b9c-47b5-a76c-a01288dd4342"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:26:16 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = '95696b72-5b9c-47b5-a76c-a01288dd4342'</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3dc4059a-5ddc-4c65-a222-0ff5911d2a7a" testId="b2ee8ff5-43fd-9922-0a20-e7fbb2d8497e" testName="UpdateWhere" computerName="THE-BIG-RIG" duration="00:00:00.0133430" startTime="2023-07-20T21:25:16.1661362-04:00" endTime="2023-07-20T21:25:16.1794793-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3dc4059a-5ddc-4c65-a222-0ff5911d2a7a">
+      <Output>
+        <StdOut>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 5</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c179ab4b-ab43-407c-8023-7e57ed4e0e3c" testId="d9987b9d-24a0-d4c4-e4b0-295b5a496f9c" testName="Select" computerName="THE-BIG-RIG" duration="00:00:00.1232150" startTime="2023-07-20T21:25:15.6998205-04:00" endTime="2023-07-20T21:25:15.8230353-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c179ab4b-ab43-407c-8023-7e57ed4e0e3c">
+      <Output>
+        <StdOut>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "19986ae5-da89-4921-aac3-b59c267119b7"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+&#xD;
+facts: Error: Connection already open</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b741cfd1-e27a-45fd-8b54-15b317907027" testId="808acbda-4118-700a-9ab5-75ef8abf7449" testName="InsertMany" computerName="THE-BIG-RIG" duration="00:00:00.0201130" startTime="2023-07-20T21:25:15.6585995-04:00" endTime="2023-07-20T21:25:15.6787115-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b741cfd1-e27a-45fd-8b54-15b317907027">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact"( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query generated: insert into "Fact"( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+Param count: 32&#xD;
+Param 0 - "@indexId0": 1L&#xD;
+Param 1 - "@id0": "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+Param 2 - "@name0": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp0": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar0": "Δ"&#xD;
+Param 5 - "@maybeSomething0": "true"&#xD;
+Param 6 - "@sometimesNothing0": 1L&#xD;
+Param 7 - "@biteSize0": "!aBite"&#xD;
+Param 8 - "@indexId1": 1L&#xD;
+Param 9 - "@id1": "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+Param 10 - "@name1": "Gerry McGuire"&#xD;
+Param 11 - "@timeStamp1": "7/20/2023 9:25:15 PM"&#xD;
+Param 12 - "@specialChar1": "Δ"&#xD;
+Param 13 - "@maybeSomething1": "true"&#xD;
+Param 14 - "@sometimesNothing1": &#xD;
+Param 15 - "@biteSize1": "!aBite"&#xD;
+Param 16 - "@indexId2": 1L&#xD;
+Param 17 - "@id2": "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+Param 18 - "@name2": "Gerry McGuire"&#xD;
+Param 19 - "@timeStamp2": "7/20/2023 9:25:15 PM"&#xD;
+Param 20 - "@specialChar2": "Δ"&#xD;
+Param 21 - "@maybeSomething2": "true"&#xD;
+Param 22 - "@sometimesNothing2": 1L&#xD;
+Param 23 - "@biteSize2": "!aBite"&#xD;
+Param 24 - "@indexId3": 1L&#xD;
+Param 25 - "@id3": "19986ae5-da89-4921-aac3-b59c267119b7"&#xD;
+Param 26 - "@name3": "Gerry McGuire"&#xD;
+Param 27 - "@timeStamp3": "7/20/2023 9:25:15 PM"&#xD;
+Param 28 - "@specialChar3": "Δ"&#xD;
+Param 29 - "@maybeSomething3": "true"&#xD;
+Param 30 - "@sometimesNothing3": 1L&#xD;
+Param 31 - "@biteSize3": "!aBite"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4b159c4c-620a-48ed-bf4f-70d3ed3444f7" testId="40146aef-5e24-931c-f935-d8cb1c2a1a7b" testName="DeleteMany" computerName="THE-BIG-RIG" duration="00:00:00.0104169" startTime="2023-07-20T21:25:15.2107392-04:00" endTime="2023-07-20T21:25:15.2211555-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4b159c4c-620a-48ed-bf4f-70d3ed3444f7">
+      <Output>
+        <StdOut>Deleting Many...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where ( "Fact"."id" = @id0) OR ("Fact"."id" = @id1 )&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="db98631e-044d-4db5-9baa-40423d830235" testId="53d2384a-fbb2-a413-58be-1fd0675167cd" testName="Select" computerName="THE-BIG-RIG" duration="00:00:00.0114200" startTime="2023-07-20T21:25:15.2617822-04:00" endTime="2023-07-20T21:25:15.2732016-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="db98631e-044d-4db5-9baa-40423d830235">
+      <Output>
+        <StdOut>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "e486283c-766c-4534-916e-2fccf98d5ea3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="428f89fd-bf2a-4df7-a469-3f4e76062c01" testId="17b58aeb-30c9-6964-6c40-fbab11cb0ed7" testName="UpdateWhere" computerName="THE-BIG-RIG" duration="00:00:00.0058840" startTime="2023-07-20T21:25:15.3039218-04:00" endTime="2023-07-20T21:25:15.3098054-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="428f89fd-bf2a-4df7-a469-3f4e76062c01">
+      <Output>
+        <StdOut>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 5</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="UpdateMany" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="637f884a-918a-8683-bb6b-2e0f84146c18">
+      <Execution id="21a4433a-8a27-4edb-93b1-2cfc1cb5bade" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="UpdateMany" />
+    </UnitTest>
+    <UnitTest name="DeleteMany" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="40146aef-5e24-931c-f935-d8cb1c2a1a7b">
+      <Execution id="4b159c4c-620a-48ed-bf4f-70d3ed3444f7" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="DeleteMany" />
+    </UnitTest>
+    <UnitTest name="Delete" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="d8e33ed2-9bff-03c9-e97c-4b6122b57f5f">
+      <Execution id="39ae0a4e-8d6e-46c6-89c9-eed17183c873" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="Delete" />
+    </UnitTest>
+    <UnitTest name="SelectWhere" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="a90e932c-1181-7947-bd3f-cd4c26ae5c6c">
+      <Execution id="fa01c269-8421-4ebe-a889-b3e5f0805f3b" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="SelectWhere" />
+    </UnitTest>
+    <UnitTest name="InsertSelect" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="56e96ce4-50b6-5365-cfd5-b3ce8ae0fd29">
+      <Execution id="c0812c8e-d2f0-4dfb-833c-c924ddf3bc48" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@10-1)" name="InsertSelect" />
+    </UnitTest>
+    <UnitTest name="Insert" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="85caf85c-0ea4-3061-d9ac-49e696c000d2">
+      <Execution id="3aa67c15-e4fd-44d5-a58f-94cea9daacd7" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="Insert" />
+    </UnitTest>
+    <UnitTest name="UpdateWhere" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="b2ee8ff5-43fd-9922-0a20-e7fbb2d8497e">
+      <Execution id="3dc4059a-5ddc-4c65-a222-0ff5911d2a7a" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="UpdateWhere" />
+    </UnitTest>
+    <UnitTest name="SelectWhere" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="703d9e23-b2da-ec05-d434-5d080ae77160">
+      <Execution id="a3f9771c-8538-4cc1-b37c-1fd55f2f7d63" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="SelectWhere" />
+    </UnitTest>
+    <UnitTest name="DeleteWhere" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="9914cd5e-0327-22a6-d447-faa2be9ff7a1">
+      <Execution id="35dce089-2374-4fc1-ab2e-aa3309da75e5" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="DeleteWhere" />
+    </UnitTest>
+    <UnitTest name="UpdateWhere" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="17b58aeb-30c9-6964-6c40-fbab11cb0ed7">
+      <Execution id="428f89fd-bf2a-4df7-a469-3f4e76062c01" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="UpdateWhere" />
+    </UnitTest>
+    <UnitTest name="Reader" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="f9346500-1cf3-80bd-8353-bd565d17466d">
+      <Execution id="ba356334-86d2-49b9-aaca-c75d30519088" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="Reader" />
+    </UnitTest>
+    <UnitTest name="Update" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="04fe663e-77f4-7638-3d23-56ab2a11f452">
+      <Execution id="3b788968-9e87-46c0-9e3e-ed75531de862" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="Update" />
+    </UnitTest>
+    <UnitTest name="Update" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="685fd3d2-6ac3-c066-f340-f935822e65eb">
+      <Execution id="e97fb153-82c4-4160-a145-8e4461b1d3f8" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="Update" />
+    </UnitTest>
+    <UnitTest name="QueryBuild" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="9c5af40b-4e18-c869-7f11-c793b0cd45f9">
+      <Execution id="161584fb-4139-4193-91ea-f0cbd59a71cd" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="QueryBuild" />
+    </UnitTest>
+    <UnitTest name="TearDown" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="32e05ec3-148e-77cd-f32a-bea700e74b04">
+      <Execution id="55b8594e-2cbf-443b-b6cc-c35c3e913021" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="TearDown" />
+    </UnitTest>
+    <UnitTest name="Insert" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="45fe581a-79a6-d39d-38f9-646e4aefd98f">
+      <Execution id="d0448fc6-3d1c-4c0a-9109-c40bb46842d5" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="Insert" />
+    </UnitTest>
+    <UnitTest name="InsertDeleteSelect" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="3e7f6762-f253-2395-a98b-b7024bc8f76d">
+      <Execution id="9a750e1d-fb02-4de2-9598-4421907bcfa3" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@10-1)" name="InsertDeleteSelect" />
+    </UnitTest>
+    <UnitTest name="Connect" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="5d408274-7e76-d306-80c5-5a9bfe39a193">
+      <Execution id="62a57531-4618-4de2-b367-55b0bf88028a" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="Connect" />
+    </UnitTest>
+    <UnitTest name="Select" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="d9987b9d-24a0-d4c4-e4b0-295b5a496f9c">
+      <Execution id="c179ab4b-ab43-407c-8023-7e57ed4e0e3c" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="Select" />
+    </UnitTest>
+    <UnitTest name="DeleteWhere" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="6f25e22c-fb80-3b16-8268-1639c4107ef2">
+      <Execution id="4230eedf-c396-4467-8fdb-c5fa19ad031f" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="DeleteWhere" />
+    </UnitTest>
+    <UnitTest name="InsertSelect" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="4525c845-e5a6-179a-b7d8-7666e50f57e3">
+      <Execution id="697deef0-bf75-4b99-8d4d-0fa34b49ffce" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@11-2)" name="InsertSelect" />
+    </UnitTest>
+    <UnitTest name="Connect" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="0fa2da76-10fd-3535-9c31-82a6b7dc1dc6">
+      <Execution id="68866e20-8680-43d4-9c0a-71481ac8e11d" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="Connect" />
+    </UnitTest>
+    <UnitTest name="InsertDeleteSelect" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="d73ca3dd-6f0d-02ae-9b15-97da40bf6710">
+      <Execution id="958b1695-5cc6-4d4f-b748-89edc1db02b9" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@11-2)" name="InsertDeleteSelect" />
+    </UnitTest>
+    <UnitTest name="UpdateMany" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="109960d2-3813-538d-c791-8f455002f0b6">
+      <Execution id="a8e9f840-a8d1-47c7-b700-b4dfa8407a82" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="UpdateMany" />
+    </UnitTest>
+    <UnitTest name="InsertMany" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="808acbda-4118-700a-9ab5-75ef8abf7449">
+      <Execution id="b741cfd1-e27a-45fd-8b54-15b317907027" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="InsertMany" />
+    </UnitTest>
+    <UnitTest name="QueryBuild" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="61dcfb39-11fa-e241-4f87-9ef81d7da35f">
+      <Execution id="7815ffa6-c265-4cfa-899f-95c7db309b3b" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="QueryBuild" />
+    </UnitTest>
+    <UnitTest name="InsertMany" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="9efe28fc-5719-572e-16c6-a90cc0bb8bcd">
+      <Execution id="5c037016-de35-40eb-b7a3-57f25f9df90e" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="InsertMany" />
+    </UnitTest>
+    <UnitTest name="Reader" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="45a1c35a-206a-680b-7adf-97b4f1220fb1">
+      <Execution id="e46c9708-ca4c-4ef9-ae47-0172cd1656ab" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="Reader" />
+    </UnitTest>
+    <UnitTest name="DeleteMany" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="15e7aaf0-1e10-0c65-15f8-df3a9c6f37ce">
+      <Execution id="e3577aff-fcd5-466c-b12a-efda5d33ea0b" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-2)" name="DeleteMany" />
+    </UnitTest>
+    <UnitTest name="TearDown" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="cc8f9a7d-2cf1-cea4-783c-8b829390949b">
+      <Execution id="23b8380f-4b3e-4fe0-810e-bc758e0026b0" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="TearDown" />
+    </UnitTest>
+    <UnitTest name="Select" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="53d2384a-fbb2-a413-58be-1fd0675167cd">
+      <Execution id="db98631e-044d-4db5-9baa-40423d830235" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="Select" />
+    </UnitTest>
+    <UnitTest name="Delete" storage="c:\hcrd\form\test\bin\debug\net7.0\test.dll" id="49a6d652-58bf-e834-bc8e-37de72d62c3c">
+      <Execution id="c00f2a70-82f8-4570-8936-6e5cd572a11a" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@10-1)" name="Delete" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="32e05ec3-148e-77cd-f32a-bea700e74b04" executionId="55b8594e-2cbf-443b-b6cc-c35c3e913021" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="45a1c35a-206a-680b-7adf-97b4f1220fb1" executionId="e46c9708-ca4c-4ef9-ae47-0172cd1656ab" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="04fe663e-77f4-7638-3d23-56ab2a11f452" executionId="3b788968-9e87-46c0-9e3e-ed75531de862" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3e7f6762-f253-2395-a98b-b7024bc8f76d" executionId="9a750e1d-fb02-4de2-9598-4421907bcfa3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="61dcfb39-11fa-e241-4f87-9ef81d7da35f" executionId="7815ffa6-c265-4cfa-899f-95c7db309b3b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="15e7aaf0-1e10-0c65-15f8-df3a9c6f37ce" executionId="e3577aff-fcd5-466c-b12a-efda5d33ea0b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="56e96ce4-50b6-5365-cfd5-b3ce8ae0fd29" executionId="c0812c8e-d2f0-4dfb-833c-c924ddf3bc48" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="685fd3d2-6ac3-c066-f340-f935822e65eb" executionId="e97fb153-82c4-4160-a145-8e4461b1d3f8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5d408274-7e76-d306-80c5-5a9bfe39a193" executionId="62a57531-4618-4de2-b367-55b0bf88028a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d8e33ed2-9bff-03c9-e97c-4b6122b57f5f" executionId="39ae0a4e-8d6e-46c6-89c9-eed17183c873" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="637f884a-918a-8683-bb6b-2e0f84146c18" executionId="21a4433a-8a27-4edb-93b1-2cfc1cb5bade" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="109960d2-3813-538d-c791-8f455002f0b6" executionId="a8e9f840-a8d1-47c7-b700-b4dfa8407a82" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9914cd5e-0327-22a6-d447-faa2be9ff7a1" executionId="35dce089-2374-4fc1-ab2e-aa3309da75e5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f25e22c-fb80-3b16-8268-1639c4107ef2" executionId="4230eedf-c396-4467-8fdb-c5fa19ad031f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="85caf85c-0ea4-3061-d9ac-49e696c000d2" executionId="3aa67c15-e4fd-44d5-a58f-94cea9daacd7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="703d9e23-b2da-ec05-d434-5d080ae77160" executionId="a3f9771c-8538-4cc1-b37c-1fd55f2f7d63" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="45fe581a-79a6-d39d-38f9-646e4aefd98f" executionId="d0448fc6-3d1c-4c0a-9109-c40bb46842d5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9efe28fc-5719-572e-16c6-a90cc0bb8bcd" executionId="5c037016-de35-40eb-b7a3-57f25f9df90e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cc8f9a7d-2cf1-cea4-783c-8b829390949b" executionId="23b8380f-4b3e-4fe0-810e-bc758e0026b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c5af40b-4e18-c869-7f11-c793b0cd45f9" executionId="161584fb-4139-4193-91ea-f0cbd59a71cd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4525c845-e5a6-179a-b7d8-7666e50f57e3" executionId="697deef0-bf75-4b99-8d4d-0fa34b49ffce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f9346500-1cf3-80bd-8353-bd565d17466d" executionId="ba356334-86d2-49b9-aaca-c75d30519088" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a90e932c-1181-7947-bd3f-cd4c26ae5c6c" executionId="fa01c269-8421-4ebe-a889-b3e5f0805f3b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49a6d652-58bf-e834-bc8e-37de72d62c3c" executionId="c00f2a70-82f8-4570-8936-6e5cd572a11a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0fa2da76-10fd-3535-9c31-82a6b7dc1dc6" executionId="68866e20-8680-43d4-9c0a-71481ac8e11d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d73ca3dd-6f0d-02ae-9b15-97da40bf6710" executionId="958b1695-5cc6-4d4f-b748-89edc1db02b9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b2ee8ff5-43fd-9922-0a20-e7fbb2d8497e" executionId="3dc4059a-5ddc-4c65-a222-0ff5911d2a7a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d9987b9d-24a0-d4c4-e4b0-295b5a496f9c" executionId="c179ab4b-ab43-407c-8023-7e57ed4e0e3c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="808acbda-4118-700a-9ab5-75ef8abf7449" executionId="b741cfd1-e27a-45fd-8b54-15b317907027" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="40146aef-5e24-931c-f935-d8cb1c2a1a7b" executionId="4b159c4c-620a-48ed-bf4f-70d3ed3444f7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="53d2384a-fbb2-a413-58be-1fd0675167cd" executionId="db98631e-044d-4db5-9baa-40423d830235" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17b58aeb-30c9-6964-6c40-fbab11cb0ed7" executionId="428f89fd-bf2a-4df7-a469-3f4e76062c01" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="32" executed="32" passed="31" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 4.4.0.0: Test execution started&#xD;
+Running all tests in C:\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll&#xD;
+   NUnit3TestExecutor discovered 32 of 32 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+Delete: facts: 0&#xD;
+DeleteMany: 0&#xD;
+DeleteWhere: facts: 0&#xD;
+Reader: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]&#xD;
+Select: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]&#xD;
+SelectWhere: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]&#xD;
+TearDown: Transaction: None&#xD;
+Update: facts: 1&#xD;
+UpdateWhere: facts: 5&#xD;
+Delete: facts: 0&#xD;
+DeleteMany: 0&#xD;
+DeleteWhere: facts: 0&#xD;
+Reader: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]&#xD;
+Select: facts: Error: Connection already open&#xD;
+SelectWhere: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" };&#xD;
+   { indexId = 1L&#xD;
+     id = "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite" }; { indexId = 1L&#xD;
+                              id = "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+                              name = "Gerry McGuire"&#xD;
+                              timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+                              specialChar = "Δ"&#xD;
+                              maybeSomething = "true"&#xD;
+                              sometimesNothing = Some 1L&#xD;
+                              biteSize = "!aBite" }; ...]&#xD;
+TearDown: Transaction: None&#xD;
+Update: facts: 1&#xD;
+UpdateWhere: facts: 5&#xD;
+NUnit Adapter 4.4.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.1484802-04:00">
+        <Text>Contest: "Data Source=./test.db;"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2113280-04:00">
+        <Text>Deleting...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2216088-04:00">
+        <Text>Deleting Many...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where ( "Fact"."id" = @id0) OR ("Fact"."id" = @id1 )&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2228507-04:00">
+        <Text>Deleting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2338665-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2439737-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact"( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query generated: insert into "Fact"( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+Param count: 32&#xD;
+Param 0 - "@indexId0": 1L&#xD;
+Param 1 - "@id0": "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+Param 2 - "@name0": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp0": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar0": "Δ"&#xD;
+Param 5 - "@maybeSomething0": "true"&#xD;
+Param 6 - "@sometimesNothing0": 1L&#xD;
+Param 7 - "@biteSize0": "!aBite"&#xD;
+Param 8 - "@indexId1": 1L&#xD;
+Param 9 - "@id1": "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+Param 10 - "@name1": "Gerry McGuire"&#xD;
+Param 11 - "@timeStamp1": "7/20/2023 9:25:15 PM"&#xD;
+Param 12 - "@specialChar1": "Δ"&#xD;
+Param 13 - "@maybeSomething1": "true"&#xD;
+Param 14 - "@sometimesNothing1": &#xD;
+Param 15 - "@biteSize1": "!aBite"&#xD;
+Param 16 - "@indexId2": 1L&#xD;
+Param 17 - "@id2": "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+Param 18 - "@name2": "Gerry McGuire"&#xD;
+Param 19 - "@timeStamp2": "7/20/2023 9:25:15 PM"&#xD;
+Param 20 - "@specialChar2": "Δ"&#xD;
+Param 21 - "@maybeSomething2": "true"&#xD;
+Param 22 - "@sometimesNothing2": 1L&#xD;
+Param 23 - "@biteSize2": "!aBite"&#xD;
+Param 24 - "@indexId3": 1L&#xD;
+Param 25 - "@id3": "e486283c-766c-4534-916e-2fccf98d5ea3"&#xD;
+Param 26 - "@name3": "Gerry McGuire"&#xD;
+Param 27 - "@timeStamp3": "7/20/2023 9:25:15 PM"&#xD;
+Param 28 - "@specialChar3": "Δ"&#xD;
+Param 29 - "@maybeSomething3": "true"&#xD;
+Param 30 - "@sometimesNothing3": 1L&#xD;
+Param 31 - "@biteSize3": "!aBite"&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2460037-04:00">
+        <Text>""indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact""&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2622781-04:00">
+        <Text>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.2738772-04:00">
+        <Text>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "f2a06c70-db7b-4720-acd9-d87051f6175c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "a39aa273-45ee-406f-a3ac-781ce9c7a8d6"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "8b8bbf31-261d-4dca-a378-6dde7260015f"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "89cd06b3-ae2a-42db-a13c-c594c8832529"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "e486283c-766c-4534-916e-2fccf98d5ea3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.3170908-04:00">
+        <Text>Selecting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where "maybeSomething" = 'true'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.3177357-04:00">
+        <Text>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.3192753-04:00">
+        <Text>Updating many...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+seq [Ok 1; Ok 1]</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.3220208-04:00">
+        <Text>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "sqliteName"&#xD;
+                                       QuotedSqlName = ""sqliteName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "sqliteName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.5790653-04:00">
+        <Text>Contest: "Data Source=./test.db;"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.5984475-04:00">
+        <Text>Deleting...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.6158484-04:00">
+        <Text>Deleting Many...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where ( "Fact"."id" = @id0) OR ("Fact"."id" = @id1 )&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.6403343-04:00">
+        <Text>Deleting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.6590470-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.6792715-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact"( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query generated: insert into "Fact"( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId0, @id0, @name0, @timeStamp0, @specialChar0, @maybeSomething0, @sometimesNothing0, @biteSize0 ), ( @indexId1, @id1, @name1, @timeStamp1, @specialChar1, @maybeSomething1, @sometimesNothing1, @biteSize1 ), ( @indexId2, @id2, @name2, @timeStamp2, @specialChar2, @maybeSomething2, @sometimesNothing2, @biteSize2 ), ( @indexId3, @id3, @name3, @timeStamp3, @specialChar3, @maybeSomething3, @sometimesNothing3, @biteSize3 );&#xD;
+Param count: 32&#xD;
+Param 0 - "@indexId0": 1L&#xD;
+Param 1 - "@id0": "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+Param 2 - "@name0": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp0": "7/20/2023 9:25:15 PM"&#xD;
+Param 4 - "@specialChar0": "Δ"&#xD;
+Param 5 - "@maybeSomething0": "true"&#xD;
+Param 6 - "@sometimesNothing0": 1L&#xD;
+Param 7 - "@biteSize0": "!aBite"&#xD;
+Param 8 - "@indexId1": 1L&#xD;
+Param 9 - "@id1": "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+Param 10 - "@name1": "Gerry McGuire"&#xD;
+Param 11 - "@timeStamp1": "7/20/2023 9:25:15 PM"&#xD;
+Param 12 - "@specialChar1": "Δ"&#xD;
+Param 13 - "@maybeSomething1": "true"&#xD;
+Param 14 - "@sometimesNothing1": &#xD;
+Param 15 - "@biteSize1": "!aBite"&#xD;
+Param 16 - "@indexId2": 1L&#xD;
+Param 17 - "@id2": "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+Param 18 - "@name2": "Gerry McGuire"&#xD;
+Param 19 - "@timeStamp2": "7/20/2023 9:25:15 PM"&#xD;
+Param 20 - "@specialChar2": "Δ"&#xD;
+Param 21 - "@maybeSomething2": "true"&#xD;
+Param 22 - "@sometimesNothing2": 1L&#xD;
+Param 23 - "@biteSize2": "!aBite"&#xD;
+Param 24 - "@indexId3": 1L&#xD;
+Param 25 - "@id3": "19986ae5-da89-4921-aac3-b59c267119b7"&#xD;
+Param 26 - "@name3": "Gerry McGuire"&#xD;
+Param 27 - "@timeStamp3": "7/20/2023 9:25:15 PM"&#xD;
+Param 28 - "@specialChar3": "Δ"&#xD;
+Param 29 - "@maybeSomething3": "true"&#xD;
+Param 30 - "@sometimesNothing3": 1L&#xD;
+Param 31 - "@biteSize3": "!aBite"&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.6813733-04:00">
+        <Text>""indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact""&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.7002520-04:00">
+        <Text>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.8236241-04:00">
+        <Text>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "6c0c8589-6b96-450a-a4c1-a54faf0a2fca"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "42172dc3-b035-485b-bb14-f40796e459fa"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "681f3d41-d942-4d76-bde2-34dde286fd1a"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "b90b1250-8377-410c-a229-44bfbe749f67"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+{ indexId = 1L&#xD;
+  id = "19986ae5-da89-4921-aac3-b59c267119b7"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "7/20/2023 9:25:15 PM"&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite" }&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:15.9818590-04:00">
+        <Text>Selecting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where "maybeSomething" = 'true'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:16.1168667-04:00">
+        <Text>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:16.1666148-04:00">
+        <Text>Updating many...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+seq [Ok 1; Ok 1]</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:16.1798570-04:00">
+        <Text>Updating...&#xD;
+columns to update: seq&#xD;
+  [{ Index = 0&#xD;
+     IsKey = false&#xD;
+     IsIndex = true&#xD;
+     SqlName = "indexId"&#xD;
+     QuotedSqlName = ""indexId""&#xD;
+     FSharpName = "indexId"&#xD;
+     Type = System.Int64&#xD;
+     PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                       IsKey = false&#xD;
+                                       IsIndex = false&#xD;
+                                       SqlName = "psqlName"&#xD;
+                                       QuotedSqlName = ""psqlName""&#xD;
+                                       FSharpName = "name"&#xD;
+                                       Type = System.String&#xD;
+                                       PropertyInfo = System.String name };&#xD;
+   { Index = 3&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "timeStamp"&#xD;
+     QuotedSqlName = ""timeStamp""&#xD;
+     FSharpName = "timeStamp"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String timeStamp };&#xD;
+   { Index = 4&#xD;
+     IsKey = false&#xD;
+     IsIndex = false&#xD;
+     SqlName = "specialChar"&#xD;
+     QuotedSqlName = ""specialChar""&#xD;
+     FSharpName = "specialChar"&#xD;
+     Type = System.String&#xD;
+     PropertyInfo = System.String specialChar }; ...]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:25:16.2021707-04:00">
+        <Text>Do we have a transaction? Some Microsoft.Data.Sqlite.SqliteTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+PRAGMA journal_mode=WAL;&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "793b99f3-8671-4c6c-858f-5db25ee2401d"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:16 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = '793b99f3-8671-4c6c-858f-5db25ee2401d'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:26:16.2924407-04:00">
+        <Text>Exception when beginning transaction: Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 5: 'database is locked'.&#xD;
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)&#xD;
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader()&#xD;
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteNonQuery()&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionExtensions.ExecuteNonQuery(SqliteConnection connection, String commandText, SqliteParameter[] parameters)&#xD;
+   at Microsoft.Data.Sqlite.SqliteTransaction..ctor(SqliteConnection connection, IsolationLevel isolationLevel, Boolean deferred)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.BeginTransaction(IsolationLevel isolationLevel, Boolean deferred)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.BeginTransaction(IsolationLevel isolationLevel)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.BeginDbTransaction(IsolationLevel isolationLevel)&#xD;
+   at Test.Orm.OrmTransaction.InsertSelect() in C:\hcrd\FORM\Test\Orm.fs:line 263&#xD;
+Do we have a transaction? None&#xD;
+Query being generated:&#xD;
+&#xD;
+PRAGMA journal_mode=WAL;&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "sqliteName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "2b2dd8c7-5d53-49e7-b16d-590e6c6c6741"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:25:46 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:26:16.3912198-04:00">
+        <Text>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "95696b72-5b9c-47b5-a76c-a01288dd4342"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:26:16 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = '95696b72-5b9c-47b5-a76c-a01288dd4342'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2023-07-20T21:26:16.6181007-04:00">
+        <Text>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "acb7a106-5fe2-4591-9fa1-a0e931d330c2"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "7/20/2023 9:26:16 PM"&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = 'acb7a106-5fe2-4591-9fa1-a0e931d330c2'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" from "Fact" where id = 'acb7a106-5fe2-4591-9fa1-a0e931d330c2'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>
