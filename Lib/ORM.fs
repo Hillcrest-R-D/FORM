@@ -49,7 +49,12 @@ module Orm =
             log ( fun _ -> printfn "Error when beginning transaction: %A" e )
             None
         
-    let inline commitTransaction ( transaction : DbTransaction ) =  transaction.Commit()
+    let commitTransaction = function 
+        | Some ( transaction : DbTransaction ) -> 
+            transaction.Commit()
+            // transaction.Connection.Close()
+            // transaction.Dispose()
+        | None -> ()
 
     let inline sqlQuote ( state : OrmState ) str  =
         match state with 
@@ -302,7 +307,7 @@ module Orm =
             try 
                 conn.Open( )
                 use cmd = makeCommand state sql conn 
-                cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                cmd.ExecuteReader( )
                 |> Ok
             with 
             | exn -> Error exn
@@ -315,7 +320,7 @@ module Orm =
                 seq {
                     use cmd = makeCommand state sql <| transaction.Connection 
                     cmd.Transaction <- transaction
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                    use reader = cmd.ExecuteReader( )
                     yield! readerFunction reader
                 } 
             )
@@ -323,7 +328,7 @@ module Orm =
                 seq {
                     connection.Open( )
                     use cmd = makeCommand state sql connection 
-                    use reader = cmd.ExecuteReader ( CommandBehavior.CloseConnection )
+                    use reader = cmd.ExecuteReader ( )
                     yield! readerFunction reader
                 }
             )
@@ -492,42 +497,68 @@ module Orm =
     
     
     let inline insert< ^T > ( state : OrmState ) insertKeys ( instance : ^T ) =
-        match connect state with
-        | Ok conn ->
-            conn.Open( )
-            let query = insertBase< ^T > state insertKeys 
-            let paramChar = getParamChar state 
-            use cmd = parameterizeCommand state query conn instance //makeCommand query conn state
-            log (fun _ -> 
-                printfn "Param count: %A" cmd.Parameters.Count
-                for i in [0..cmd.Parameters.Count-1] do 
-                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-            )   
-            let result = exceptionHandler ( fun ( ) -> cmd.ExecuteNonQuery ( ) )
-            conn.Close( )
-            result
-        | Error e -> Error e
+        let query = insertBase< ^T > state insertKeys 
+        let paramChar = getParamChar state 
+        withTransaction 
+            state 
+            (
+                fun transaction ->
+                    use command = parameterizeCommand state query (transaction.Connection) instance //makeCommand query conn state
+                    log (fun _ -> 
+                        printfn "Param count: %A" command.Parameters.Count
+                        for i in [0..command.Parameters.Count-1] do 
+                            printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                    )  
+                    command.Transaction <- transaction
+                    command.ExecuteNonQuery ( ) 
+            )
+            (
+                fun connection ->
+                    connection.Open( )
+                    let query = insertBase< ^T > state insertKeys 
+                    let paramChar = getParamChar state 
+                    use command = parameterizeCommand state query connection instance //makeCommand query connection state
+                    log (fun _ -> 
+                        printfn "Param count: %A" command.Parameters.Count
+                        for i in [0..command.Parameters.Count-1] do 
+                            printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                    )   
+                    let result =  command.ExecuteNonQuery ( )
+                    connection.Close( )
+                    result
+            )
 
     let inline insertMany< ^T > ( state : OrmState ) insertKeys ( instances : ^T seq ) =
-        match connect state with
-        | Ok conn -> 
-            conn.Open( )
-            let query = insertManyBase< ^T > state insertKeys instances 
-            let paramChar = ( getParamChar state )
-            let numCols = columns< ^T > state |> Seq.length
-            use cmd = parameterizeSeqCommand state query conn instances //makeCommand query conn state
-            log (fun _ -> 
-                printfn "Query generated: %s" query
-                printfn "Param count: %A" cmd.Parameters.Count
-                for i in [0..cmd.Parameters.Count-1] do 
-                    printfn "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-            )   
-            let result = 
-                exceptionHandler ( fun ( ) -> cmd.ExecuteNonQuery ( ) ) 
-    
-            conn.Close( )
-            result
-        | Error e -> Error e
+        let paramChar = ( getParamChar state )
+        let numCols = columns< ^T > state |> Seq.length
+        let query = insertManyBase< ^T > state insertKeys instances 
+        withTransaction 
+            state 
+            ( fun transaction ->  
+                use command = parameterizeSeqCommand state query ( transaction.Connection ) instances //makeCommand query connection state
+                log (fun _ -> 
+                    printfn "Query generated: %s" query
+                    printfn "Param count: %A" command.Parameters.Count
+                    for i in [0..command.Parameters.Count-1] do 
+                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                )   
+                command.Transaction <- transaction
+                command.ExecuteNonQuery ( )
+            )
+            ( fun connection -> 
+                connection.Open( )
+                use command = parameterizeSeqCommand state query connection instances //makeCommand query connection state
+                log (fun _ -> 
+                    printfn "Query generated: %s" query
+                    printfn "Param count: %A" command.Parameters.Count
+                    for i in [0..command.Parameters.Count-1] do 
+                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                )   
+                let result = command.ExecuteNonQuery ( )
+        
+                connection.Close( )
+                result 
+            )
     
     (*
     uPDATE a

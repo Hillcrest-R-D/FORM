@@ -80,6 +80,37 @@ type ForeignKeyAttribute( table : obj, column : string, properties : obj, field:
     member _.table = table
     member _.column = column   
 
+
+// type JoinDirection = 
+//     | Left = 0
+//     | Right = 1
+//     | Inner = 2
+//     | Outer = 3
+// [<Table("Article", Contexts.Main)>]
+// type Article = 
+//     {
+//         id : string
+//         specialId : string
+//         body : string
+//         [<Join("Comments", [("id", "commentId"), ("specialId", "specialId")], kind, Contexts.Main)>]
+//         comments : Comment seq
+//     }
+
+// [<Table("Article", Contexts.Main)>]
+// type ArticleByProxy = 
+//     {
+//         id : string
+//         specialId : string
+//         body : string
+//         [<Join( ( "Lookup", [( "articleId", "id")]), ("Comments", [("id", "commentId")]), kind, Contexts.Main)>]
+//         comments : Comment seq
+//     }
+
+// type Join ( (table : string), (on : (string * string) list) , (kind : JoinDirection), (context : obj) ) =
+//     inherit DbAttribute( )
+//     override _.Value = ( table,  ( box( context ) :?> DbContext )  |> EnumToValue )
+//     member _.table = table
+
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
     Index : int
