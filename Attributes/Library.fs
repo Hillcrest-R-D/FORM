@@ -81,11 +81,11 @@ type ForeignKeyAttribute( table : obj, column : string, properties : obj, field:
     member _.column = column   
 
 
-// type JoinDirection = 
-//     | Left = 0
-//     | Right = 1
-//     | Inner = 2
-//     | Outer = 3
+type JoinDirection = 
+    | Left = 0
+    | Right = 1
+    | Inner = 2
+    | Outer = 3
 // [<Table("Article", Contexts.Main)>]
 // type Article = 
 //     {
@@ -106,10 +106,65 @@ type ForeignKeyAttribute( table : obj, column : string, properties : obj, field:
 //         comments : Comment seq
 //     }
 
-// type Join ( (table : string), (on : (string * string) list) , (kind : JoinDirection), (context : obj) ) =
-//     inherit DbAttribute( )
-//     override _.Value = ( table,  ( box( context ) :?> DbContext )  |> EnumToValue )
-//     member _.table = table
+
+///<Description>An attribute type which allows an FSharp record type to be defined using sql joinery</Description>
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type Join ( table : Type, kind : JoinDirection, context : obj ) =
+    inherit DbAttribute( )
+    override _.Value = ( table.Name,  ( box( context ) :?> DbContext )  |> EnumToValue )
+    member _.table = table
+    member _.kind = kind 
+
+
+///<Description>An attribute type which allows an FSharp record type to be defined using sql joinery</Description>
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type On (table : Type, on : string, context : obj ) =
+    inherit DbAttribute( )
+    override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
+
+[<Table("UserInfo", DbContext.Default)>]
+type UserInfo =
+    {
+        userId : string 
+        otherThing : string 
+        name : string 
+        email : string 
+        phone : string 
+    }
+
+[<Table("Secrets", DbContext.Default)>]
+type UserSecrets =
+    {
+        userId : string 
+        password : string 
+    }
+[<Table("User", DbContext.Default)>]
+type User = 
+    {
+        [<JoinKey(typeof<UserInfo>, "userId", DbContext.Default)>]
+        id : string // User
+        [<JoinKey(typeof<UserInfo>, "otherThing", DbContext.Default)>]
+        secondaryKey: int
+        [<Join(typeof<UserInfo>, JoinDirection.Left, DbContext.Default)>]
+        info : UserInfo 
+        // [<Join("UserInfo", [("userId", "id")], JoinDirection.Left, DbContext.Default)>]
+        // name : string // UserInfo
+        // [<Join("UserInfo", [("userId", "id")], JoinDirection.Left, DbContext.Default)>]
+        // email : string // UserInfo
+        // [<Join("UserInfo", [("userId", "id")], JoinDirection.Left, DbContext.Default)>]
+        // phone : string 
+        [<Join("Passwords", [("userId", "id")], JoinDirection.Left, DbContext.Default)>]
+        secrets : UserSecrets // Passwords
+    }
+
+    static member from = 
+        seq {
+            (DbContexts.Default, typeof<UserInfo>) , "from User u JOIN UserInfo ui ON ui.userId = u.id JOIN UserSecrets us ON us.userId = u.id"
+        }
+        |> dict
+
+    User.from<UserInfo>
+        
 
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 

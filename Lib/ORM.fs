@@ -191,21 +191,21 @@ module Orm =
         let rty = typeof< ^T >
         let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
         let fields = 
-            seq { for fld in ( columnMapping< ^T > state ) -> fld.SqlName, fld } 
+            seq { for fld in ( columnMapping< ^T > state ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo" 
             |> dict 
         seq { 
             while reader.Read( ) do
                 yield 
                     seq { 0..reader.FieldCount-1 }
-                    |> Seq.map ( fun i -> reader.GetName( i ), reader.GetValue( i ) )
-                    |> Seq.sortBy ( fun ( name, _ ) ->  fields[name].Index )
-                    |> Seq.map ( fun ( name, value ) -> 
-                        match optionType fields[name].Type with
+                    |> Seq.map ( fun i -> reader.GetName( i ), reader.GetValue( i ) ) //get SQL column name and value => (name, value)
+                    |> Seq.sortBy ( fun ( name, _ ) ->  fields[name].Index ) //constructor is positional, need to add values in correct order
+                    |> Seq.map ( fun ( name, value ) ->   
+                        match optionType fields[name].Type with //handle option type, i.e. option<T> if record field is optional, else T
                         | Some ``type`` -> toOption ``type`` value
-                        | None   -> value
-                    )
-                    |> Seq.toArray
-                    |> makeEntity 
+                        | None -> value
+                    ) // => seq { Some 1; "field 2 value"; None; etc}
+                    |> Seq.toArray // record constructor requires an array
+                    |> makeEntity // dang ol' class factory man
         }   
     
     let inline getParamChar state = 
