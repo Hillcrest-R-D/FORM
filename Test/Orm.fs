@@ -238,6 +238,10 @@ type OrmTransaction ( _testingState ) =
         | _ -> "sqliteName"
 
     
+    let sleep () = System.Threading.Thread.Sleep(500)
+
+    let commit transaction x = Orm.tryCommit transaction |> ignore; x 
+
     [<OneTimeSetUp>]
     member _.Setup () =
         let createTable = 
@@ -260,15 +264,12 @@ type OrmTransaction ( _testingState ) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertSelect () =
+        // sleep ()
         let transaction = Orm.beginTransaction testingState
         let theFact = Fact.init()
         let mutable theBackFact = Fact.init()
         printfn "Do we have a transaction? %A" transaction
-        testingState
-        |> function 
-        | SQLite _ -> Orm.execute testingState "PRAGMA journal_mode=WAL;" transaction
-        | _ -> Ok 0
-        |> Result.bind ( fun _ -> Orm.insert< Fact > testingState true ( theFact ) transaction )
+        Orm.insert< Fact > testingState true ( theFact ) transaction 
         |> Result.bind ( fun _ -> 
             Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
             |> function 
@@ -279,6 +280,7 @@ type OrmTransaction ( _testingState ) =
             | _ -> Error (exn "No data returned by select, you forgot the facts!")
         )
         |> Result.map ( fun _ -> Orm.commitTransaction transaction )
+        |> Result.mapError ( fun _ -> Orm.rollbackTransaction transaction )
         |> function 
         | Ok _ -> 
             if theFact = theBackFact 
@@ -291,16 +293,14 @@ type OrmTransaction ( _testingState ) =
     [<Test>]
     [<NonParallelizable>]
     member _.InsertDeleteSelect () =
+        // sleep ()
         let transaction = Orm.beginTransaction testingState
         let theFact = Fact.init()
         let mutable theBackFact = Fact.init()
         let err = exn "No data returned by select, you forgot the facts!"
         printfn "Do we have a transaction? %A" transaction
-        testingState
-        |> function 
-        | SQLite _ -> Orm.execute testingState "PRAGMA journal_mode=WAL;" transaction
-        | _ -> Ok 0
-        |> Result.bind ( fun _ -> Orm.insert< Fact > testingState true ( theFact ) transaction )
+
+        Orm.insert< Fact > testingState true ( theFact ) transaction
         |> Result.bind ( fun _ -> Orm.delete< Fact > testingState theFact transaction )
         |> Result.bind ( fun _ -> 
             Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
@@ -311,7 +311,7 @@ type OrmTransaction ( _testingState ) =
             | Error e  -> Error e
             | _ -> Error err
         )
-        |> Result.map ( fun _ -> Orm.commitTransaction transaction )
+        |> commit transaction
         |> function 
         | Ok _ -> Assert.Fail(sprintf "%A %A" theFact theBackFact) 
         | Error error -> 
@@ -319,15 +319,51 @@ type OrmTransaction ( _testingState ) =
             then Assert.Pass()
             else Assert.Fail(error.ToString()) 
 
-    // [<Test>]
-    // [<NonParallelizable>]
-    // member _.ReaderWithTransaction () =
-    //     printfn "Reading..."
-    //     Orm.consumeReader<Fact> testingState 
-    //     |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader transaction
-    //     |> function 
-    //     | Ok facts -> Assert.Pass(sprintf "%A" facts)
-    //     | Error e -> Assert.Fail(sprintf "%A" e)
+
+    [<Test>]
+    [<NonParallelizable>]
+    member _.InsertUpdateSelect () =
+        // sleep ()
+        let transaction = Orm.beginTransaction testingState
+        let theFact = Fact.init()
+        let theNewFact = { theFact with name = "All Facts, All the Time" }
+        let mutable theBackFact = Fact.init()
+        let err = exn "No data returned by select, you forgot the facts!"
+        printfn "Do we have a transaction? %A" transaction
+
+        Orm.insert< Fact > testingState true ( theFact ) transaction
+        |> Result.bind ( fun _ -> Orm.update< Fact > testingState theNewFact transaction )
+        |> Result.bind ( fun _ -> 
+            Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
+            |> function 
+            | Ok facts when Seq.length facts > 0 -> 
+                theBackFact <- Seq.head facts
+                Ok facts
+            | Error e  -> Error e
+            | _ -> Error err
+        )
+        |> commit transaction
+        |> function 
+        | Ok facts ->
+            if theNewFact = theBackFact
+            then 
+                Assert.Pass(sprintf "You remembered the facts: %A - %A | %A" theFact theBackFact facts) 
+            else 
+                Assert.Fail(sprintf "Look at all these facts: %A - %A | %A" theFact theBackFact facts)
+        | Error error ->
+            Assert.Fail(error.ToString()) 
+    
+    [<Test>]
+    [<NonParallelizable>]
+    member _.ReaderWithTransaction () =
+        printfn "Reading..."
+        let transaction = Orm.beginTransaction testingState
+        Orm.consumeReader<Fact> testingState 
+        |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader transaction
+        |> commit transaction 
+        |> function 
+        | Ok facts -> Assert.Pass(sprintf "%A" facts)
+        | Error e -> Assert.Fail(sprintf "%A" e)
 
 
     // // [<OneTimeTearDown>]

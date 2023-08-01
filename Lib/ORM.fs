@@ -48,14 +48,25 @@ module Orm =
         | Error e -> 
             log ( fun _ -> printfn "Error when beginning transaction: %A" e )
             None
-        
-    let commitTransaction = function 
-        | Some ( transaction : DbTransaction ) -> 
-            transaction.Commit()
-            // transaction.Connection.Close()
-            // transaction.Dispose()
-        | None -> ()
+    
 
+ 
+    let commitTransaction = 
+        Option.map ( fun ( transaction : DbTransaction ) -> transaction.Commit() )
+    let rollbackTransaction = 
+        Option.map ( fun ( transaction : DbTransaction ) -> transaction.Rollback() )
+
+    let tryCommit (transaction : DbTransaction option) = // option<Transaction> -> Result<unit, exn>
+            try 
+                commitTransaction transaction |> Ok 
+            with  
+            | exn -> 
+                rollbackTransaction transaction 
+#if DEBUG                 
+                |> printfn "%A"
+#endif
+                exn |> Error
+            
     let inline sqlQuote ( state : OrmState ) str  =
         match state with 
         | MSSQL _ -> $"[{str}]"
