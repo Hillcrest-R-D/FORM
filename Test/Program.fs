@@ -16,7 +16,7 @@ module Main =
 
     [<EntryPoint>]
     let main _ = 
-        DotNetEnv.Env.Load() |> ignore
+        DotNetEnv.Env.Load "../" |> ignore
         let testId = 1
         let testIdSeq = seq{1}
         // printfn "int to seq: %A\n int to seq to seq: %A" (Seq.concat [[testId]]) (Seq.red [[testIdSeq]]) 

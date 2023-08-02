@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="dotnetenv" Version="2.5.0" />
+    <PackageReference Include="form.attributes" Version="0.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="Microsoft.TestPlatform" Version="16.5.0" />
     <PackageReference Include="microsoft.testplatform.objectmodel" Version="16.5.0" />

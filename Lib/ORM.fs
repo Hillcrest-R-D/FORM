@@ -77,7 +77,7 @@ module Orm =
         match state with 
         | MSSQL     ( _, c ) -> c 
         | MySQL     ( _, c ) -> c 
-        | PSQL      ( _, c ) -> c
+        | PSQL      ( _, c ) -> c 
         | SQLite    ( _, c ) -> c 
 
     let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
@@ -86,7 +86,14 @@ module Orm =
                 then fst x.Value
                 else s
             ) "" attrs
-        
+
+    let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
+        Array.fold ( fun s ( x : OnAttribute ) ->  
+                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
+                then (fst x.Value, x.key.Name)
+                else s
+            ) ("", "") attrs 
+
     let inline tableName< ^T > ( state : OrmState ) = 
         let attrs =
             typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
@@ -101,7 +108,6 @@ module Orm =
         name.Split( "." )
         |> Array.map ( fun x -> sqlQuote state x )
         |> String.concat "."
-        
 
     let inline columnMapping< ^T > ( state : OrmState ) = 
         FSharpType.GetRecordFields typedefof< ^T > 
@@ -121,12 +127,25 @@ module Orm =
                 |> Array.map ( fun y -> y :?> DbAttribute )
                 |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
                 |> fun y -> if y = "" then false else true 
+            let on = 
+                x.GetCustomAttributes( typeof< OnAttribute >, false ) 
+                |> Array.map ( fun y -> y :?> OnAttribute )
+                |> fun y -> attrJoinFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
+                |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
+            let source =
+                x.GetCustomAttributes( typeof< ByJoinAttribute >, false ) 
+                |> Array.map ( fun y -> y :?> DbAttribute )
+                |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
+                |> fun y -> if y = "" then tableName< ^T > state else y
             let fsharpName = x.Name
             let quotedName = sqlQuote state sqlName 
             { 
                 Index = i
                 IsKey = isKey
                 IsIndex = isIndex
+                JoinOn = on 
+                Source = source
+                QuotedSource = sqlQuote state source
                 SqlName = sqlName
                 QuotedSqlName = quotedName
                 FSharpName = fsharpName

@@ -40,6 +40,7 @@ type Orm (_testingState) =
     member _.Setup () =
         let createTable = 
             $"DROP TABLE IF EXISTS {tableName};
+            DROP TABLE IF EXISTS \"SubFact\";
             CREATE TABLE {tableName} (
                 \"indexId\" int not null,
                 \"id\" text primary key,
@@ -49,6 +50,10 @@ type Orm (_testingState) =
                 \"maybeSomething\" text,
                 \"sometimesNothing\" int null,
                 \"biteSize\" text
+            );
+            CREATE TABLE \"SubFact\" (
+                \"factId\" text not null,
+                \"subFact\" text not null
             );"
 
         Orm.execute testingState createTable None  |> printfn "Create Table Returns: %A"
@@ -125,10 +130,20 @@ type Orm (_testingState) =
         let initial = Fact.init() 
         let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
         let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.updateMany< Fact > testingState [changed;changed2] None 
-        |> printf "%A"
+        Orm.updateMany< Fact > testingState [changed;changed2] None |> printf "%A"
+
+        let evan = Orm.selectWhere<Fact> testingState $"id = '{testGuid3}'" None
+        let mac = Orm.selectWhere<Fact> testingState $"id = '{testGuid3}'" None
+
+        match evan, mac with 
+        | Ok e, Ok m -> 
+            if Seq.head e = changed && Seq.head m = changed2 
+            then Assert.Pass()
+            else Assert.Fail("Failed comparison.")
+        | _, _ -> 
+            Assert.Fail("Couldn't verify update happened")
         
-        Assert.Pass()
+        
     
     // [<Test>]
     // [<NonParallelizable>]
@@ -246,6 +261,7 @@ type OrmTransaction ( _testingState ) =
     member _.Setup () =
         let createTable = 
             $"DROP TABLE IF EXISTS {tableName};
+            DROP TABLE IF EXISTS \"SubFact\";
             CREATE TABLE {tableName} (
                 \"indexId\" int not null,
                 \"id\" text primary key,
@@ -255,6 +271,10 @@ type OrmTransaction ( _testingState ) =
                 \"maybeSomething\" text,
                 \"sometimesNothing\" int null,
                 \"biteSize\" text
+            );
+            CREATE TABLE \"SubFact\" (
+                \"factId\" text not null,
+                \"subFact\" text not null
             );"
 
         

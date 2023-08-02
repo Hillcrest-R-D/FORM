@@ -83,4 +83,52 @@ match Unbatchable.selectAll<User> db with
 | Error e -> Error e
 
 Batchable.selectAll<User> db -->
+
+
+
+
+
+
+
+
+[<Table("UserInfo", DbContext.Default)>]
+type UserInfo =
+    {
+        userId : string 
+        otherThing : string 
+        name : string 
+        email : string 
+        phone : string 
+    }
+
+[<Table("Secrets", DbContext.Default)>]
+type UserSecrets =
+    {
+        userId : string 
+        password : string 
+    }
+[<Table("User", DbContext.Default)>]
+type User = 
+    {
+        [<On(typeof<UserInfo>, "userId", DbContext.Default)>]
+        [<On(typeof<UserSecrets>, "userId", DbContext.Default)>]
+        id : string // User
+        [<On(typeof<UserInfo>, "otherThing", DbContext.Default)>]
+        secondaryKey: int
+        // [<Join(typeof<UserInfo>, JoinDirection.Left, DbContext.Default)>]
+        // info : UserInfo 
+        [<ByJoin(typeof<UserInfo>, JoinDirection.Left, DbContext.Default)>]
+        name : string // UserInfo
+        [<ByJoin(typeof<UserInfo>, JoinDirection.Left, DbContext.Default)>]
+        email : string // UserInfo
+        [<ByJoin(typeof<UserInfo>, JoinDirection.Left, DbContext.Default)>]
+        phone : string 
+        [<ByJoin(typeof<UserSecrets>, JoinDirection.Left, DbContext.Default)>]
+        secrets : UserSecrets // Passwords
+    }
+
+    
 ```
+
+
+
