@@ -28,7 +28,7 @@ module Utilities =
         stopwatch.Elapsed
     let create = 
         "create table Sanic (
-            id int not null,
+            id int primary key,
             name varchar(32) not null,
             modified timestamp not null
         )"
@@ -37,9 +37,9 @@ module Utilities =
 
 module Data = 
     let collection1k = [ for i in 1..1000 -> { id = i; name = "John Doe"; modified = DateTime.Now } ]
-    let collection10k = [ for i in 1..10000 -> { id = i; name = "Jane Doe"; modified = DateTime.Now } ]
-    let modifiedCollection1k = Utilities.mapOver collection1k
-    let modifiedCollection10k = Utilities.mapOver collection10k
+    let collection10k = [ for i in 1001..11000 -> { id = i; name = "Jane Doe"; modified = DateTime.Now } ]
+    let modifiedCollection1k () = Utilities.mapOver collection1k
+    let modifiedCollection10k () = Utilities.mapOver collection10k
     let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
     let postgresConnectionString () = System.Environment.GetEnvironmentVariable("postgres_connection_string")
 
@@ -65,6 +65,6 @@ Utilities.timeIt ( fun _ -> formInsert Data.collection1k ) |> printfn "Form inse
 Utilities.timeIt ( fun _ -> formInsert Data.collection10k ) |> printfn "Form insert 10k: %A"
 Utilities.timeIt ( fun _ -> formSelect 1000 ) |> printfn "Form select 1k: %A"
 Utilities.timeIt ( fun _ -> formSelect 10000 ) |> printfn "Form select 10k: %A"
-Utilities.timeIt ( fun _ -> formUpdate Data.modifiedCollection1k ) |> printfn "Form update 1k: %A"
-Utilities.timeIt ( fun _ -> formUpdate Data.modifiedCollection10k ) |> printfn "Form update 10k: %A"
+Utilities.timeIt ( fun _ -> formUpdate ( Data.modifiedCollection1k () ) ) |> printfn "Form update 1k: %A"
+Utilities.timeIt ( fun _ -> formUpdate ( Data.modifiedCollection10k () ) ) |> printfn "Form update 10k: %A"
 
