@@ -136,7 +136,7 @@ module Orm =
                 x.GetCustomAttributes( typeof< ByJoinAttribute >, false ) 
                 |> Array.map ( fun y -> y :?> DbAttribute )
                 |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                |> fun y -> if y = "" then tableName< ^T > state else y
+                |> fun y -> if y = "" then tableName< ^T > state else sqlQuote state y
             let fsharpName = x.Name
             let quotedName = sqlQuote state sqlName 
             { 
@@ -145,7 +145,7 @@ module Orm =
                 IsIndex = isIndex
                 JoinOn = on 
                 Source = source
-                QuotedSource = sqlQuote state source
+                QuotedSource = source
                 SqlName = sqlName
                 QuotedSqlName = quotedName
                 FSharpName = fsharpName
@@ -162,7 +162,7 @@ module Orm =
 
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
-        |> Array.map ( fun x -> x.QuotedSqlName )
+        |> Array.map ( fun x -> $"{x.QuotedSource}.{x.QuotedSqlName}" )
        
     let inline fields< ^T >  ( state : OrmState ) = 
         mapping< ^T > state
@@ -210,7 +210,7 @@ module Orm =
         let rty = typeof< ^T >
         let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
         let fields = 
-            seq { for fld in ( columnMapping< ^T > state ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo" 
+            seq { for fld in ( columnMapping< ^T > state |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo"  //! Filter out joins for non-select queries
             |> dict 
         seq { 
             while reader.Read( ) do
@@ -238,7 +238,8 @@ module Orm =
         let paramChar = getParamChar state
         let tableName = ( table< ^T > state ) 
         let cols = 
-            mapping< ^T > state 
+            mapping< ^T > state
+            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries 
             |> Seq.filter (fun col -> insertKeys || not col.IsKey )
         let placeHolders = 
             cols
@@ -259,6 +260,7 @@ module Orm =
         let tableName   = table< ^T >       state 
         let cols = 
             mapping< ^T > state 
+            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName  ) //! Filter out joins for non-select queries
             |> Seq.filter (fun col -> insertKeys || not col.IsKey )
         let columns     = columns< ^T >     state
         let placeHolders = 
@@ -407,6 +409,7 @@ module Orm =
         let cmd = makeCommand state query conn 
         
         mapping< ^T > state
+        |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
         |> Seq.iter ( fun mappedInstance -> 
             let paramChar = getParamChar state
             let formattedParam = 
@@ -445,6 +448,7 @@ module Orm =
         |> Seq.iteri ( fun index instance ->
         
             mapping< ^T > state
+            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Seq.iter ( fun mappedInstance -> 
                 let paramChar = getParamChar state
                 let formattedParam = 
@@ -475,12 +479,50 @@ module Orm =
         )
         
         cmd
-        
+    
+    // type User = 
+    //     {
+    //         [<On(typeof<UserInfo>, "userId", JoinDirection.Left, DbContext.Default)>]
+    //         [<On(typeof<UserSecrets>, "userId", JoinDirection.Left, DbContext.Default)>]
+    //         id : string 
+    //         [<On(typeof<UserInfo>, "ident", JoinDirection.Left, DbContext.Default)>]
+    //         infoSecondary : int 
+    //         [<ByJoin(typeof<UserInfo>, DbContext.Default)>]
+    //         name : string 
+    //         [<ByJoin(typeof<UserSecrets>, DbContext.Default)>]
+    //         password : string 
+    //     }
+
+    let inline joins< ^T > (state : OrmState) = 
+        let qoute = sqlQuote state
+        mapping< ^T > state
+        |> Array.filter (fun sqlMap -> Option.isSome sqlMap.JoinOn)
+        |> Array.groupBy (fun x -> x.JoinOn |> Option.get |> fst)
+        |> Array.map (fun (source, maps)  -> 
+            // let head = Array.head maps
+            
+            Array.map (fun map -> 
+                let secCol = map.JoinOn |> Option.get |> snd 
+                $"{qoute source}.{qoute secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
+            ) maps
+            |> String.concat " and "
+            |> fun onString -> $"join {qoute source} on {onString}"
+        )
+        |> String.concat "\n"
+        // |> Array.map ( fun (primary, (secSource, secTable)) -> $"{secSource}.{secTable} = {primary}" ) 
+        //?=> [idMap1, idMap2, infoSecondaryMap] => [ [idMap1, infoSecondaryMap], [idMap2] ]
+        //=> ["UserSecrets.userId = User.id", "UserInfo.userId = User.id"]
+
+        // left join UserInfo on UserInfo.userId = User.cola and UserInfo.ident = User.infoSecondary
+        // left join UserSecrets on UserSecrets.userId = User.id
+        // ...
     
     let inline queryBase< ^T > ( state : OrmState ) = 
         let cols = columns< ^T > state 
+        let joins = joins<^T> state 
+        // let sources = 
         ( String.concat ", " cols ) + " from " + table< ^T > state
-
+        + " " + joins
     let inline private select< ^T > ( state : OrmState ) query = 
         withTransaction  
             state 
@@ -600,6 +642,7 @@ module Orm =
         let pchar = getParamChar state
         let cols = 
             mapping< ^T > state
+            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Seq.filter (fun col -> not col.IsKey) //Can't update keys
         log ( fun _ -> printfn "columns to update: %A" cols )
         let queryParams = 
@@ -617,6 +660,7 @@ module Orm =
 
     let inline ensureId< ^T > ( state: OrmState ) = 
         mapping< ^T > state 
+        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
         |> Array.filter ( fun x -> x.IsKey )
         |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
     
@@ -645,6 +689,7 @@ module Orm =
         ensureId< ^T > state 
         |> Result.bind (fun sqlMapping ->
             sqlMapping
+            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state ( sprintf " where %s" idConditional ) instance transaction
@@ -700,6 +745,7 @@ module Orm =
             let tableName = table< ^T > state 
             let paramChar = getParamChar state
             sqlMapping
+            |> Seq.filter ( fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
             |> fun where -> deleteHelper< ^T > state where instance transaction 
@@ -713,6 +759,7 @@ module Orm =
             instances 
             |> Seq.mapi ( fun i _ ->
                 sqlMapping
+                |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
                 |> Seq.map ( fun x -> sprintf "%s.%s = %s%s%i" tableName x.QuotedSqlName paramChar x.FSharpName i)
                 |> String.concat " and "
             
@@ -742,6 +789,7 @@ module Orm =
 
     let inline lookupId<^S> state : string seq =
         columnMapping<^S> state
+        |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^S > state  ) //! Filter out joins for non-select queries
         |> Seq.filter (fun col -> col.IsKey) 
         |> Seq.map (fun keyCol -> keyCol.QuotedSqlName)
 

@@ -52,9 +52,10 @@ type Orm (_testingState) =
                 \"biteSize\" text
             );
             CREATE TABLE \"SubFact\" (
-                \"factId\" text not null,
+                \"factId\" int not null,
                 \"subFact\" text not null
-            );"
+            );
+            "
 
         Orm.execute testingState createTable None  |> printfn "Create Table Returns: %A"
         
@@ -133,7 +134,7 @@ type Orm (_testingState) =
         Orm.updateMany< Fact > testingState [changed;changed2] None |> printf "%A"
 
         let evan = Orm.selectWhere<Fact> testingState $"id = '{testGuid3}'" None
-        let mac = Orm.selectWhere<Fact> testingState $"id = '{testGuid3}'" None
+        let mac = Orm.selectWhere<Fact> testingState $"id = '{testGuid2}'" None
 
         match evan, mac with 
         | Ok e, Ok m -> 
@@ -273,7 +274,7 @@ type OrmTransaction ( _testingState ) =
                 \"biteSize\" text
             );
             CREATE TABLE \"SubFact\" (
-                \"factId\" text not null,
+                \"factId\" int not null,
                 \"subFact\" text not null
             );"
 
@@ -289,6 +290,7 @@ type OrmTransaction ( _testingState ) =
         let theFact = Fact.init()
         let mutable theBackFact = Fact.init()
         printfn "Do we have a transaction? %A" transaction
+        Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
         Orm.insert< Fact > testingState true ( theFact ) transaction 
         |> Result.bind ( fun _ -> 
             Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
@@ -319,7 +321,7 @@ type OrmTransaction ( _testingState ) =
         let mutable theBackFact = Fact.init()
         let err = exn "No data returned by select, you forgot the facts!"
         printfn "Do we have a transaction? %A" transaction
-
+        Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
         Orm.insert< Fact > testingState true ( theFact ) transaction
         |> Result.bind ( fun _ -> Orm.delete< Fact > testingState theFact transaction )
         |> Result.bind ( fun _ -> 

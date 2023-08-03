@@ -31,6 +31,9 @@ module Main =
         Orm.columnMapping<Fact> <| sqliteState()
         |> printfn "%A"
 
+        Orm.queryBase<Fact> <| sqliteState()
+        |> printfn "%A"
+
         0
 
 

@@ -121,8 +121,8 @@ type OnAttribute (table : Type, on : string, kind : JoinDirection, context : obj
     inherit DbAttribute( )
     override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
     member _.key = 
-        FSharpValue.GetRecordFields(table)
-        |> Array.map ( fun field -> field :?> PropertyInfo )
+        table.GetProperties()
+        // |> Array.map ( fun field -> field :?> PropertyInfo )
         |> Array.filter (fun field -> field.Name = on)
         |> Array.head
     member _.kind = kind 

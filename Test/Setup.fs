@@ -17,10 +17,10 @@ type Contexts =
     | MSSQL = 4
     | SQLite = 8
 
-let psqlState ()=     PSQL( psqlConnectionString (), Contexts.PSQL )
-let mysqlState ()=    MySQL( mysqlConnectionString (), Contexts.MySQL )
-let mssqlState ()=    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
-let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
+let psqlState () =     PSQL( psqlConnectionString (), Contexts.PSQL )
+let mysqlState () =    MySQL( mysqlConnectionString (), Contexts.MySQL )
+let mssqlState () =    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
+let sqliteState () =   SQLite( sqliteConnectionString (), Contexts.SQLite )
 
 [<Table("SubFact", Contexts.PSQL)>]
 [<Table("SubFact", Contexts.MySQL)>]
@@ -28,7 +28,7 @@ let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
 [<Table("SubFact", Contexts.SQLite)>]
 type SubFact = 
     {
-        factId : string 
+        factId : int64 
         subFact : string
     }
 
