@@ -210,7 +210,7 @@ module Orm =
         let rty = typeof< ^T >
         let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
         let fields = 
-            seq { for fld in ( columnMapping< ^T > state |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo"  //! Filter out joins for non-select queries
+            seq { for fld in ( columnMapping< ^T > state  ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo"  //! Filter out joins for non-select queries
             |> dict 
         seq { 
             while reader.Read( ) do
@@ -506,7 +506,7 @@ module Orm =
                 $"{qoute source}.{qoute secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
             ) maps
             |> String.concat " and "
-            |> fun onString -> $"join {qoute source} on {onString}"
+            |> fun onString -> $"left join {qoute source} on {onString}"
         )
         |> String.concat "\n"
         // |> Array.map ( fun (primary, (secSource, secTable)) -> $"{secSource}.{secTable} = {primary}" ) 
@@ -551,7 +551,13 @@ module Orm =
         |> select< ^T > state 
     
     let inline selectLimit< ^T > ( state : OrmState ) lim = 
-        selectHelper< ^T > state ( fun x -> $"select top {lim} {x}" ) 
+        selectHelper< ^T > state ( fun x -> 
+            match state with 
+            | MSSQL _ ->
+                $"select top {lim} {x}" 
+            | _ ->
+                $"select {x} limit {lim}" 
+        ) 
 
     let inline selectWhere< ^T > ( state : OrmState ) where   = 
         selectHelper< ^T > state ( fun x -> $"select {x} where {where}" ) 

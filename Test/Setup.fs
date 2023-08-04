@@ -74,7 +74,7 @@ type Fact =
         biteSize : string
         [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
         [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
-        subFact : string 
+        subFact : string option
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -95,7 +95,7 @@ module Fact =
             maybeSomething = "true"
             sometimesNothing = Some 1
             biteSize =  "!aBite"
-            subFact = "sooper dooper secret fact"
+            subFact = Some "sooper dooper secret fact"
         }
 
     

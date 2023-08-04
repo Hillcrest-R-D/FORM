@@ -74,7 +74,7 @@ type Orm (_testingState) =
         match Orm.insert< Fact > testingState true ( Fact.init() ) None with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
-
+    
     [<Test>]
     [<NonParallelizable>]
     member _.InsertMany () =
@@ -100,7 +100,15 @@ type Orm (_testingState) =
             Assert.Pass(sprintf "facts: %A" facts) 
         | Error e -> Assert.Fail(e.ToString())
 
- 
+    [<Test>]
+    [<NonParallelizable>]
+    member _.SelectLimit () =
+        printfn "Selecting All..."
+        match Orm.selectLimit< Fact > testingState 5 None with 
+        | Ok facts -> 
+            Seq.iter ( printfn  "%A") facts
+            Assert.Pass(sprintf "facts: %A" facts) 
+        | Error e -> Assert.Fail(e.ToString())
 
     [<Test>]
     [<NonParallelizable>]
@@ -129,8 +137,8 @@ type Orm (_testingState) =
     member _.UpdateMany () =
         printfn "Updating many..."
         let initial = Fact.init() 
-        let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
-        let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
+        let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
+        let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
         Orm.updateMany< Fact > testingState [changed;changed2] None |> printf "%A"
 
         let evan = Orm.selectWhere<Fact> testingState $"id = '{testGuid3}'" None
@@ -237,7 +245,7 @@ type Orm (_testingState) =
         |> Option.map ( Orm.commitTransaction )
         |> sprintf "Transaction: %A"
         |> Assert.Pass
-
+ 
 [<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
 type OrmTransaction ( _testingState ) = 
     let testingState = _testingState ()
@@ -287,10 +295,10 @@ type OrmTransaction ( _testingState ) =
     member _.InsertSelect () =
         // sleep ()
         let transaction = Orm.beginTransaction testingState
-        let theFact = Fact.init()
+        let theFact = {Fact.init() with subFact = None}
         let mutable theBackFact = Fact.init()
         printfn "Do we have a transaction? %A" transaction
-        Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
+        // Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
         Orm.insert< Fact > testingState true ( theFact ) transaction 
         |> Result.bind ( fun _ -> 
             Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
@@ -321,7 +329,7 @@ type OrmTransaction ( _testingState ) =
         let mutable theBackFact = Fact.init()
         let err = exn "No data returned by select, you forgot the facts!"
         printfn "Do we have a transaction? %A" transaction
-        Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
+        // Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
         Orm.insert< Fact > testingState true ( theFact ) transaction
         |> Result.bind ( fun _ -> Orm.delete< Fact > testingState theFact transaction )
         |> Result.bind ( fun _ -> 
@@ -348,8 +356,8 @@ type OrmTransaction ( _testingState ) =
         // sleep ()
         let transaction = Orm.beginTransaction testingState
         let theFact = Fact.init()
-        let theNewFact = { theFact with name = "All Facts, All the Time" }
-        let mutable theBackFact = Fact.init()
+        let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = None }
+        let mutable theBackFact = Fact.init() 
         let err = exn "No data returned by select, you forgot the facts!"
         printfn "Do we have a transaction? %A" transaction
 

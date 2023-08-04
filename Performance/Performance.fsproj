@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BenchmarkConfig.fs" />
+    <Compile Include="Utilities.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
