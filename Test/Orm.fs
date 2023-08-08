@@ -57,7 +57,7 @@ type Orm (_testingState) =
             );
             "
 
-        Orm.execute testingState createTable None  |> printfn "Create Table Returns: %A"
+        Orm.execute testingState None createTable |> printfn "Create Table Returns: %A"
         
     [<Test>]
     [<NonParallelizable>]
@@ -71,7 +71,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.Insert () =
-        match Orm.insert< Fact > testingState true ( Fact.init() ) None with 
+        match Orm.insert< Fact > testingState None true ( Fact.init() )  with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
     
@@ -79,7 +79,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.InsertMany () =
         let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-        match Orm.insertMany< Fact > testingState true ( str8Facts ) None with 
+        match Orm.insertMany< Fact > testingState None true ( str8Facts ) with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
         
@@ -104,7 +104,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.SelectLimit () =
         printfn "Selecting All..."
-        match Orm.selectLimit< Fact > testingState 5 None with 
+        match Orm.selectLimit< Fact > testingState None 5  with 
         | Ok facts -> 
             Seq.iter ( printfn  "%A") facts
             Assert.Pass(sprintf "facts: %A" facts) 
@@ -114,7 +114,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.SelectWhere () =
         printfn "Selecting Where..."
-        match Orm.selectWhere< Fact > testingState "\"maybeSomething\" = 'true'" None with 
+        match Orm.selectWhere< Fact > testingState None "\"maybeSomething\" = 'true'" with 
         | Ok facts ->
             Assert.Pass(sprintf "facts: %A" (facts)) 
         | Error e -> Assert.Fail(e.ToString())
@@ -126,7 +126,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = { Fact.init() with id = testGuid1 }
         let changed = { initial with name = "Evan Towlett"}
-        match Orm.update< Fact > testingState changed None with 
+        match Orm.update< Fact > testingState None changed with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -139,10 +139,10 @@ type Orm (_testingState) =
         let initial = Fact.init() 
         let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
         let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
-        Orm.updateMany< Fact > testingState [changed;changed2] None |> printf "%A"
+        Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
-        let evan = Orm.selectWhere<Fact> testingState $"id = '{testGuid3}'" None
-        let mac = Orm.selectWhere<Fact> testingState $"id = '{testGuid2}'" None
+        let evan = Orm.selectWhere<Fact> testingState None $"id = '{testGuid3}'" 
+        let mac = Orm.selectWhere<Fact> testingState None $"id = '{testGuid2}'" 
 
         match evan, mac with 
         | Ok e, Ok m -> 
@@ -172,7 +172,7 @@ type Orm (_testingState) =
         printfn "Updating..."
         let initial = Fact.init () 
         let changed = { initial with name = "Evan Howlett"}
-        match Orm.updateWhere< Fact > testingState "\"indexId\" = 1" changed None  with 
+        match Orm.updateWhere< Fact > testingState None "\"indexId\" = 1" changed   with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -184,7 +184,7 @@ type Orm (_testingState) =
         printfn "Deleting..."
         let initial = Fact.init () 
         let changed = { initial with name = "Evan Howlett"}
-        match Orm.delete< Fact > testingState changed None with 
+        match Orm.delete< Fact > testingState None changed with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -195,7 +195,7 @@ type Orm (_testingState) =
     [<NonParallelizable>]
     member _.DeleteWhere () = 
         printfn "Deleting Where..."
-        match Orm.deleteWhere< Fact > testingState "\"indexId\" = 1" None with 
+        match Orm.deleteWhere< Fact > testingState None "\"indexId\" = 1" with 
         | Ok inserted ->
             Assert.Pass(sprintf "facts: %A" inserted)
         | Error e -> Assert.Fail(e.ToString())
@@ -208,7 +208,7 @@ type Orm (_testingState) =
         let initial = Fact.init() 
         let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
         let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        Orm.deleteMany< Fact > testingState [changed;changed2] None
+        Orm.deleteMany< Fact > testingState None [changed;changed2] 
         |> function 
         | Ok i -> Assert.Pass(sprintf "%A" i )
         | Error e -> Assert.Fail(sprintf "%A" e)
@@ -220,7 +220,7 @@ type Orm (_testingState) =
     member _.Reader () =
         printfn "Reading..."
         Orm.consumeReader<Fact> testingState 
-        |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader None
+        |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader 
         |> function 
         | Ok facts -> Assert.Pass(sprintf "%A" facts)
         | Error e -> Assert.Fail(sprintf "%A" e)
@@ -287,7 +287,7 @@ type OrmTransaction ( _testingState ) =
             );"
 
         
-        Orm.execute testingState createTable None  |> printfn "Create Table Returns: %A"
+        Orm.execute testingState None createTable |> printfn "Create Table Returns: %A"
 
 
     [<Test>]
@@ -299,9 +299,9 @@ type OrmTransaction ( _testingState ) =
         let mutable theBackFact = Fact.init()
         printfn "Do we have a transaction? %A" transaction
         // Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
-        Orm.insert< Fact > testingState true ( theFact ) transaction 
+        Orm.insert< Fact > testingState transaction true ( theFact ) 
         |> Result.bind ( fun _ -> 
-            Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
+            Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'" 
             |> function 
             | Ok facts when Seq.length facts > 0 -> 
                 theBackFact <- Seq.head facts
@@ -330,10 +330,10 @@ type OrmTransaction ( _testingState ) =
         let err = exn "No data returned by select, you forgot the facts!"
         printfn "Do we have a transaction? %A" transaction
         // Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
-        Orm.insert< Fact > testingState true ( theFact ) transaction
-        |> Result.bind ( fun _ -> Orm.delete< Fact > testingState theFact transaction )
+        Orm.insert< Fact > testingState transaction true ( theFact ) 
+        |> Result.bind ( fun _ -> Orm.delete< Fact > testingState transaction theFact  )
         |> Result.bind ( fun _ -> 
-            Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
+            Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'" 
             |> function 
             | Ok facts when Seq.length facts > 0 -> 
                 theBackFact <- Seq.head facts
@@ -361,10 +361,10 @@ type OrmTransaction ( _testingState ) =
         let err = exn "No data returned by select, you forgot the facts!"
         printfn "Do we have a transaction? %A" transaction
 
-        Orm.insert< Fact > testingState true ( theFact ) transaction
-        |> Result.bind ( fun _ -> Orm.update< Fact > testingState theNewFact transaction )
+        Orm.insert< Fact > testingState transaction true ( theFact ) 
+        |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
         |> Result.bind ( fun _ -> 
-            Orm.selectWhere< Fact > testingState $"id = '{theFact.id}'" transaction 
+            Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'"  
             |> function 
             | Ok facts when Seq.length facts > 0 -> 
                 theBackFact <- Seq.head facts
@@ -389,7 +389,7 @@ type OrmTransaction ( _testingState ) =
         printfn "Reading..."
         let transaction = Orm.beginTransaction testingState
         Orm.consumeReader<Fact> testingState 
-        |> fun reader -> Orm.executeWithReader testingState "select * from \"Fact\"" reader transaction
+        |> fun reader -> Orm.executeWithReader testingState transaction "select * from \"Fact\"" reader 
         |> commit transaction 
         |> function 
         | Ok facts -> Assert.Pass(sprintf "%A" facts)

@@ -13,6 +13,7 @@ module Utilities =
         "create table if not exists \"Sanic\" (
             id int,
             name varchar(32) not null,
+            optional int null,
             modified timestamp not null
         )"
 
@@ -32,12 +33,29 @@ module Data =
         [<PrimaryKey("id", Context.SQLite)>]
         id: int 
         name: string
+        optional : int option 
         modified: DateTime
     }
     let small = 1000
     let big = 10000
-    let collectionSmall = [ for i in 1..small -> { id = i; name = "John Doe"; modified = DateTime.Now } ]
-    let collectionBig = [ for i in 1001..(small+big) -> { id = i; name = "Jane Doe"; modified = DateTime.Now } ]
+    let collectionSmall = 
+        [ for i in 1..small -> 
+            { 
+                id = i
+                name = "John Doe" 
+                optional = if i % 2 = 0 then None else Some i 
+                modified = DateTime.Now 
+            } 
+        ]
+    let collectionBig = 
+        [ for i in 1001..(small+big) -> 
+            { 
+                id = i
+                name = "Jane Doe"
+                optional = if i % 2 = 0 then None else Some i
+                modified = DateTime.Now 
+            } 
+        ]
     let modifiedCollectionSmall () = Utilities.mapOver collectionSmall
     let modifiedCollectionBig () = Utilities.mapOver collectionBig
     let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")

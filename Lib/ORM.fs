@@ -297,8 +297,9 @@ module Orm =
             connect state 
             |> Result.map ( noneFunction )
 
-    let inline execute ( state : OrmState ) sql =
-        withTransaction 
+    let inline execute ( state : OrmState ) ( transaction : DbTransaction option ) sql =
+        transaction 
+        |> withTransaction 
             state
             ( fun transaction -> 
                 use cmd = makeCommand state sql ( transaction.Connection )
@@ -345,8 +346,9 @@ module Orm =
             | exn -> Error exn
         | Error e -> Error e
 
-    let inline executeWithReader( state : OrmState )  sql ( readerFunction : IDataReader -> 't ) = //Result<'t, exn>
-        withTransaction 
+    let inline executeWithReader ( state : OrmState ) ( transaction : DbTransaction option ) sql ( readerFunction : IDataReader -> 't ) = //Result<'t, exn>
+        transaction
+        |> withTransaction 
             state
             ( fun transaction -> 
                 seq {
@@ -408,32 +410,29 @@ module Orm =
     let inline parameterizeCommand< ^T > state query conn ( instance : ^T ) =
         let cmd = makeCommand state query conn 
         
+        let paramChar = getParamChar state
+        
         mapping< ^T > state
         |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
         |> Seq.iter ( fun mappedInstance -> 
-            let paramChar = getParamChar state
-            let formattedParam = 
-                sprintf "%s%s" paramChar mappedInstance.FSharpName
-            let param = 
-                let mutable tmp = cmd.CreateParameter( )
-
-                tmp.ParameterName <- formattedParam 
+            let param =  
+                let mutable tmp = cmd.CreateParameter( )    
+                let mappedValue = mappedInstance.PropertyInfo.GetValue( instance )
+                tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
                 if
-                    mappedInstance.PropertyInfo.GetValue( instance ) = null 
+                    mappedValue = null 
                 then
                     tmp.IsNullable <- true
                     tmp.Value <- DBNull.Value
-                else 
-                    let _type = mappedInstance.Type
-                        
-                    if genericTypeName false _type = "FSharpOption"
+                else
+                    if genericTypeName false mappedInstance.Type = "FSharpOption"
                     then
                         tmp.IsNullable <- true
-                        unwrapOption tmp (mappedInstance.PropertyInfo.GetValue( instance )) ()
+                        unwrapOption tmp (mappedValue) ()
                         
                     else
                         tmp.Value <- 
-                            mappedInstance.PropertyInfo.GetValue( instance ) // Some 1
+                            mappedValue // Some 1
                 tmp
 
             cmd.Parameters.Add ( param ) |> ignore
@@ -523,8 +522,9 @@ module Orm =
         // let sources = 
         ( String.concat ", " cols ) + " from " + table< ^T > state
         + " " + joins
-    let inline private select< ^T > ( state : OrmState ) query = 
-        withTransaction  
+    let inline private select< ^T > ( state : OrmState ) (transaction : DbTransaction option) query = 
+        transaction
+        |> withTransaction  
             state 
             ( fun (transaction : DbTransaction) -> 
                 seq {
@@ -544,26 +544,24 @@ module Orm =
                 }
                 
             )
-
-    let inline selectHelper< ^T > ( state : OrmState ) f = 
+            
+    let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
         queryBase< ^T > state
         |> f
-        |> select< ^T > state 
+        |> select< ^T > state transaction
     
-    let inline selectLimit< ^T > ( state : OrmState ) lim = 
-        selectHelper< ^T > state ( fun x -> 
+    let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) lim = 
+        selectHelper< ^T > state transaction ( fun x -> 
             match state with 
-            | MSSQL _ ->
-                $"select top {lim} {x}" 
-            | _ ->
-                $"select {x} limit {lim}" 
+            | MSSQL _ -> $"select top {lim} {x}" 
+            | _ -> $"select {x} limit {lim}" 
         ) 
 
-    let inline selectWhere< ^T > ( state : OrmState ) where   = 
-        selectHelper< ^T > state ( fun x -> $"select {x} where {where}" ) 
+    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where   = 
+        selectHelper< ^T > state transaction ( fun x -> $"select {x} where {where}" ) 
         
-    let inline selectAll< ^T > ( state : OrmState ) = 
-        selectHelper< ^T > state ( fun x -> $"select {x}" ) 
+    let inline selectAll< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) = 
+        selectHelper< ^T > state transaction ( fun x -> $"select {x}" ) 
 
         
     let inline makeParameter ( state : OrmState ) : DbParameter =
@@ -574,10 +572,11 @@ module Orm =
         | SQLite _ -> SqliteParameter( )
     
     
-    let inline insert< ^T > ( state : OrmState ) insertKeys ( instance : ^T ) =
+    let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instance : ^T ) =
         let query = insertBase< ^T > state insertKeys 
         let paramChar = getParamChar state 
-        withTransaction 
+        transaction 
+        |> withTransaction 
             state 
             (
                 fun transaction ->
@@ -606,11 +605,12 @@ module Orm =
                     result
             )
 
-    let inline insertMany< ^T > ( state : OrmState ) insertKeys ( instances : ^T seq ) =
+    let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instances : ^T seq ) =
         let paramChar = ( getParamChar state )
         let numCols = columns< ^T > state |> Seq.length
         let query = insertManyBase< ^T > state insertKeys instances 
-        withTransaction 
+        transaction
+        |> withTransaction 
             state 
             ( fun transaction ->  
                 use command = parameterizeSeqCommand state query ( transaction.Connection ) instances //makeCommand query connection state
@@ -670,9 +670,10 @@ module Orm =
         |> Array.filter ( fun x -> x.IsKey )
         |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
     
-    let inline updateHelper<^T> ( state : OrmState ) ( whereClause : string ) ( instance : ^T ) = 
+    let inline updateHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instance : ^T ) = 
         let query = ( updateBase< ^T > state ) + whereClause 
-        withTransaction 
+        transaction
+        |> withTransaction 
             state 
             ( fun transaction ->  
                 use command = parameterizeCommand< ^T > state query ( transaction.Connection ) instance 
@@ -688,32 +689,33 @@ module Orm =
             )
         
         
-    let inline update< ^T > ( state : OrmState ) ( instance: ^T ) transaction = 
+    let inline update< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instance: ^T ) = 
         let table = table< ^T > state 
         let paramChar = getParamChar state
         
         ensureId< ^T > state 
-        |> Result.bind (fun sqlMapping ->
+            |> Result.bind (fun sqlMapping ->
             sqlMapping
             |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
-            |> fun idConditional -> updateHelper< ^T > state ( sprintf " where %s" idConditional ) instance transaction
+            |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
         
-    let inline updateMany< ^T > ( state : OrmState ) ( instances: ^T seq ) transaction = 
-        Seq.map ( fun instance -> update<^T> state instance transaction ) instances 
+    let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
+        Seq.map ( fun instance -> update<^T> state transaction instance ) instances 
         
-    let inline updateWhere< ^T > ( state : OrmState ) ( where : string ) ( instance: ^T )  = 
-        updateHelper< ^T > state ( sprintf " where %s" where ) instance 
+    let inline updateWhere< ^T > ( state : OrmState ) transaction ( where : string ) ( instance: ^T )  = 
+        updateHelper< ^T > state transaction ( sprintf " where %s" where ) instance 
         
     let inline deleteBase< ^T > state =
         table< ^T > state 
         |> sprintf "delete from %s where "
 
-    let inline deleteHelper< ^T > ( state : OrmState ) ( whereClause : string ) ( instance : ^T ) =
+    let inline deleteHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instance : ^T ) =
         let query = deleteBase< ^T > state + whereClause 
-        withTransaction 
+        transaction
+        |> withTransaction 
             state 
             ( fun transaction -> 
                 use command = parameterizeCommand< ^T > state query ( transaction.Connection ) instance 
@@ -728,9 +730,10 @@ module Orm =
                 result
             )
     
-    let inline deleteManyHelper< ^T > ( state : OrmState ) ( whereClause : string ) ( instances : ^T seq ) =
+    let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
         let query = deleteBase< ^T > state + whereClause 
-        withTransaction 
+        transaction 
+        |> withTransaction 
             state 
             ( fun transaction -> 
                 use command = parameterizeSeqCommand< ^T > state query ( transaction.Connection ) instances 
@@ -745,7 +748,7 @@ module Orm =
                 result
             )
         
-    let inline delete< ^T > state instance transaction = 
+    let inline delete< ^T > state ( transaction : DbTransaction option )  instance = 
         ensureId< ^T > state 
         |> Result.bind ( fun sqlMapping -> 
             let tableName = table< ^T > state 
@@ -754,10 +757,10 @@ module Orm =
             |> Seq.filter ( fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
             |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
-            |> fun where -> deleteHelper< ^T > state where instance transaction 
+            |> fun where -> deleteHelper< ^T > state transaction where instance  
         )
 
-    let inline deleteMany< ^T > state instances transaction =
+    let inline deleteMany< ^T > state ( transaction : DbTransaction option ) instances  =
         ensureId< ^T > state 
         |> Result.bind ( fun sqlMapping -> 
             let tableName = table< ^T > state 
@@ -772,14 +775,15 @@ module Orm =
             )
             |> String.concat ") OR ("
             |> sprintf "( %s )" 
-            |> fun where -> deleteManyHelper< ^T > state where instances transaction
+            |> fun where -> deleteManyHelper< ^T > state transaction where instances 
         )        
         
     /// <Warning> Running this function is equivalent to DELETE 
     /// FROM table WHERE whereClause </Warning>
-    let inline deleteWhere< ^T > state whereClause  = 
+    let inline deleteWhere< ^T > state ( transaction : DbTransaction option ) whereClause = 
         let query =  (deleteBase< ^T > state) + whereClause
-        withTransaction
+        transaction 
+        |> withTransaction
             state
             ( fun transaction -> 
                 use cmd = makeCommand state query ( transaction.Connection ) 
@@ -847,7 +851,7 @@ module Orm =
             )
             if Seq.isEmpty id then {inst with value = None}
             else 
-                selectWhere<^S> state whereClause None
+                selectWhere<^S> state None whereClause 
                 |> function 
                 | Ok vals when Seq.length vals > 0 ->
                     Some <| Seq.head vals    
