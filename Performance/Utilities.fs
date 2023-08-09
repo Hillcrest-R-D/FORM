@@ -2,6 +2,7 @@ namespace rec Benchmarks
 
 module Utilities =
     open System
+    open Dapper
     let mapOver = List.map ( fun ( x : Data.Sanic )-> { x with modified = System.DateTime.Now } )
     let timeIt f = 
         let stopwatch = Diagnostics.Stopwatch.StartNew()
@@ -21,6 +22,24 @@ module Utilities =
 
     let truncate = "delete from \"Sanic\";"
 
+    
+    type OptionHandler<'T> () =
+        inherit SqlMapper.TypeHandler<option<'T>> ()
+
+        override __.SetValue (param, value) =
+            let valueOrNull =
+                match value with
+                | Some x -> box x
+                | None   -> null
+            param.Value <- valueOrNull
+
+        override __.Parse value =
+            if Object.ReferenceEquals(value, null) || value = box DBNull.Value
+            then None
+            else Some (value :?> 'T)
+
+    SqlMapper.AddTypeHandler (OptionHandler<int>())
+
 module Data =
     open System
     open Form.Attributes
@@ -37,7 +56,7 @@ module Data =
         modified: DateTime
     }
     let small = 1000
-    let big = 10000
+    let big = 5000
     let collectionSmall = 
         [ for i in 1..small -> 
             { 
@@ -48,7 +67,7 @@ module Data =
             } 
         ]
     let collectionBig = 
-        [ for i in 1001..(small+big) -> 
+        [ for i in 1001..(big) -> 
             { 
                 id = i
                 name = "Jane Doe"

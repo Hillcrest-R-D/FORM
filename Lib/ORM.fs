@@ -440,57 +440,48 @@ module Orm =
         
         cmd
 
-    let inline parameterizeSeqCommand< ^T > state query conn ( instances : ^T seq ) =
-        let cmd = makeCommand state query conn
-        
-        instances 
-        |> Seq.iteri ( fun index instance ->
-        
-            mapping< ^T > state
-            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Seq.iter ( fun mappedInstance -> 
-                let paramChar = getParamChar state
-                let formattedParam = 
-                    sprintf "%s%s%i" paramChar mappedInstance.FSharpName index //``the instance formerly known as mappedInstance``
-                let param = 
-                    let mutable tmp = cmd.CreateParameter( ) 
-                    
-                    tmp.ParameterName <- formattedParam 
-                    if
-                        mappedInstance.PropertyInfo.GetValue( instance ) = null 
-                    then
-                        tmp.IsNullable <- true
-                        tmp.Value <- DBNull.Value
-                    else 
-                        let _type = mappedInstance.Type
-                        if genericTypeName false _type = "FSharpOption"
-                        then
-                            tmp.IsNullable <- true
-                            unwrapOption tmp (mappedInstance.PropertyInfo.GetValue( instance )) ()
-                            
-                        else
-                            tmp.Value <- 
-                                mappedInstance.PropertyInfo.GetValue( instance ) // Some 1
-                    tmp
-
-                cmd.Parameters.Add ( param ) |> ignore
-            )
-        )
-        
-        cmd
+   
     
-    // type User = 
-    //     {
-    //         [<On(typeof<UserInfo>, "userId", JoinDirection.Left, DbContext.Default)>]
-    //         [<On(typeof<UserSecrets>, "userId", JoinDirection.Left, DbContext.Default)>]
-    //         id : string 
-    //         [<On(typeof<UserInfo>, "ident", JoinDirection.Left, DbContext.Default)>]
-    //         infoSecondary : int 
-    //         [<ByJoin(typeof<UserInfo>, DbContext.Default)>]
-    //         name : string 
-    //         [<ByJoin(typeof<UserSecrets>, DbContext.Default)>]
-    //         password : string 
-    //     }
+    let inline parameterizeSeqCommand< ^T > state query (transaction : DbTransaction) ( instances : ^T seq ) =
+        let cmd = makeCommand state query transaction.Connection
+        let mapp = 
+            mapping< ^T > state
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries 
+        cmd.Transaction <- transaction 
+        let paramChar = getParamChar state        
+        let mutable cmdParams = 
+            mapp 
+            |> Array.map (
+                fun (mappedInstance : SqlMapping ) ->
+                    let mutable tmp = cmd.CreateParameter( ) 
+                    tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
+                    cmd.Parameters.Add ( tmp ) |> ignore
+                    tmp
+                )
+            
+        instances 
+        |> Seq.mapi ( fun index instance ->
+            mapp 
+            |> Array.iteri ( fun jindex mappedInstance ->   
+                let thing = mappedInstance.PropertyInfo.GetValue( instance )                  
+                if
+                    thing = null 
+                then
+                    cmdParams[jindex].IsNullable <- true
+                    cmdParams[jindex].Value <- DBNull.Value
+                else 
+                    let _type = mappedInstance.Type
+                    if genericTypeName false _type = "FSharpOption"
+                    then
+                        cmdParams[jindex].IsNullable <- true
+                        unwrapOption cmdParams[jindex] (thing) ()
+                        
+                    else
+                        cmdParams[jindex].Value <- thing // Some 1
+            )
+            cmd.ExecuteNonQuery()
+        )
+        |> Seq.fold (+) 0
 
     let inline joins< ^T > (state : OrmState) = 
         let qoute = sqlQuote state
@@ -604,40 +595,25 @@ module Orm =
                     connection.Close( )
                     result
             )
-
+            
     let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instances : ^T seq ) =
         let paramChar = ( getParamChar state )
         let numCols = columns< ^T > state |> Seq.length
-        let query = insertManyBase< ^T > state insertKeys instances 
+        let query = insertBase< ^T > state insertKeys 
         transaction
         |> withTransaction 
             state 
             ( fun transaction ->  
-                use command = parameterizeSeqCommand state query ( transaction.Connection ) instances //makeCommand query connection state
-                log (fun _ -> 
-                    printfn "Query generated: %s" query
-                    printfn "Param count: %A" command.Parameters.Count
-                    for i in [0..command.Parameters.Count-1] do 
-                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                )   
-                command.Transaction <- transaction
-                command.ExecuteNonQuery ( )
+                parameterizeSeqCommand state query transaction instances //makeCommand query connection state
+            
             )
             ( fun connection -> 
-                connection.Open( )
-                use command = parameterizeSeqCommand state query connection instances //makeCommand query connection state
-                log (fun _ -> 
-                    printfn "Query generated: %s" query
-                    printfn "Param count: %A" command.Parameters.Count
-                    for i in [0..command.Parameters.Count-1] do 
-                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                )   
-                let result = command.ExecuteNonQuery ( )
-        
-                connection.Close( )
-                result 
+                connection.Open()
+                use transaction = connection.BeginTransaction()
+                parameterizeSeqCommand state query transaction instances //makeCommand query connection state
+                |> fun x -> transaction.Commit();connection.Close(); x
             )
-    
+
     (*
     uPDATE a
         ...
@@ -696,8 +672,8 @@ module Orm =
         ensureId< ^T > state 
             |> Result.bind (fun sqlMapping ->
             sqlMapping
-            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
+            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
@@ -736,16 +712,13 @@ module Orm =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                use command = parameterizeSeqCommand< ^T > state query ( transaction.Connection ) instances 
-                command.Transaction <- transaction
-                command.ExecuteNonQuery ( )        
+                parameterizeSeqCommand< ^T > state query ( transaction ) instances  
             )
             ( fun connection -> 
                 connection.Open( )
-                use cmd = parameterizeSeqCommand< ^T > state query connection instances 
-                let result = cmd.ExecuteNonQuery ( )
-                connection.Close()
-                result
+                let transaction = connection.BeginTransaction() 
+                parameterizeSeqCommand< ^T > state query transaction instances 
+                |> fun x -> transaction.Commit();connection.Close(); x 
             )
         
     let inline delete< ^T > state ( transaction : DbTransaction option )  instance = 
@@ -765,16 +738,10 @@ module Orm =
         |> Result.bind ( fun sqlMapping -> 
             let tableName = table< ^T > state 
             let paramChar = getParamChar state
-            instances 
-            |> Seq.mapi ( fun i _ ->
-                sqlMapping
-                |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
-                |> Seq.map ( fun x -> sprintf "%s.%s = %s%s%i" tableName x.QuotedSqlName paramChar x.FSharpName i)
-                |> String.concat " and "
-            
-            )
-            |> String.concat ") OR ("
-            |> sprintf "( %s )" 
+            sqlMapping
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
+            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName)
+            |> String.concat " and " // id1 = @id1 AND id2 = @id2
             |> fun where -> deleteManyHelper< ^T > state transaction where instances 
         )        
         
@@ -849,7 +816,7 @@ module Orm =
                 printfn "lookupId Id Column Name: %A" id 
                 printfn "Where Clause: %A" whereClause 
             )
-            if Seq.isEmpty id then {inst with value = None}
+            if Seq.isEmpty id then {inst with value = None} 
             else 
                 selectWhere<^S> state None whereClause 
                 |> function 

@@ -9,12 +9,13 @@ open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open Configs
 
+
 [<
   MemoryDiagnoser; 
   Config(typeof<BenchmarkConfig>);
   RPlotExporter
 >]
-type InsertBenchmark() =
+type InsertSmallBenchmark() =
 
     let _sqliteState = SQLite( Benchmarks.Data.sqliteConnectionString (), Data.Context.SQLite )
     [<IterationSetup>]
@@ -23,7 +24,7 @@ type InsertBenchmark() =
         Orm.execute _sqliteState None Benchmarks.Utilities.create  |> printfn "%A"
     
     [<Benchmark>]
-    member _.InsertFormSmall () = 
+    member _.InsertForm () = 
         let transaction = Orm.beginTransaction _sqliteState
         // Orm.insertMany<Data.Sanic> _sqliteState transaction true Data.collectionSmall
         List.map ( fun item -> 
@@ -33,14 +34,14 @@ type InsertBenchmark() =
         Orm.commitTransaction transaction
 
     [<Benchmark>]
-    member _.InsertManyFormSmall () = 
+    member _.InsertManyForm () = 
         let transaction = Orm.beginTransaction _sqliteState
         Orm.insertMany<Data.Sanic> _sqliteState transaction true Data.collectionSmall
         |> ignore
         Orm.commitTransaction transaction
 
     [<Benchmark>]
-    member _.InsertDapperSmall () = 
+    member _.InsertDapper () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -49,7 +50,7 @@ type InsertBenchmark() =
     
     
     [<Benchmark>]
-    member _.InsertMicrosoftSmall () = 
+    member _.InsertMicrosoft () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -74,14 +75,27 @@ type InsertBenchmark() =
             | Some i -> paramOptional.Value <- i 
             | None -> 
                 paramOptional.ParameterName <- "@optional"
-                paramOptional.Value <- null
+                paramOptional.Value <- DBNull.Value
             paramModified.Value <- item.modified
             cmd.ExecuteNonQuery() |> ignore
         ) Data.collectionSmall
         transaction.Commit()
 
+[<
+  MemoryDiagnoser; 
+  Config(typeof<BenchmarkConfig>);
+  RPlotExporter
+>]
+type InsertBigBenchmark() =
+
+    let _sqliteState = SQLite( Benchmarks.Data.sqliteConnectionString (), Data.Context.SQLite )
+    [<IterationSetup>]
+    member _.Setup() = 
+        Orm.execute _sqliteState None Benchmarks.Utilities.drop  |> printfn "%A"
+        Orm.execute _sqliteState None Benchmarks.Utilities.create  |> printfn "%A"
+
     [<Benchmark>]
-    member _.InsertFormBig () = 
+    member _.InsertForm () = 
         let transaction = Orm.beginTransaction _sqliteState
         List.map ( fun item -> 
             Orm.insert<Data.Sanic> _sqliteState transaction true item   
@@ -90,13 +104,14 @@ type InsertBenchmark() =
         Orm.commitTransaction transaction
 
     [<Benchmark>]
-    member _.InsertManyFormBig () = 
+    member _.InsertManyForm () = 
         let transaction = Orm.beginTransaction _sqliteState
         Orm.insertMany<Data.Sanic> _sqliteState transaction true Data.collectionBig |> ignore
         Orm.commitTransaction transaction
+    
 
     [<Benchmark>]
-    member _.InsertDapperBig () = 
+    member _.InsertDapper () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -105,7 +120,7 @@ type InsertBenchmark() =
     
     
     [<Benchmark>]
-    member _.InsertMicrosoftBig () = 
+    member _.InsertMicrosoft () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -130,7 +145,7 @@ type InsertBenchmark() =
             | Some i -> paramOptional.Value <- i 
             | None -> 
                 paramOptional.IsNullable <- true
-                paramOptional.Value <- null
+                paramOptional.Value <- DBNull.Value
             paramModified.Value <- item.modified
             cmd.ExecuteNonQuery() |> ignore
         ) Data.collectionBig
@@ -198,7 +213,7 @@ type DapperBenchmark() =
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
-        connection.Execute("update \"Sanic\" set name = @name, modified = @modified where id = @id", Data.collectionSmall, transaction)
+        connection.Execute("update \"Sanic\" set name = @name, modified = @modified where id = @id", Data.collectionSmall, transaction) |> ignore
         transaction.Commit()
 
     [<Benchmark>]
@@ -290,10 +305,12 @@ module Main =
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
+        
         // BenchmarkRunner.Run<FormBenchmark>() |> ignore
         // BenchmarkRunner.Run<DapperBenchmark>() |> ignore
         // BenchmarkRunner.Run<MicrosoftBenchmark>() |> ignore
-        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        BenchmarkRunner.Run<InsertSmallBenchmark>() |> ignore
+        BenchmarkRunner.Run<InsertBigBenchmark>() |> ignore
         
         0
         
