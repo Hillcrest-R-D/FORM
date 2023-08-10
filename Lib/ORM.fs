@@ -206,24 +206,27 @@ module Orm =
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
-        // Heavily inspired by http://www.fssnip.net/gE -- thanks igeta!
-        let rty = typeof< ^T >
-        let makeEntity vals = FSharpValue.MakeRecord( rty, vals ) :?>  ^T
-        let fields = 
-            seq { for fld in ( columnMapping< ^T > state  ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo"  //! Filter out joins for non-select queries
-            |> dict 
+        let reifiedType = typeof< ^T >
+        let makeEntity vals = FSharpValue.MakeRecord( reifiedType, vals ) :?>  ^T
+        // let fields = 
+        //     seq { for fld in ( columnMapping< ^T > state  ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo"  //! Filter out joins for non-select queries
+        //     |> dict 
+            
+            
         seq { 
+            let mutable first = true
+            let mutable options = [| for fld in ( columnMapping< ^T > state  ) do  
+                match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
+                | Some _type -> toOption _type 
+                | None -> id
+            |]
+
             while reader.Read( ) do
                 yield 
-                    seq { 0..reader.FieldCount-1 }
-                    |> Seq.map ( fun i -> reader.GetName( i ), reader.GetValue( i ) ) //get SQL column name and value => (name, value)
-                    |> Seq.sortBy ( fun ( name, _ ) ->  fields[name].Index ) //constructor is positional, need to add values in correct order
-                    |> Seq.map ( fun ( name, value ) ->   
-                        match optionType fields[name].Type with //handle option type, i.e. option<T> if record field is optional, else T
-                        | Some ``type`` -> toOption ``type`` value
-                        | None -> value
-                    ) // => seq { Some 1; "field 2 value"; None; etc}
-                    |> Seq.toArray // record constructor requires an array
+                    [| for i in 0..reader.FieldCount-1 do options[i] <| reader.GetValue( i ) |]
+                    // |> Array.map ( fun i -> options[reader.GetName( i )] reader.GetValue( i ) ) //get SQL column name and value => (name, value)
+                    // |> Array.sortBy ( fun ( name, _ ) -> fields[name].Index ) //constructor is positional, need to add values in correct order
+                    // |> Array.map ( fun ( name, value ) -> options[name] value ) 
                     |> makeEntity // dang ol' class factory man
         }   
     
@@ -442,7 +445,7 @@ module Orm =
 
    
     
-    let inline parameterizeSeqCommand< ^T > state query (transaction : DbTransaction) ( instances : ^T seq ) =
+    let inline parameterizeSeqAndExecuteCommand< ^T > state query (transaction : DbTransaction) ( instances : ^T seq ) =
         let cmd = makeCommand state query transaction.Connection
         let mapp = 
             mapping< ^T > state
@@ -470,8 +473,7 @@ module Orm =
                     cmdParams[jindex].IsNullable <- true
                     cmdParams[jindex].Value <- DBNull.Value
                 else 
-                    let _type = mappedInstance.Type
-                    if genericTypeName false _type = "FSharpOption"
+                    if genericTypeName false mappedInstance.Type = "FSharpOption"
                     then
                         cmdParams[jindex].IsNullable <- true
                         unwrapOption cmdParams[jindex] (thing) ()
@@ -604,13 +606,13 @@ module Orm =
         |> withTransaction 
             state 
             ( fun transaction ->  
-                parameterizeSeqCommand state query transaction instances //makeCommand query connection state
+                parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
             
             )
             ( fun connection -> 
                 connection.Open()
                 use transaction = connection.BeginTransaction()
-                parameterizeSeqCommand state query transaction instances //makeCommand query connection state
+                parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
                 |> fun x -> transaction.Commit();connection.Close(); x
             )
 
@@ -663,14 +665,28 @@ module Orm =
                 connection.Close( )
                 result 
             )
-        
+
+    let inline updateManyHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) = 
+        let query = ( updateBase< ^T > state ) + whereClause 
+        transaction
+        |> withTransaction 
+            state 
+            ( fun transaction -> 
+                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) instances  
+            )
+            ( fun connection -> 
+                connection.Open( )
+                let transaction = connection.BeginTransaction() 
+                parameterizeSeqAndExecuteCommand< ^T > state query transaction instances 
+                |> fun x -> transaction.Commit();connection.Close(); x 
+            )
         
     let inline update< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instance: ^T ) = 
         let table = table< ^T > state 
         let paramChar = getParamChar state
         
         ensureId< ^T > state 
-            |> Result.bind (fun sqlMapping ->
+        |> Result.bind (fun sqlMapping ->
             sqlMapping
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
@@ -679,8 +695,23 @@ module Orm =
         )
         
     let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
-        Seq.map ( fun instance -> update<^T> state transaction instance ) instances 
+        // Seq.map ( fun instance -> update<^T> state transaction instance ) instances 
+        let table = table<^T> state
+        let paramChar = getParamChar state
         
+        ensureId< ^T > state 
+        |> Result.bind (fun sqlMapping ->
+            sqlMapping
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
+            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> String.concat " and "
+            |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
+        )
+
+
+
+
+
     let inline updateWhere< ^T > ( state : OrmState ) transaction ( where : string ) ( instance: ^T )  = 
         updateHelper< ^T > state transaction ( sprintf " where %s" where ) instance 
         
@@ -712,12 +743,12 @@ module Orm =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqCommand< ^T > state query ( transaction ) instances  
+                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) instances  
             )
             ( fun connection -> 
                 connection.Open( )
                 let transaction = connection.BeginTransaction() 
-                parameterizeSeqCommand< ^T > state query transaction instances 
+                parameterizeSeqAndExecuteCommand< ^T > state query transaction instances 
                 |> fun x -> transaction.Commit();connection.Close(); x 
             )
         

@@ -3,7 +3,7 @@ namespace rec Benchmarks
 module Utilities =
     open System
     open Dapper
-    let mapOver = List.map ( fun ( x : Data.Sanic )-> { x with modified = System.DateTime.Now } )
+    let mapOver = List.map ( fun ( x : Data.Sanic )-> { x with modified = System.DateTime.Now.ToString("yyyy-MM-dd") } )
     let timeIt f = 
         let stopwatch = Diagnostics.Stopwatch.StartNew()
         f() |> ignore
@@ -50,10 +50,10 @@ module Data =
     [<CLIMutable>]
     type Sanic = {
         [<PrimaryKey("id", Context.SQLite)>]
-        id: int 
+        id: int64 
         name: string
-        optional : int option 
-        modified: DateTime
+        optional : int64 option 
+        modified: string
     }
     let small = 1000
     let big = 5000
@@ -63,7 +63,7 @@ module Data =
                 id = i
                 name = "John Doe" 
                 optional = if i % 2 = 0 then None else Some i 
-                modified = DateTime.Now 
+                modified = DateTime.Now.ToString("yyyy-MM-dd")
             } 
         ]
     let collectionBig = 
@@ -72,9 +72,11 @@ module Data =
                 id = i
                 name = "Jane Doe"
                 optional = if i % 2 = 0 then None else Some i
-                modified = DateTime.Now 
+                modified = DateTime.Now.ToString("yyyy-MM-dd") 
             } 
         ]
+    let collections = [|collectionSmall; collectionBig|]
+
     let modifiedCollectionSmall () = Utilities.mapOver collectionSmall
     let modifiedCollectionBig () = Utilities.mapOver collectionBig
     let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
