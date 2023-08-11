@@ -175,6 +175,26 @@ module Orm =
     let inline fields< ^T >  ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
+
+    //! More performance work
+    // let mutable _toOptions = Dictionary<Type, (obj[] -> obj) * (obj[] -> obj)>()
+    // let inline toOption ( type_: Type ) ( value: obj ) =
+    //     let ctors = 
+    //     if _toOptions.ContainsKey( type_ )
+    //     then _toOptions[type_]
+    //     else
+    //         let info = FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
+    //         _toOptions[type_] <- 
+    //             FSharpValue.PreComputeUnionConstructor(info[0])
+    //             , FSharpValue.PreComputeUnionConstructor(info[1])
+            
+    //         if DBNull.Value.Equals( value ) 
+    //         then _toOptions[type_][0] [||] 
+    //         else _toOptions[type_][1] [|value|]
+
+    //     // if DBNull.Value.Equals( value ) 
+    //     // then ctors[0] [||] 
+    //     // else ctors[1] [|value|]
     let mutable _toOptions = Dictionary<Type, UnionCaseInfo array>()
     let inline toOption ( type_: Type ) ( value: obj ) =
         let mutable info = Array.empty
@@ -185,6 +205,7 @@ module Orm =
             _toOptions[type_] <- info
         let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
         let case =  info[tag]
+        let ctor = FSharpValue.PreComputeUnionConstructor
         FSharpValue.MakeUnion( case, variable )
 
     let mutable _options = Dictionary<Type, Type option>()
