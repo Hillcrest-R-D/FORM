@@ -7,6 +7,7 @@ open Microsoft.Data.Sqlite
 open Dapper
 open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
+open BenchmarkDotNet.Diagnostics.dotTrace
 open Configs
 
 
@@ -135,7 +136,6 @@ type UpdateBenchmark() =
     
     [<Benchmark>]
     member _.Microsoft () = 
-        
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -167,9 +167,10 @@ type UpdateBenchmark() =
 
 
 [<
-  MemoryDiagnoser; 
+  MemoryDiagnoser;
   Config(typeof<BenchmarkConfig>);
-  RPlotExporter
+  RPlotExporter;
+  DotTraceDiagnoser
 >]
 type SelectBenchmark() =
 
@@ -213,18 +214,18 @@ type SelectBenchmark() =
         let mutable data = List.empty
         // Orm.consumeReader<Data.Sanic> _sqliteState reader 
         // |> Seq.iter ignore
-        while (reader.Read()) do
-            let datum : Data.Sanic = 
+        seq {
+            while (reader.Read()) do
                 { 
-                    id = reader.GetValue(0) |> unbox<int64>
-                    name = reader.GetValue(1) |> unbox<string> 
+                    id = reader.GetValue(0) :?> int64 //104abc3e
+                    name = reader.GetValue(1) :?> string
                     optional = 
                         reader.GetValue(2) |> function 
                         | :? int64 as i -> Some i
                         | _ -> None
-                    modified = reader.GetValue(3) |> unbox<string> ; 
-                }
-            data <- data @ [ datum ]
+                    modified = reader.GetValue(3) :?> string
+                } : Data.Sanic
+        } |> Seq.iter ignore
 
 module Main = 
     [<EntryPoint>]

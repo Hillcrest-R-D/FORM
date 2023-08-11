@@ -56,7 +56,7 @@ module Data =
         modified: string
     }
     let small = 1000
-    let big = 5000
+    let big = 100000
     let collectionSmall = 
         [ for i in 1..small -> 
             { 

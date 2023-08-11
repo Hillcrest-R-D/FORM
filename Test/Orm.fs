@@ -33,6 +33,11 @@ type Orm (_testingState) =
         | PSQL _ -> "psqlName"
         | _ -> "sqliteName"
 
+    let intType = 
+        match testingState with 
+        | SQLite _ -> "int"
+        | PSQL _ -> "bigint"
+        | _ -> "bigint"
     let transaction = 
         None// Orm.beginTransaction testingState
     
@@ -42,17 +47,17 @@ type Orm (_testingState) =
             $"DROP TABLE IF EXISTS {tableName};
             DROP TABLE IF EXISTS \"SubFact\";
             CREATE TABLE {tableName} (
-                \"indexId\" int not null,
+                \"indexId\" {intType} not null,
                 \"id\" text primary key,
                 \"{nameCol}\" text null,
                 \"timeStamp\" text,
                 \"specialChar\" text,
                 \"maybeSomething\" text,
-                \"sometimesNothing\" int null,
+                \"sometimesNothing\" {intType} null,
                 \"biteSize\" text
             );
             CREATE TABLE \"SubFact\" (
-                \"factId\" int not null,
+                \"factId\" {intType} not null,
                 \"subFact\" text not null
             );
             "
@@ -261,7 +266,12 @@ type OrmTransaction ( _testingState ) =
         | PSQL _ -> "psqlName"
         | _ -> "sqliteName"
 
-    
+    let intType = 
+        match testingState with 
+        | SQLite _ -> "int"
+        | PSQL _ -> "bigint"
+        | _ -> "bigint"
+        
     let sleep () = System.Threading.Thread.Sleep(500)
 
     let commit transaction x = Orm.tryCommit transaction |> ignore; x 
@@ -272,17 +282,17 @@ type OrmTransaction ( _testingState ) =
             $"DROP TABLE IF EXISTS {tableName};
             DROP TABLE IF EXISTS \"SubFact\";
             CREATE TABLE {tableName} (
-                \"indexId\" int not null,
+                \"indexId\" {intType} not null,
                 \"id\" text primary key,
                 \"{nameCol}\" text null,
                 \"timeStamp\" text,
                 \"specialChar\" text,
                 \"maybeSomething\" text,
-                \"sometimesNothing\" int null,
+                \"sometimesNothing\" {intType} null,
                 \"biteSize\" text
             );
             CREATE TABLE \"SubFact\" (
-                \"factId\" int not null,
+                \"factId\" {intType} not null,
                 \"subFact\" text not null
             );"
 

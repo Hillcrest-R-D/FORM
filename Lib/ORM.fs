@@ -13,6 +13,7 @@ open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
 open Form.Attributes
 open FSharp.Reflection.FSharpReflectionExtensions
+open System.Collections.Generic
 
 module Orm = 
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
@@ -79,7 +80,6 @@ module Orm =
         | MySQL     ( _, c ) -> c 
         | PSQL      ( _, c ) -> c 
         | SQLite    ( _, c ) -> c 
-
     let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
         Array.fold ( fun s ( x : DbAttribute ) ->  
                 if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
@@ -93,66 +93,74 @@ module Orm =
                 then (fst x.Value, x.key.Name)
                 else s
             ) ("", "") attrs 
-
+    let mutable _tableNames = Dictionary<Type * OrmState, string>()
     let inline tableName< ^T > ( state : OrmState ) = 
-        let attrs =
-            typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
-            |> Array.map ( fun x -> x :?> DbAttribute )
-        
-        let name = 
-            if attrs = Array.empty then
-                typedefof< ^T >.Name
-            else 
-                attrFold attrs ( context< ^T > state )
-        
-        name.Split( "." )
-        |> Array.map ( fun x -> sqlQuote state x )
-        |> String.concat "."
+        let reifiedType = typeof< ^T >
+        let mutable name = ""
+        if _tableNames.TryGetValue( (reifiedType, state), &name ) 
+        then name
+        else 
+            let attrs =
+                typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
+                |> Array.map ( fun x -> x :?> DbAttribute )
+            
+            let tName = 
+                if attrs = Array.empty then
+                    typedefof< ^T >.Name
+                else 
+                    attrFold attrs ( context< ^T > state )
+                |> fun x -> x.Split( "." )
+                |> Array.map ( fun x -> sqlQuote state x )
+                |> String.concat "."
+            
+            _tableNames[(reifiedType, state)] <- tName 
+            tName
+
+    
+    let inline mappingHelper< ^T, ^A > state (propertyInfo : PropertyInfo) = 
+        propertyInfo.GetCustomAttributes( typeof< ^A >, false ) 
+        |> Array.map ( fun y -> y :?> DbAttribute )
+        |> fun y -> attrFold y ( context< ^T > state )  
+
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>();
 
     let inline columnMapping< ^T > ( state : OrmState ) = 
-        FSharpType.GetRecordFields typedefof< ^T > 
-        |> Array.mapi ( fun i x -> 
-            let sqlName =  
-                x.GetCustomAttributes( typeof< ColumnAttribute >, false ) 
-                |> Array.map ( fun y -> y :?> DbAttribute )
-                |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                |> fun y -> if y = "" then x.Name else y 
-            let isKey =
-                x.GetCustomAttributes( typeof< PrimaryKeyAttribute >, false ) 
-                |> Array.map ( fun y -> y :?> DbAttribute )
-                |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                |> fun y -> if y = "" then false else true 
-            let isIndex =
-                x.GetCustomAttributes( typeof< IdAttribute >, false ) 
-                |> Array.map ( fun y -> y :?> DbAttribute )
-                |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                |> fun y -> if y = "" then false else true 
-            let on = 
-                x.GetCustomAttributes( typeof< OnAttribute >, false ) 
-                |> Array.map ( fun y -> y :?> OnAttribute )
-                |> fun y -> attrJoinFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
-            let source =
-                x.GetCustomAttributes( typeof< ByJoinAttribute >, false ) 
-                |> Array.map ( fun y -> y :?> DbAttribute )
-                |> fun y -> attrFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                |> fun y -> if y = "" then tableName< ^T > state else sqlQuote state y
-            let fsharpName = x.Name
-            let quotedName = sqlQuote state sqlName 
-            { 
-                Index = i
-                IsKey = isKey
-                IsIndex = isIndex
-                JoinOn = on 
-                Source = source
-                QuotedSource = source
-                SqlName = sqlName
-                QuotedSqlName = quotedName
-                FSharpName = fsharpName
-                Type = x.PropertyType 
-                PropertyInfo = x
-            } 
-        )
+        let reifiedType = typeof< ^T >
+        let mutable outMapping = Array.empty
+        if _mappings.TryGetValue((reifiedType, state), &outMapping) 
+        then outMapping
+        else 
+            let mapping = 
+                FSharpType.GetRecordFields typedefof< ^T > 
+                |> Array.mapi ( fun i x -> 
+                    let source =
+                        let tmp = mappingHelper< ^T, ByJoinAttribute > state x
+                        if tmp = "" then tableName< ^T > state else sqlQuote state tmp
+                    let sqlName = 
+                        let tmp = mappingHelper< ^T, ColumnAttribute > state x
+                        if tmp = "" then x.Name else tmp
+                    { 
+                        Index = i
+                        IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
+                        IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
+                        JoinOn = 
+                            x.GetCustomAttributes( typeof< OnAttribute >, false ) 
+                            |> Array.map ( fun y -> y :?> OnAttribute )
+                            |> fun y -> attrJoinFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
+                            |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
+                        Source = source
+                        QuotedSource = source
+                        SqlName = sqlName
+                        QuotedSqlName = sqlQuote state sqlName
+                        FSharpName = x.Name
+                        Type = x.PropertyType 
+                        PropertyInfo = x
+                    } 
+                )
+            _mappings[(reifiedType, state)] <- mapping 
+            mapping
         
     let inline table< ^T > ( state : OrmState ) = 
         tableName< ^T > state
@@ -167,17 +175,31 @@ module Orm =
     let inline fields< ^T >  ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
-    
+    let mutable _toOptions = Dictionary<Type, UnionCaseInfo array>()
     let inline toOption ( type_: Type ) ( value: obj ) =
+        let mutable info = Array.empty
+        if _toOptions.TryGetValue( type_, &info )
+        then ()
+        else 
+            info <- FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
+            _toOptions[type_] <- info
         let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
-        let optionType = typedefof<Option<_>>.MakeGenericType( [|type_|] )
-        let case = FSharpType.GetUnionCases( optionType ) |> Seq.find ( fun info -> info.Tag = tag )
+        let case =  info[tag]
         FSharpValue.MakeUnion( case, variable )
 
+    let mutable _options = Dictionary<Type, Type option>()
+
     let inline optionType ( type_ : Type )  =
-        if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
-        then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
-        else None
+        let mutable opt = None 
+        if _options.TryGetValue( type_, &opt )
+        then opt
+        else 
+            let tmp = 
+                if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
+                then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
+                else None
+            _options[type_] <- tmp
+            tmp
 
     let toDbType ( typeCode : TypeCode ) = 
         match typeCode with 
@@ -204,30 +226,30 @@ module Orm =
         with 
         | exn -> Error exn
 
+    let mutable _constructors = Dictionary< Type, obj[] -> obj>()
+
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
         let reifiedType = typeof< ^T >
-        let makeEntity vals = FSharpValue.MakeRecord( reifiedType, vals ) :?>  ^T
-        // let fields = 
-        //     seq { for fld in ( columnMapping< ^T > state  ) -> fld.SqlName, fld } // sqlSource User.name -> "UserInfo"  //! Filter out joins for non-select queries
-        //     |> dict 
-            
-            
-        seq { 
-            let mutable first = true
-            let mutable options = [| for fld in ( columnMapping< ^T > state  ) do  
+        let constructor = 
+            let mutable tmp = fun _ -> obj()
+            if _constructors.TryGetValue(reifiedType, &tmp)
+            then ()
+            else 
+                tmp <- FSharpValue.PreComputeRecordConstructor(reifiedType)
+                _constructors[reifiedType] <- tmp
+            tmp
+
+        
+        let mutable options = 
+            [| for fld in ( columnMapping< ^T > state  ) do  
                 match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
                 | Some _type -> toOption _type 
                 | None -> id
             |]
-
+        seq { 
             while reader.Read( ) do
-                yield 
-                    [| for i in 0..reader.FieldCount-1 do options[i] <| reader.GetValue( i ) |]
-                    // |> Array.map ( fun i -> options[reader.GetName( i )] reader.GetValue( i ) ) //get SQL column name and value => (name, value)
-                    // |> Array.sortBy ( fun ( name, _ ) -> fields[name].Index ) //constructor is positional, need to add values in correct order
-                    // |> Array.map ( fun ( name, value ) -> options[name] value ) 
-                    |> makeEntity // dang ol' class factory man
+                constructor [| for i in 0..reader.FieldCount-1 do options[i] <| reader.GetValue( i ) |] :?> ^T // dang ol' class factory man
         }   
     
     let inline getParamChar state = 
@@ -521,7 +543,6 @@ module Orm =
             state 
             ( fun (transaction : DbTransaction) -> 
                 seq {
-                    
                     use cmd = makeCommand state query ( transaction.Connection ) 
                     cmd.Transaction <- transaction 
                     use reader = cmd.ExecuteReader( ) 

@@ -17,7 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="benchmarkdotnet" Version="0.13.6" />
+    <PackageReference Include="benchmarkdotnet" Version="0.13.7" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.13.7" />
     <PackageReference Include="dotnetenv" Version="2.5.0" />
     <PackageReference Include="dapper" Version="2.0.143" />
     <PackageReference Include="microsoft.data.sqlite" Version="7.0.9" />
