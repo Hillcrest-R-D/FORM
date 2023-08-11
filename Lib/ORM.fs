@@ -176,39 +176,36 @@ module Orm =
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
 
-    //! More performance work
-    // let mutable _toOptions = Dictionary<Type, (obj[] -> obj) * (obj[] -> obj)>()
-    // let inline toOption ( type_: Type ) ( value: obj ) =
-    //     let ctors = 
-    //     if _toOptions.ContainsKey( type_ )
-    //     then _toOptions[type_]
-    //     else
-    //         let info = FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
-    //         _toOptions[type_] <- 
-    //             FSharpValue.PreComputeUnionConstructor(info[0])
-    //             , FSharpValue.PreComputeUnionConstructor(info[1])
-            
-    //         if DBNull.Value.Equals( value ) 
-    //         then _toOptions[type_][0] [||] 
-    //         else _toOptions[type_][1] [|value|]
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let mutable _toOptions = Dictionary<Type, obj[] -> obj>()
+    let inline toOption ( type_: Type ) ( value: obj ) : obj =
+        let constructor = 
+            if _toOptions.ContainsKey( type_ )
+            then _toOptions[type_]
+            else
+                let info = FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
+                _toOptions[type_] <- FSharpValue.PreComputeUnionConstructor(info[1])
+                _toOptions[type_]
+                
 
-    //     // if DBNull.Value.Equals( value ) 
-    //     // then ctors[0] [||] 
-    //     // else ctors[1] [|value|]
-    let mutable _toOptions = Dictionary<Type, UnionCaseInfo array>()
-    let inline toOption ( type_: Type ) ( value: obj ) =
-        let mutable info = Array.empty
-        if _toOptions.TryGetValue( type_, &info )
-        then ()
-        else 
-            info <- FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
-            _toOptions[type_] <- info
-        let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
-        let case =  info[tag]
-        FSharpValue.MakeUnion( case, variable )
+        if DBNull.Value.Equals( value ) 
+        then None
+        else constructor [|value|]
+        
+
+    // let mutable _toOptions = Dictionary<Type, UnionCaseInfo array>()
+    // let inline toOption ( type_: Type ) ( value: obj ) =
+    //     let mutable info = Array.empty
+    //     if _toOptions.TryGetValue( type_, &info )
+    //     then ()
+    //     else 
+    //         info <- FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
+    //         _toOptions[type_] <- info
+    //     let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
+    //     FSharpValue.MakeUnion( info[tag], variable )
 
     let mutable _options = Dictionary<Type, Type option>()
-
     let inline optionType ( type_ : Type )  =
         let mutable opt = None 
         if _options.TryGetValue( type_, &opt )
@@ -258,9 +255,7 @@ module Orm =
             else 
                 tmp <- FSharpValue.PreComputeRecordConstructor(reifiedType)
                 _constructors[reifiedType] <- tmp
-            tmp
-
-        
+            tmp        
         let mutable options = 
             [| for fld in ( columnMapping< ^T > state  ) do  
                 match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
@@ -269,7 +264,11 @@ module Orm =
             |]
         seq { 
             while reader.Read( ) do
-                constructor [| for i in 0..reader.FieldCount-1 do options[i] <| reader.GetValue( i ) |] :?> ^T // dang ol' class factory man
+                constructor 
+                    [| for i in 0..reader.FieldCount-1 do 
+                        options[i] <| reader.GetValue( i ) 
+                    |] 
+                :?> ^T // dang ol' class factory man
         }   
     
     let inline getParamChar state = 
@@ -284,46 +283,18 @@ module Orm =
         let tableName = ( table< ^T > state ) 
         let cols = 
             mapping< ^T > state
-            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries 
-            |> Seq.filter (fun col -> insertKeys || not col.IsKey )
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries 
+            |> Array.filter (fun col -> insertKeys || not col.IsKey )
         let placeHolders = 
             cols
-            |> Seq.mapi ( fun i x -> sprintf "%s%s" paramChar x.FSharpName )
+            |> Array.mapi ( fun i x -> sprintf "%s%s" paramChar x.FSharpName )
             |> String.concat ", "
         let columnNames = 
             cols
-            |> Seq.map ( fun x -> x.QuotedSqlName )
+            |> Array.map ( fun x -> x.QuotedSqlName )
             |> String.concat ", "  
         
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
-
-    //Insert Into table1 Values
-    // ( $1, $2, $3 ),
-    // ( $4, $5, $6 ),
-    let inline insertManyBase< ^T > ( state : OrmState ) insertKeys ( instances : ^T seq )  =
-        let paramChar   = getParamChar     state
-        let tableName   = table< ^T >       state 
-        let cols = 
-            mapping< ^T > state 
-            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName  ) //! Filter out joins for non-select queries
-            |> Seq.filter (fun col -> insertKeys || not col.IsKey )
-        let columns     = columns< ^T >     state
-        let placeHolders = 
-            instances 
-            |> Seq.mapi ( fun index e ->
-                cols
-                |> Seq.mapi ( fun innerIndex x -> 
-                    sprintf "%s%s%i" paramChar x.FSharpName index
-                )
-                |> String.concat ", "
-            )
-            |> String.concat " ), ( "
-        let columnNames = 
-            cols 
-            |> Seq.map ( fun x -> x.QuotedSqlName )
-            |> String.concat ", " 
-        //placeHolders e.g. = "@cola1,@colb1),(@cola2,@colb2),(@cola3,@colb3"
-        sprintf "insert into %s( %s ) values ( %s );"  tableName columnNames placeHolders
     
     let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
         log (fun _ -> printfn "Query being generated:\n\n%s\n\n\n" query )
@@ -358,21 +329,6 @@ module Orm =
                 connection.Close() 
                 result
             )
-        
-        // function 
-        // | Some ( tran : DbTransaction ) ->
-        //     withTransaction db 
-        //         use cmd = makeCommand state sql ( tran.Connection )
-        //         let result = cmd.ExecuteNonQuery( tran )
-        //     Ok result
-        // | None ->  
-        //     match connect state with 
-        //     | Ok conn -> 
-        //         conn.Open( )
-                
-        //         conn.Close( )
-        //         Ok result
-        //     | Error e -> Error e
     
     ///<Description>
     /// Takes a function of IDataReader -> Result< 't seq, exn> (see FORMs consumeReader function as example) to 
@@ -458,8 +414,8 @@ module Orm =
         let paramChar = getParamChar state
         
         mapping< ^T > state
-        |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
-        |> Seq.iter ( fun mappedInstance -> 
+        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
+        |> Array.iter ( fun mappedInstance -> 
             let param =  
                 let mutable tmp = cmd.CreateParameter( )    
                 let mappedValue = mappedInstance.PropertyInfo.GetValue( instance )
@@ -640,8 +596,6 @@ module Orm =
             )
             
     let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instances : ^T seq ) =
-        let paramChar = ( getParamChar state )
-        let numCols = columns< ^T > state |> Seq.length
         let query = insertBase< ^T > state insertKeys 
         transaction
         |> withTransaction 
@@ -667,18 +621,18 @@ module Orm =
         let pchar = getParamChar state
         let cols = 
             mapping< ^T > state
-            |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Seq.filter (fun col -> not col.IsKey) //Can't update keys
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
+            |> Array.filter (fun col -> not col.IsKey) //Can't update keys
         log ( fun _ -> printfn "columns to update: %A" cols )
         let queryParams = 
             cols 
-            |> Seq.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3
+            |> Array.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3
             
 
         let table = table< ^T > state 
         let set = 
-            Seq.zip cols queryParams
-            |> Seq.map ( fun x -> sprintf "%s = %s" (fst x).QuotedSqlName (snd x) ) 
+            Array.zip cols queryParams
+            |> Array.map ( fun x -> sprintf "%s = %s" (fst x).QuotedSqlName (snd x) ) 
             |> String.concat ", "
 
         "update " + table + " set " + set 
@@ -736,7 +690,7 @@ module Orm =
         )
         
     let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
-        // Seq.map ( fun instance -> update<^T> state transaction instance ) instances 
+        // Array.map ( fun instance -> update<^T> state transaction instance ) instances 
         let table = table<^T> state
         let paramChar = getParamChar state
         
@@ -799,8 +753,8 @@ module Orm =
             let tableName = table< ^T > state 
             let paramChar = getParamChar state
             sqlMapping
-            |> Seq.filter ( fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
-            |> Seq.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.filter ( fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
+            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
             |> String.concat " and "
             |> fun where -> deleteHelper< ^T > state transaction where instance  
         )
@@ -836,11 +790,11 @@ module Orm =
                 |> fun res -> connection.Close(); res
             )
 
-    let inline lookupId<^S> state : string seq =
+    let inline lookupId<^S> state =
         columnMapping<^S> state
-        |> Seq.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^S > state  ) //! Filter out joins for non-select queries
-        |> Seq.filter (fun col -> col.IsKey) 
-        |> Seq.map (fun keyCol -> keyCol.QuotedSqlName)
+        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^S > state  ) //! Filter out joins for non-select queries
+        |> Array.filter (fun col -> col.IsKey) 
+        |> Array.map (fun keyCol -> keyCol.QuotedSqlName)
 
     type SqlValueDescriptor = 
         {

@@ -15,14 +15,15 @@ open Configs
 [<
   MemoryDiagnoser; 
   Config(typeof<BenchmarkConfig>);
-  RPlotExporter
+  RPlotExporter;
+  DotTraceDiagnoser
 >]
 type InsertBenchmark() =
     
-    let _sqliteState = SQLite( Benchmarks.Data.sqliteConnectionString (), Data.Context.SQLite )
-    let mutable _data = List.empty
+    let _sqliteState = SQLite( Data.sqliteConnectionString (), Data.Context.SQLite )
+    let mutable _data = Array.empty
     
-    static member public DataValues = [ Data.collectionSmall; Data.collectionBig ]
+    static member public DataValues = Data.collections
     
     [<ParamsSource(nameof(InsertBenchmark.DataValues))>]
     member public _.Data 
@@ -32,37 +33,37 @@ type InsertBenchmark() =
     
     [<IterationSetup>]
     member _.Setup() = 
-        Orm.execute _sqliteState None Benchmarks.Utilities.drop  |> printfn "%A"
-        Orm.execute _sqliteState None Benchmarks.Utilities.create  |> printfn "%A"
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
+        Orm.execute _sqliteState None Utilities.drop |> ignore
+        Orm.execute _sqliteState None Utilities.create |> ignore
     
     [<Benchmark>]
-    member _.InsertForm () = 
+    member _.Form () = 
         let transaction = Orm.beginTransaction _sqliteState
-        // Orm.insertMany<Data.Sanic> _sqliteState transaction true Data.collectionSmall
-        List.map ( fun item -> 
-            Orm.insert<Data.Sanic> _sqliteState transaction true item   
-        ) _data
+        Array.map ( Orm.insert<Data.Sanic> _sqliteState transaction true ) _data
         |> ignore
         Orm.commitTransaction transaction
 
     [<Benchmark>]
-    member _.InsertManyForm () = 
+    member _.FormMany () = 
         let transaction = Orm.beginTransaction _sqliteState
         Orm.insertMany<Data.Sanic> _sqliteState transaction true _data
         |> ignore
         Orm.commitTransaction transaction
         
     [<Benchmark>]
-    member _.InsertDapper () = 
+    member _.Dapper () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
-        connection.Execute("insert into \"Sanic\" values (@id, @name, @optional, @modified)", _data) |> ignore
+        connection.Execute("insert into \"Sanic\" values (@id, @name, @optional, @modified)", _data, transaction) |> ignore
         transaction.Commit()
+        connection.Close()
     
     
-    [<Benchmark>]
-    member _.InsertMicrosoft () = 
+    [<Benchmark(Baseline = true)>]
+    member _.Microsoft () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -81,7 +82,7 @@ type InsertBenchmark() =
         cmd.Parameters.Add(paramName) |> ignore
         cmd.Parameters.Add(paramOptional) |> ignore
         cmd.Parameters.Add(paramModified) |> ignore
-        List.iter ( fun ( item : Data.Sanic ) -> 
+        Array.iter ( fun ( item : Data.Sanic ) -> 
             paramId.Value <- item.id
             paramName.Value <- item.name
             match item.optional with 
@@ -91,18 +92,20 @@ type InsertBenchmark() =
             cmd.ExecuteNonQuery() |> ignore
         ) _data
         transaction.Commit()
+        connection.Close()
 
 [<
   MemoryDiagnoser; 
   Config(typeof<BenchmarkConfig>);
-  RPlotExporter
+  RPlotExporter;
+  DotTraceDiagnoser
 >]
 type UpdateBenchmark() =
     
-    let _sqliteState = SQLite( Benchmarks.Data.sqliteConnectionString (), Data.Context.SQLite )
-    let mutable _data = List.empty
+    let _sqliteState = SQLite( Data.sqliteConnectionString (), Data.Context.SQLite )
+    let mutable _data = Array.empty
     
-    static member public DataValues = [ Utilities.mapOver Data.collectionSmall; Utilities.mapOver Data.collectionBig  ]
+    static member public DataValues = Data.collections
     
     [<ParamsSource(nameof(InsertBenchmark.DataValues))>]
     member public _.Data 
@@ -111,8 +114,10 @@ type UpdateBenchmark() =
     
     [<GlobalSetup>]
     member _.Setup () = 
-        Orm.execute _sqliteState None Benchmarks.Utilities.drop  |> printfn "%A"
-        Orm.execute _sqliteState None Benchmarks.Utilities.create  |> printfn "%A"
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
+        Orm.execute _sqliteState None Utilities.drop |> ignore
+        Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
         Orm.insertMany<Data.Sanic> _sqliteState transaction true _data |> ignore
         Orm.commitTransaction transaction |> ignore
@@ -133,8 +138,9 @@ type UpdateBenchmark() =
         use transaction = connection.BeginTransaction()
         connection.Execute("update \"Sanic\" set name = @name, optional = @optional, modified = @modified where id = @id",  _data, transaction) |> ignore
         transaction.Commit()
+        connection.Close()
     
-    [<Benchmark>]
+    [<Benchmark(Baseline = true)>]
     member _.Microsoft () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
@@ -154,7 +160,7 @@ type UpdateBenchmark() =
         cmd.Parameters.Add(paramName) |> ignore
         cmd.Parameters.Add(paramOptional) |> ignore
         cmd.Parameters.Add(paramModified) |> ignore
-        List.iter ( fun ( item : Data.Sanic ) -> 
+        Array.iter ( fun ( item : Data.Sanic ) -> 
             paramId.Value <- item.id
             paramName.Value <- item.name
             match item.optional with 
@@ -164,6 +170,7 @@ type UpdateBenchmark() =
             cmd.ExecuteNonQuery() |> ignore
         ) _data
         transaction.Commit()
+        connection.Close()
 
 
 [<
@@ -174,9 +181,9 @@ type UpdateBenchmark() =
 >]
 type SelectBenchmark() =
 
-    let _sqliteState = SQLite( Benchmarks.Data.sqliteConnectionString (), Data.Context.SQLite )
+    let _sqliteState = SQLite( Data.sqliteConnectionString (), Data.Context.SQLite )
     let mutable _data = 0
-    static member public DataValues = [ Data.small; Data.big  ]
+    static member public DataValues = [| Data.small; Data.big |]
     
     [<ParamsSource(nameof(InsertBenchmark.DataValues))>]
     member public _.Data 
@@ -186,34 +193,32 @@ type SelectBenchmark() =
 
     [<GlobalSetup>]
     member _.Setup () = 
-        Orm.execute _sqliteState None Benchmarks.Utilities.drop  |> printfn "%A"
-        Orm.execute _sqliteState None Benchmarks.Utilities.create  |> printfn "%A"
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
+        Orm.execute _sqliteState None Utilities.drop |> ignore
+        Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
-        Orm.insertMany<Data.Sanic> _sqliteState transaction true ( Data.collectionSmall @ Data.collectionBig ) |> ignore
+        Orm.insertMany<Data.Sanic> _sqliteState transaction true ( [| yield! Data.collectionSmall; yield! Data.collectionBig |] ) |> ignore
         Orm.commitTransaction transaction |> ignore
         ()
     
 
     [<Benchmark>]
-    member this.Form () = 
+    member _.Form () = 
         Orm.selectLimit<Data.Sanic> _sqliteState None _data  
         |> Result.map ( Seq.iter ignore )
 
     [<Benchmark>]
-    member this.Dapper () = 
+    member _.Dapper () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
-        for item in connection.Query<Data.Sanic>($"select * from Sanic limit {_data};") do () |> ignore
+        for _ in connection.Query<Data.Sanic>($"select * from Sanic limit {_data};") do () 
     
-    [<Benchmark>]
-    member this.Microsoft () = 
-        
+    [<Benchmark(Baseline = true)>]
+    member _.Microsoft () = 
         use connection = new SqliteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use cmd = new SqliteCommand( $"select * from \"Sanic\" limit {_data}", connection )
         let reader = cmd.ExecuteReader()
-        let mutable data = List.empty
-        // Orm.consumeReader<Data.Sanic> _sqliteState reader 
-        // |> Seq.iter ignore
         seq {
             while (reader.Read()) do
                 { 
@@ -231,9 +236,8 @@ module Main =
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
-        
-        // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
-        // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
+        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
         BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0

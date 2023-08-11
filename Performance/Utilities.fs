@@ -3,7 +3,7 @@ namespace rec Benchmarks
 module Utilities =
     open System
     open Dapper
-    let mapOver = List.map ( fun ( x : Data.Sanic )-> { x with modified = System.DateTime.Now.ToString("yyyy-MM-dd") } )
+    let mapOver = Array.map ( fun ( x : Data.Sanic )-> { x with modified = System.DateTime.Now.ToString("yyyy-MM-dd") } )
     let timeIt f = 
         let stopwatch = Diagnostics.Stopwatch.StartNew()
         f() |> ignore
@@ -38,7 +38,7 @@ module Utilities =
             then None
             else Some (value :?> 'T)
 
-    SqlMapper.AddTypeHandler (OptionHandler<int>())
+    
 
 module Data =
     open System
@@ -56,25 +56,25 @@ module Data =
         modified: string
     }
     let small = 1000
-    let big = 100000
+    let big = 10000
     let collectionSmall = 
-        [ for i in 1..small -> 
+        [| for i in 1..small -> 
             { 
                 id = i
                 name = "John Doe" 
                 optional = if i % 2 = 0 then None else Some i 
                 modified = DateTime.Now.ToString("yyyy-MM-dd")
             } 
-        ]
+        |]
     let collectionBig = 
-        [ for i in 1001..(big) -> 
+        [| for i in 1001..(big) -> 
             { 
                 id = i
                 name = "Jane Doe"
                 optional = if i % 2 = 0 then None else Some i
                 modified = DateTime.Now.ToString("yyyy-MM-dd") 
             } 
-        ]
+        |]
     let collections = [|collectionSmall; collectionBig|]
 
     let modifiedCollectionSmall () = Utilities.mapOver collectionSmall
