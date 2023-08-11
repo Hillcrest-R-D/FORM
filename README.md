@@ -37,7 +37,7 @@ type User =
 
 **Table** and **Column** attributes take a name and a context. The name must match that of the relevant object in the database which is referred to by the given context; that is to say, the **User** type refers to a table called "User" in Database1, and "Users" in Database2. If no attribute is given, the underlying logic will default to the name of the type/field, so if you use the same names in your project and your database(s), no **Table**/**Column** attribute is necessary; i.e., the "Id" field will be assumed to map to an "Id" column in both the "User" table in **Database1**, and the same in the "Users" table in **Database2**.
 
-If you want to override the default schema or database, you're able to prepend the table name with the schema name or the shema and database name and everything will translate properly, e.g.:
+If you want to override the default schema or database, you're able to prepend the table name with the schema name or the schema and database name and everything will translate properly, e.g.:
 ```fsharp
 [<Table("SomeDatabase.aSchema.aReallyGoodTable", Contexts.Database1)>] 
 [<Table("bSchema.aReallyGoodTable", Contexts.Database1)>]
@@ -58,15 +58,15 @@ Now we can do some querying:
 selectAll<User> db1State |> printfn "%A"
 ```
 
-This should send a "select *" query to the db1./.User table, if everything was setup correctly. Keep in mind that our querying functions return **Result<[]^T, exn>**, so be prepared to handle those accordingly.
+This should send a "select *" query to the db1./.User table, if everything was setup correctly. Keep in mind that our querying functions return **Result<'T seq, exn>**, so be prepared to handle those accordingly.
 
 We also allow you to run arbitrary SQL against your database.
 
 ```fsharp 
-execute "create table User ( id int not null);" Contexts.Database1 //returns Result<int, exn>
+execute db1State "create table User ( id int not null);" //returns Result<int, exn>
 ```
 
-Or if you need to read the result, you can supply a funciton that takes an IDataReader and we'll consume that and pass the results back.
+Or if you need to read the result, you can supply a function that takes an IDataReader and we'll consume that and pass the results back.
 
 ```fsharp
 let query = 
@@ -78,8 +78,8 @@ let query =
     This consumeReader function is used internally by Form but if you don't want to implement your own reader, you can use it.
     Make sure to align the column names in the hand-written sql with what's returned by mapping< ^T >.
 *)
-let reader = fun readerContext -> consumeReader<User> readerContext Contexts.Database1 
-let result = executeWithReader query reader Contexts.Database1 //Result<User seq, exn>
+let reader = consumeReader<User> db1State  
+let result = executeWithReader db1State query reader  //Result<User seq, exn>
 ```
 
 We have implemented the basic CRUD operations along with some variations on them. If you'd like to see something, try to implement it yourself and open a pull request or make a request through the issues. 

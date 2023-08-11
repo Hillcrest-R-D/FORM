@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <PackageId>Form.Attributes</PackageId>
-    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.0.3</Version>
+    <Version>0.0.7</Version>
     <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
     <Company>Hillcrest Research and Development</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

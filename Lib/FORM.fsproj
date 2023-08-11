@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>1.0.6</Version>
+    <Version>2.0.0</Version>
     <Authors>
         <Author>Evan Howlett, HCRD</Author> 
         <Author>Mackenzie F. Libby, HCRD</Author>
@@ -20,10 +20,10 @@
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Form.Attributes" Version="0.0.3" />
-    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.0" />
-    <PackageReference Include="microsoft.data.sqlite" Version="7.0.3" />
-    <PackageReference Include="mysqlconnector" Version="2.2.5" />
-    <PackageReference Include="npgsql" Version="7.0.2" />
+    <PackageReference Include="Form.Attributes" Version="0.0.7" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.1" />
+    <PackageReference Include="microsoft.data.sqlite" Version="7.0.9" />
+    <PackageReference Include="mysqlconnector" Version="2.2.6" />
+    <PackageReference Include="npgsql" Version="7.0.4" />
   </ItemGroup>
 </Project>

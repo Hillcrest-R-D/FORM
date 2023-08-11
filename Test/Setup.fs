@@ -17,11 +17,20 @@ type Contexts =
     | MSSQL = 4
     | SQLite = 8
 
-let psqlState ()=     PSQL( psqlConnectionString (), Contexts.PSQL )
-let mysqlState ()=    MySQL( mysqlConnectionString (), Contexts.MySQL )
-let mssqlState ()=    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
-let sqliteState  ()=   SQLite( sqliteConnectionString (), Contexts.SQLite )
+let psqlState () =     PSQL( psqlConnectionString (), Contexts.PSQL )
+let mysqlState () =    MySQL( mysqlConnectionString (), Contexts.MySQL )
+let mssqlState () =    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
+let sqliteState () =   SQLite( sqliteConnectionString (), Contexts.SQLite )
 
+[<Table("SubFact", Contexts.PSQL)>]
+[<Table("SubFact", Contexts.MySQL)>]
+[<Table("SubFact", Contexts.MSSQL)>]
+[<Table("SubFact", Contexts.SQLite)>]
+type SubFact = 
+    {
+        factId : int64 
+        subFact : string
+    }
 
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
@@ -33,6 +42,8 @@ type Fact =
         [<Id(Contexts.SQLite)>]
         [<Id(Contexts.MySQL)>]
         [<Id(Contexts.MSSQL)>]
+        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.PSQL)>]
+        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.SQLite)>]
         indexId: int64
         [<PrimaryKey("pk",Contexts.PSQL)>]
         [<PrimaryKey("pk",Contexts.MySQL)>]
@@ -61,6 +72,9 @@ type Fact =
         sometimesNothing : int64 option
         [<Unique("group2", Contexts.PSQL)>]
         biteSize : string
+        [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
+        [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
+        subFact : string option
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -81,6 +95,7 @@ module Fact =
             maybeSomething = "true"
             sometimesNothing = Some 1
             biteSize =  "!aBite"
+            subFact = Some "sooper dooper secret fact"
         }
 
     
