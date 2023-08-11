@@ -205,7 +205,6 @@ module Orm =
             _toOptions[type_] <- info
         let tag, variable = if DBNull.Value.Equals( value ) then 0, [||] else 1, [|value|]
         let case =  info[tag]
-        let ctor = FSharpValue.PreComputeUnionConstructor
         FSharpValue.MakeUnion( case, variable )
 
     let mutable _options = Dictionary<Type, Type option>()
