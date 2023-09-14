@@ -341,7 +341,7 @@ module Orm =
             try 
                 conn.Open( )
                 use cmd = makeCommand state sql conn 
-                cmd.ExecuteReader( )
+                cmd.ExecuteReader( CommandBehavior.CloseConnection )
                 |> Ok
             with 
             | exn -> Error exn
@@ -363,8 +363,9 @@ module Orm =
                 seq {
                     connection.Open( )
                     use cmd = makeCommand state sql connection 
-                    use reader = cmd.ExecuteReader ( )
+                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
                     yield! readerFunction reader
+                    connection.Close()
                 }
             )
 
@@ -529,8 +530,9 @@ module Orm =
                 seq {
                     connection.Open()
                     use cmd = makeCommand state query connection 
-                    use reader = cmd.ExecuteReader( ) 
+                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection ) 
                     yield! consumeReader< ^T > state reader  
+                    connection.Close()
                 }
                 
             )
@@ -590,7 +592,7 @@ module Orm =
                         for i in [0..command.Parameters.Count-1] do 
                             printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
                     )   
-                    let result =  command.ExecuteNonQuery ( )
+                    let result = command.ExecuteNonQuery ( )
                     connection.Close( )
                     result
             )
@@ -602,7 +604,6 @@ module Orm =
             state 
             ( fun transaction ->  
                 parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
-            
             )
             ( fun connection -> 
                 connection.Open()

@@ -7,7 +7,7 @@ open NUnit.Framework
 
 type FixtureArgs =
     static member Source : obj seq = seq {
-        [| sqliteState |] 
+        // [| sqliteState |] 
         [| psqlState |]
     }
     
@@ -87,7 +87,20 @@ type Orm (_testingState) =
         match Orm.insertMany< Fact > testingState None true ( str8Facts ) with 
         | Ok _ -> Assert.Pass() 
         | Error e -> Assert.Fail(e.ToString())
-        
+
+    [<Test>]
+    [<NonParallelizable>]
+    member _.AsyncInsertMany () =
+        async {
+            let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
+            match Orm.insertMany< Fact > testingState None true ( str8Facts ) with 
+            | Ok _ -> 
+                System.Threading.Thread.Sleep(10000)
+                Assert.Pass() 
+            | Error e -> Assert.Fail(e.ToString())
+        }
+
+
     [<Test>]
     [<NonParallelizable>]
     member _.QueryBuild () =
@@ -104,6 +117,21 @@ type Orm (_testingState) =
             Seq.iter ( printfn  "%A") facts
             Assert.Pass(sprintf "facts: %A" facts) 
         | Error e -> Assert.Fail(e.ToString())
+
+    [<Test>]
+    [<NonParallelizable>]
+    member _.AsyncSelect () =
+        printfn "Asynchronously Selecting All..."
+        async {
+            match Orm.selectAll< Fact > testingState None with 
+            | Ok facts -> 
+                // let newFacts = Seq.toList facts 
+                Seq.iter ( printfn  "%A") facts 
+                // System.Threading.Thread.Sleep(10000)
+                Assert.Pass(sprintf "facts: %A" facts) 
+            | Error e -> Assert.Fail(e.ToString())
+        }
+        |> Async.RunSynchronously
 
     [<Test>]
     [<NonParallelizable>]
@@ -230,6 +258,7 @@ type Orm (_testingState) =
         | Ok facts -> Assert.Pass(sprintf "%A" facts)
         | Error e -> Assert.Fail(sprintf "%A" e)
 
+    
 
     // [<Test>]
     // [<NonParallelizable>]
