@@ -125,12 +125,12 @@ module Orm =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>();
-
+ 
     let inline columnMapping< ^T > ( state : OrmState ) = 
         let reifiedType = typeof< ^T >
         let mutable outMapping = Array.empty
         if _mappings.TryGetValue((reifiedType, state), &outMapping) 
-        then outMapping
+        then outMapping 
         else 
             let mapping = 
                 FSharpType.GetRecordFields typedefof< ^T > 
@@ -307,8 +307,11 @@ module Orm =
     let inline withTransaction state transactionFunction noneFunction = 
         function 
         | Some ( transaction : DbTransaction ) ->
-            transactionFunction transaction
-            |> Ok 
+            try 
+                transactionFunction transaction
+                |> Ok 
+            with 
+            | exn -> Error exn
         | None -> 
             connect state 
             |> Result.map ( noneFunction )
@@ -335,7 +338,7 @@ module Orm =
     /// transfer the results of executing the specified sql against the specified database given by state into an 
     /// arbitrary type 't, defined by you in the readerFunction.
     /// </Description>
-    let inline generateReader state sql  =
+    let inline generateReader state sql =
         match connect state with
         | Ok conn -> 
             try 
@@ -566,7 +569,6 @@ module Orm =
     
     let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instance : ^T ) =
         let query = insertBase< ^T > state insertKeys 
-        let paramChar = getParamChar state 
         transaction 
         |> withTransaction 
             state 
@@ -585,7 +587,6 @@ module Orm =
                 fun connection ->
                     connection.Open( )
                     let query = insertBase< ^T > state insertKeys 
-                    let paramChar = getParamChar state 
                     use command = parameterizeCommand state query connection instance //makeCommand query connection state
                     log (fun _ -> 
                         printfn "Param count: %A" command.Parameters.Count
