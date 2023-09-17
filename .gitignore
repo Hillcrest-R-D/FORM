@@ -7,6 +7,7 @@
 **obj/
 **/*.env
 
+
 # User-specific files
 *.rsuser
 *.suo
@@ -45,7 +46,7 @@ bld/
 Generated\ Files/
 
 # MSTest test Results
-[Tt]est[Rr]esult*/
+# [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
 # NUnit
@@ -199,9 +200,9 @@ publish/
 PublishScripts/
 
 # NuGet Packages
-*.nupkg
+**/*.nupkg
 # NuGet Symbol Packages
-*.snupkg
+**/*.snupkg
 # The packages folder can be ignored because of Package Restore
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
@@ -209,8 +210,8 @@ PublishScripts/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
-*.nuget.props
-*.nuget.targets
+**/*.nuget.props
+**/*.nuget.targets
 
 # Microsoft Azure Build Output
 csx/

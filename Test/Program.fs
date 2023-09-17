@@ -1,6 +1,7 @@
 namespace HCRD.FORM.Tests
 open Form
 open Form.Orm
+open Form.Attributes
 open Setup
 module Main = 
     type Contexts =
@@ -15,7 +16,7 @@ module Main =
 
     [<EntryPoint>]
     let main _ = 
-        DotNetEnv.Env.Load() |> ignore
+        DotNetEnv.Env.Load "../" |> ignore
         let testId = 1
         let testIdSeq = seq{1}
         // printfn "int to seq: %A\n int to seq to seq: %A" (Seq.concat [[testId]]) (Seq.red [[testIdSeq]]) 
@@ -27,7 +28,11 @@ module Main =
 
         // let rel : Orm.Relation<int64, Fact>  = { id = 1; value = None}
         // let test = (Orm.Relation<int64,Fact>.Value rel psqlState).value
+        Orm.columnMapping<Fact> <| sqliteState()
+        |> printfn "%A"
 
+        Orm.queryBase<Fact> <| sqliteState()
+        |> printfn "%A"
 
         0
 

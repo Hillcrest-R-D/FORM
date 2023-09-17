@@ -2,15 +2,14 @@ module HCRD.FORM.Tests.Setup
 
 open Form
 open Form.Orm 
+open Form.Attributes
 
 DotNetEnv.Env.Load() |> ignore
 
-let psqlConnectionString = 
-    System.Environment.GetEnvironmentVariable("postgres_connection_string")
-let mysqlConnectionString = ""
-let mssqlConnectionString = ""
-let sqliteConnectionString = 
-    System.Environment.GetEnvironmentVariable("sqlite_connection_string")
+let psqlConnectionString () = System.Environment.GetEnvironmentVariable("postgres_connection_string")
+let mysqlConnectionString () = ""
+let mssqlConnectionString () = ""
+let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
 
 type Contexts =
     | PSQL = 1
@@ -18,10 +17,20 @@ type Contexts =
     | MSSQL = 4
     | SQLite = 8
 
-let psqlState =     PSQL( psqlConnectionString, Contexts.PSQL )
-let mysqlState =    MySQL( mysqlConnectionString, Contexts.MySQL )
-let mssqlState =    MSSQL( mssqlConnectionString, Contexts.MSSQL )
-let sqliteState  =   SQLite( sqliteConnectionString, Contexts.SQLite )
+let psqlState () =     PSQL( psqlConnectionString (), Contexts.PSQL )
+let mysqlState () =    MySQL( mysqlConnectionString (), Contexts.MySQL )
+let mssqlState () =    MSSQL( mssqlConnectionString (), Contexts.MSSQL )
+let sqliteState () =   SQLite( sqliteConnectionString (), Contexts.SQLite )
+
+[<Table("SubFact", Contexts.PSQL)>]
+[<Table("SubFact", Contexts.MySQL)>]
+[<Table("SubFact", Contexts.MSSQL)>]
+[<Table("SubFact", Contexts.SQLite)>]
+type SubFact = 
+    {
+        factId : int64 
+        subFact : string
+    }
 
 [<Table("Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
@@ -31,13 +40,15 @@ type Fact =
     {
         [<Id(Contexts.PSQL)>]
         [<Id(Contexts.SQLite)>]
+        [<Id(Contexts.MySQL)>]
+        [<Id(Contexts.MSSQL)>]
+        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.PSQL)>]
+        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.SQLite)>]
         indexId: int64
-        [<Key(Key.PrimaryKey, Contexts.PSQL)>]
-        [<Key(Key.PrimaryKey, Contexts.MySQL)>]
-        [<Key(Key.PrimaryKey, Contexts.MSSQL)>]
-        [<Key(Key.PrimaryKey, Contexts.SQLite)>]
-        [<Id(Contexts.PSQL)>]
-        [<Id(Contexts.SQLite)>]
+        [<PrimaryKey("pk",Contexts.PSQL)>]
+        [<PrimaryKey("pk",Contexts.MySQL)>]
+        [<PrimaryKey("pk",Contexts.MSSQL)>]
+        [<PrimaryKey("pk",Contexts.SQLite)>]
         id: string
         [<Column("psqlName", Contexts.PSQL)>]
         [<Column("mysqlName", Contexts.MySQL)>]
@@ -52,12 +63,18 @@ type Fact =
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.PSQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP()", Contexts.MySQL)>]
         [<Constraint("DEFAULT CURRENT_TIMESTAMP", Contexts.SQLite)>]
-        timeStamp: string    
+        timeStamp: string
+        [<Unique("group1", Contexts.PSQL)>]    
         specialChar : string
         [<SQLType("boolean", Contexts.PSQL)>]
         maybeSomething : string 
-        sometimesNothing : int option
+        [<Unique("group1", Contexts.PSQL)>] 
+        sometimesNothing : int64 option
+        [<Unique("group2", Contexts.PSQL)>]
         biteSize : string
+        [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
+        [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
+        subFact : string option
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -76,8 +93,9 @@ module Fact =
             timeStamp = System.DateTime.Now.ToString()
             specialChar = "Δ"
             maybeSomething = "true"
-            sometimesNothing = None
-            biteSize =  "!yourmom"
+            sometimesNothing = Some 1
+            biteSize =  "!aBite"
+            subFact = Some "sooper dooper secret fact"
         }
 
     

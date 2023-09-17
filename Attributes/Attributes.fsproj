@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Form.Attributes</PackageId>
+    <TargetFrameworks>net7.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Version>0.0.7</Version>
+    <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
+    <Company>Hillcrest Research and Development</Company>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="../README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

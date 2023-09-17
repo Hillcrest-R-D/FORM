@@ -1,0 +1,1972 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="86fa71ad-1c3e-4930-a555-c789288e7122" name="Fenton@DESKTOP-BGD87SJ 2023-09-13 22:37:03" runUser="DESKTOP-BGD87SJ\Fenton" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2023-09-13T22:37:03.3192057-04:00" queuing="2023-09-13T22:37:03.3192060-04:00" start="2023-09-13T22:36:51.9493485-04:00" finish="2023-09-13T22:37:06.6308398-04:00" />
+  <TestSettings name="default" id="964858ae-c3c7-4eec-896e-cd4e7ab5327c">
+    <Deployment runDeploymentRoot="Fenton_DESKTOP-BGD87SJ_2023-09-13_22_37_03" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="f9aba35a-53a8-46b5-bfc0-272d9fe34885" testId="c5ecb518-1979-13a9-c293-a04b6295e274" testName="DeleteMany" computerName="DESKTOP-BGD87SJ" duration="00:00:00.1446490" startTime="2023-09-13T22:37:03.4548968-04:00" endTime="2023-09-13T22:37:03.5995452-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f9aba35a-53a8-46b5-bfc0-272d9fe34885">
+      <Output>
+        <StdOut>Deleting Many...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+2</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="aa9bcbf2-d706-4816-b5d2-68175e5d276c" testId="2d284b6c-5c67-896d-d39b-b582fc474284" testName="ReaderWithTransaction" computerName="DESKTOP-BGD87SJ" duration="00:00:00.4426060" startTime="2023-09-13T22:37:06.1148551-04:00" endTime="2023-09-13T22:37:06.5574604-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aa9bcbf2-d706-4816-b5d2-68175e5d276c">
+      <Output>
+        <StdOut>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+Error: Index was outside the bounds of the array.</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="20826064-c31b-43b8-8ff2-4430d442ff6b" testId="14ed805e-3806-d0a9-d072-7039f5af1f4b" testName="Reader" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0492480" startTime="2023-09-13T22:37:03.9631689-04:00" endTime="2023-09-13T22:37:04.0124167-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="20826064-c31b-43b8-8ff2-4430d442ff6b">
+      <Output>
+        <StdOut>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+Error: Index was outside the bounds of the array.</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="55d2e3e0-df2a-490c-b871-e0169ab68404" testId="57cae47f-3b44-3854-5d05-8185ecbc5129" testName="Connect" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0009740" startTime="2023-09-13T22:37:03.4007448-04:00" endTime="2023-09-13T22:37:03.4017187-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="55d2e3e0-df2a-490c-b871-e0169ab68404">
+      <Output>
+        <StdOut>Contest: "Data Source=./test.db;"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b7bee493-3058-4819-a503-f45a9ad7d117" testId="14032f00-d57e-064d-43c8-625d0f94033c" testName="UpdateWhere" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0544310" startTime="2023-09-13T22:37:04.6069785-04:00" endTime="2023-09-13T22:37:04.6614089-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b7bee493-3058-4819-a503-f45a9ad7d117">
+      <Output>
+        <StdOut>Updating...&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 5</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ab41f7c7-39f6-4047-8d9d-431a53baf657" testId="6b0006e5-ab81-1704-d774-56777789dc1c" testName="TearDown" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0006530" startTime="2023-09-13T22:37:04.2787968-04:00" endTime="2023-09-13T22:37:04.2794492-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ab41f7c7-39f6-4047-8d9d-431a53baf657">
+      <Output>
+        <StdOut>Transaction: None</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="94be666c-ee8c-49a2-af8f-4abaf91cc653" testId="9492c0ce-4418-80f8-dcb0-0fcac251a06f" testName="Select" computerName="DESKTOP-BGD87SJ" duration="00:00:00.1111200" startTime="2023-09-13T22:37:04.0124407-04:00" endTime="2023-09-13T22:37:04.1235599-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="94be666c-ee8c-49a2-af8f-4abaf91cc653">
+      <Output>
+        <StdOut>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fca6dc6b-4a9f-486a-8b04-4c432efe4151" testId="11ca4904-a1cf-c42f-1896-98cfb1a9d85e" testName="DeleteWhere" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0504850" startTime="2023-09-13T22:37:03.5995702-04:00" endTime="2023-09-13T22:37:03.6500546-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fca6dc6b-4a9f-486a-8b04-4c432efe4151">
+      <Output>
+        <StdOut>Deleting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 2</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8bcadc26-de0a-46f1-9f26-10f5b208c46c" testId="f189dfb4-c52c-9727-119d-7c606e4a4427" testName="SelectLimit" computerName="DESKTOP-BGD87SJ" duration="00:00:00.1059970" startTime="2023-09-13T22:37:04.1235848-04:00" endTime="2023-09-13T22:37:04.2295807-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8bcadc26-de0a-46f1-9f26-10f5b208c46c">
+      <Output>
+        <StdOut>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" limit 5&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" limit 5&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4d2d394e-cdfb-4190-9d96-a87f6ceeeace" testId="8def2ab4-03c9-dd78-923a-b03a9ebf2979" testName="AsyncSelect" computerName="DESKTOP-BGD87SJ" duration="00:00:00.1183810" startTime="2023-09-13T22:37:03.2822964-04:00" endTime="2023-09-13T22:37:03.4006770-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d2d394e-cdfb-4190-9d96-a87f6ceeeace">
+      <Output>
+        <StdOut>Asynchronously Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "4bbe011a-557f-49e9-bed1-6206b6e96443"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "4bbe011a-557f-49e9-bed1-6206b6e96443"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:36:52 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:36:52 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:36:52 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:36:52 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b5f74e56-c57f-4236-9096-3076f21498d9" testId="06b1aa90-97eb-58a2-6bb9-e18d9d0ec32f" testName="SelectWhere" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0491710" startTime="2023-09-13T22:37:04.2296061-04:00" endTime="2023-09-13T22:37:04.2787765-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5f74e56-c57f-4236-9096-3076f21498d9">
+      <Output>
+        <StdOut>Selecting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where "maybeSomething" = 'true'&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }; ...]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="52f0c49a-3ce1-4b99-b4b7-381b0c4cba38" testId="545b1bf1-e638-f0da-05f9-2695305561da" testName="QueryBuild" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0027130" startTime="2023-09-13T22:37:03.9603873-04:00" endTime="2023-09-13T22:37:03.9630996-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="52f0c49a-3ce1-4b99-b4b7-381b0c4cba38">
+      <Output>
+        <StdOut>""Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId""</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="eeac62a6-8e83-4e4e-b5dd-8f40a3888ad7" testId="88acee2d-0361-65c8-86f8-7fd9f73b3ea7" testName="InsertMany" computerName="DESKTOP-BGD87SJ" duration="00:00:00.2538300" startTime="2023-09-13T22:37:03.7065314-04:00" endTime="2023-09-13T22:37:03.9603609-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eeac62a6-8e83-4e4e-b5dd-8f40a3888ad7">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="51427a5a-8a9e-42ac-b14c-a3e12b783981" testId="81d0d541-a556-9943-40c1-c5f6435f396d" testName="InsertUpdateSelect" computerName="DESKTOP-BGD87SJ" duration="00:00:00.6541600" startTime="2023-09-13T22:37:05.4606560-04:00" endTime="2023-09-13T22:37:06.1148149-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="51427a5a-8a9e-42ac-b14c-a3e12b783981">
+      <Output>
+        <StdOut>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:05 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '0eddaede-dc69-4cd5-8df0-21fddee100da'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '0eddaede-dc69-4cd5-8df0-21fddee100da'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '0eddaede-dc69-4cd5-8df0-21fddee100da'&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+You remembered the facts: { indexId = 1L&#xD;
+  id = "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:05 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = Some "sooper dooper secret fact" } - { indexId = 1L&#xD;
+  id = "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+  name = "All Facts, All the Time"&#xD;
+  timeStamp = "9/13/2023 22:37:05 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None } | seq [{ indexId = 1L&#xD;
+       id = "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+       name = "All Facts, All the Time"&#xD;
+       timeStamp = "9/13/2023 22:37:05 "&#xD;
+       specialChar = "Δ"&#xD;
+       maybeSomething = "true"&#xD;
+       sometimesNothing = Some 1L&#xD;
+       biteSize = "!aBite"&#xD;
+       subFact = None }]</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="58552806-2435-4ac9-bf23-64da966537b3" testId="8bc43a71-3dd5-d4b3-9160-b6788c246f20" testName="InsertSelect" computerName="DESKTOP-BGD87SJ" duration="00:00:00.5318200" startTime="2023-09-13T22:37:04.9288152-04:00" endTime="2023-09-13T22:37:05.4606355-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="58552806-2435-4ac9-bf23-64da966537b3">
+      <Output>
+        <StdOut>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "6d80b2b0-fcc2-4de5-9b4a-6a1fb6127baa"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:05 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '6d80b2b0-fcc2-4de5-9b4a-6a1fb6127baa'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '6d80b2b0-fcc2-4de5-9b4a-6a1fb6127baa'</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="119ce2df-c722-414f-83df-1f4154af99ff" testId="4bedf109-5060-9917-8aaf-b66007733e5c" testName="UpdateMany" computerName="DESKTOP-BGD87SJ" duration="00:00:00.2672310" startTime="2023-09-13T22:37:04.3397248-04:00" endTime="2023-09-13T22:37:04.6069557-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="119ce2df-c722-414f-83df-1f4154af99ff">
+      <Output>
+        <StdOut>Updating many...&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Ok 2Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '3a2db014-755f-489e-a718-ff2774488316'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = 'f5ad8d51-69bf-4124-8af7-44450b00e59c'</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="76348771-46bf-4f50-86fb-adcbee011dd1" testId="1fa7f75f-f26c-e1fd-caab-d2e8d803c175" testName="Insert" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0564300" startTime="2023-09-13T22:37:03.6500800-04:00" endTime="2023-09-13T22:37:03.7065099-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76348771-46bf-4f50-86fb-adcbee011dd1">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:03 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e2edd802-57a5-431c-93a4-13892eb1640a" testId="79394db7-0c7a-bbb8-795c-4b52a68853a0" testName="Delete" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0531440" startTime="2023-09-13T22:37:03.4017327-04:00" endTime="2023-09-13T22:37:03.4548763-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e2edd802-57a5-431c-93a4-13892eb1640a">
+      <Output>
+        <StdOut>Deleting...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 0</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8a830009-5a09-48bf-9ec3-bcc3226176cc" testId="86fe2b56-373f-063f-5cdb-a94f011dd4ca" testName="InsertDeleteSelect" computerName="DESKTOP-BGD87SJ" duration="00:00:00.2116060" startTime="2023-09-13T22:37:04.7171836-04:00" endTime="2023-09-13T22:37:04.9287900-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8a830009-5a09-48bf-9ec3-bcc3226176cc">
+      <Output>
+        <StdOut>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "03e540bd-77c5-46f2-b699-2711ea32ace7"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:04 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '03e540bd-77c5-46f2-b699-2711ea32ace7'</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fe39c698-e7f2-448b-a594-28b453519606" testId="2ca81fe3-1888-0a66-75b0-9470085ed4cc" testName="Update" computerName="DESKTOP-BGD87SJ" duration="00:00:00.0602370" startTime="2023-09-13T22:37:04.2794625-04:00" endTime="2023-09-13T22:37:04.3396982-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fe39c698-e7f2-448b-a594-28b453519606">
+      <Output>
+        <StdOut>Updating...&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+facts: 1</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d296db00-18a2-4f59-b45a-4fc57da25d84" testId="9f990d3e-d56c-7eb6-81a2-ebbf929b48fb" testName="AsyncInsertMany" computerName="DESKTOP-BGD87SJ" duration="00:00:10.3070370" startTime="2023-09-13T22:36:52.9744191-04:00" endTime="2023-09-13T22:37:03.2814209-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d296db00-18a2-4f59-b45a-4fc57da25d84">
+      <Output>
+        <StdOut>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Connect" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="57cae47f-3b44-3854-5d05-8185ecbc5129">
+      <Execution id="55d2e3e0-df2a-490c-b871-e0169ab68404" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="Connect" />
+    </UnitTest>
+    <UnitTest name="Delete" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="79394db7-0c7a-bbb8-795c-4b52a68853a0">
+      <Execution id="e2edd802-57a5-431c-93a4-13892eb1640a" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="Delete" />
+    </UnitTest>
+    <UnitTest name="InsertSelect" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="8bc43a71-3dd5-d4b3-9160-b6788c246f20">
+      <Execution id="58552806-2435-4ac9-bf23-64da966537b3" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@11-1)" name="InsertSelect" />
+    </UnitTest>
+    <UnitTest name="AsyncInsertMany" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="9f990d3e-d56c-7eb6-81a2-ebbf929b48fb">
+      <Execution id="d296db00-18a2-4f59-b45a-4fc57da25d84" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="AsyncInsertMany" />
+    </UnitTest>
+    <UnitTest name="InsertMany" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="88acee2d-0361-65c8-86f8-7fd9f73b3ea7">
+      <Execution id="eeac62a6-8e83-4e4e-b5dd-8f40a3888ad7" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="InsertMany" />
+    </UnitTest>
+    <UnitTest name="UpdateWhere" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="14032f00-d57e-064d-43c8-625d0f94033c">
+      <Execution id="b7bee493-3058-4819-a503-f45a9ad7d117" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="UpdateWhere" />
+    </UnitTest>
+    <UnitTest name="SelectWhere" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="06b1aa90-97eb-58a2-6bb9-e18d9d0ec32f">
+      <Execution id="b5f74e56-c57f-4236-9096-3076f21498d9" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="SelectWhere" />
+    </UnitTest>
+    <UnitTest name="Select" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="9492c0ce-4418-80f8-dcb0-0fcac251a06f">
+      <Execution id="94be666c-ee8c-49a2-af8f-4abaf91cc653" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="Select" />
+    </UnitTest>
+    <UnitTest name="ReaderWithTransaction" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="2d284b6c-5c67-896d-d39b-b582fc474284">
+      <Execution id="aa9bcbf2-d706-4816-b5d2-68175e5d276c" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@11-1)" name="ReaderWithTransaction" />
+    </UnitTest>
+    <UnitTest name="UpdateMany" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="4bedf109-5060-9917-8aaf-b66007733e5c">
+      <Execution id="119ce2df-c722-414f-83df-1f4154af99ff" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="UpdateMany" />
+    </UnitTest>
+    <UnitTest name="InsertDeleteSelect" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="86fe2b56-373f-063f-5cdb-a94f011dd4ca">
+      <Execution id="8a830009-5a09-48bf-9ec3-bcc3226176cc" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@11-1)" name="InsertDeleteSelect" />
+    </UnitTest>
+    <UnitTest name="AsyncSelect" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="8def2ab4-03c9-dd78-923a-b03a9ebf2979">
+      <Execution id="4d2d394e-cdfb-4190-9d96-a87f6ceeeace" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="AsyncSelect" />
+    </UnitTest>
+    <UnitTest name="TearDown" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="6b0006e5-ab81-1704-d774-56777789dc1c">
+      <Execution id="ab41f7c7-39f6-4047-8d9d-431a53baf657" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="TearDown" />
+    </UnitTest>
+    <UnitTest name="QueryBuild" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="545b1bf1-e638-f0da-05f9-2695305561da">
+      <Execution id="52f0c49a-3ce1-4b99-b4b7-381b0c4cba38" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="QueryBuild" />
+    </UnitTest>
+    <UnitTest name="Update" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="2ca81fe3-1888-0a66-75b0-9470085ed4cc">
+      <Execution id="fe39c698-e7f2-448b-a594-28b453519606" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="Update" />
+    </UnitTest>
+    <UnitTest name="SelectLimit" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="f189dfb4-c52c-9727-119d-7c606e4a4427">
+      <Execution id="8bcadc26-de0a-46f1-9f26-10f5b208c46c" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="SelectLimit" />
+    </UnitTest>
+    <UnitTest name="Reader" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="14ed805e-3806-d0a9-d072-7039f5af1f4b">
+      <Execution id="20826064-c31b-43b8-8ff2-4430d442ff6b" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="Reader" />
+    </UnitTest>
+    <UnitTest name="Insert" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="1fa7f75f-f26c-e1fd-caab-d2e8d803c175">
+      <Execution id="76348771-46bf-4f50-86fb-adcbee011dd1" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="Insert" />
+    </UnitTest>
+    <UnitTest name="InsertUpdateSelect" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="81d0d541-a556-9943-40c1-c5f6435f396d">
+      <Execution id="51427a5a-8a9e-42ac-b14c-a3e12b783981" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@11-1)" name="InsertUpdateSelect" />
+    </UnitTest>
+    <UnitTest name="DeleteWhere" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="11ca4904-a1cf-c42f-1896-98cfb1a9d85e">
+      <Execution id="fca6dc6b-4a9f-486a-8b04-4c432efe4151" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="DeleteWhere" />
+    </UnitTest>
+    <UnitTest name="DeleteMany" storage="c:\users\fenton\documents\github\hcrd\form\test\bin\debug\net7.0\test.dll" id="c5ecb518-1979-13a9-c293-a04b6295e274">
+      <Execution id="f9aba35a-53a8-46b5-bfc0-272d9fe34885" />
+      <TestMethod codeBase="C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@11-1)" name="DeleteMany" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="c5ecb518-1979-13a9-c293-a04b6295e274" executionId="f9aba35a-53a8-46b5-bfc0-272d9fe34885" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2d284b6c-5c67-896d-d39b-b582fc474284" executionId="aa9bcbf2-d706-4816-b5d2-68175e5d276c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14ed805e-3806-d0a9-d072-7039f5af1f4b" executionId="20826064-c31b-43b8-8ff2-4430d442ff6b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="57cae47f-3b44-3854-5d05-8185ecbc5129" executionId="55d2e3e0-df2a-490c-b871-e0169ab68404" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14032f00-d57e-064d-43c8-625d0f94033c" executionId="b7bee493-3058-4819-a503-f45a9ad7d117" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b0006e5-ab81-1704-d774-56777789dc1c" executionId="ab41f7c7-39f6-4047-8d9d-431a53baf657" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9492c0ce-4418-80f8-dcb0-0fcac251a06f" executionId="94be666c-ee8c-49a2-af8f-4abaf91cc653" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="11ca4904-a1cf-c42f-1896-98cfb1a9d85e" executionId="fca6dc6b-4a9f-486a-8b04-4c432efe4151" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f189dfb4-c52c-9727-119d-7c606e4a4427" executionId="8bcadc26-de0a-46f1-9f26-10f5b208c46c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8def2ab4-03c9-dd78-923a-b03a9ebf2979" executionId="4d2d394e-cdfb-4190-9d96-a87f6ceeeace" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="06b1aa90-97eb-58a2-6bb9-e18d9d0ec32f" executionId="b5f74e56-c57f-4236-9096-3076f21498d9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="545b1bf1-e638-f0da-05f9-2695305561da" executionId="52f0c49a-3ce1-4b99-b4b7-381b0c4cba38" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="88acee2d-0361-65c8-86f8-7fd9f73b3ea7" executionId="eeac62a6-8e83-4e4e-b5dd-8f40a3888ad7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="81d0d541-a556-9943-40c1-c5f6435f396d" executionId="51427a5a-8a9e-42ac-b14c-a3e12b783981" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8bc43a71-3dd5-d4b3-9160-b6788c246f20" executionId="58552806-2435-4ac9-bf23-64da966537b3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4bedf109-5060-9917-8aaf-b66007733e5c" executionId="119ce2df-c722-414f-83df-1f4154af99ff" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1fa7f75f-f26c-e1fd-caab-d2e8d803c175" executionId="76348771-46bf-4f50-86fb-adcbee011dd1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="79394db7-0c7a-bbb8-795c-4b52a68853a0" executionId="e2edd802-57a5-431c-93a4-13892eb1640a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="86fe2b56-373f-063f-5cdb-a94f011dd4ca" executionId="8a830009-5a09-48bf-9ec3-bcc3226176cc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2ca81fe3-1888-0a66-75b0-9470085ed4cc" executionId="fe39c698-e7f2-448b-a594-28b453519606" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9f990d3e-d56c-7eb6-81a2-ebbf929b48fb" executionId="d296db00-18a2-4f59-b45a-4fc57da25d84" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="21" executed="21" passed="21" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 4.4.0.0: Test execution started&#xD;
+Running all tests in C:\Users\Fenton\Documents\GitHub\hcrd\FORM\Test\bin\Debug\net7.0\Test.dll&#xD;
+   NUnit3TestExecutor discovered 21 of 21 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+AsyncSelect: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "4bbe011a-557f-49e9-bed1-6206b6e96443"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:36:52 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:36:52 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:36:52 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:36:52 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }]&#xD;
+Delete: facts: 0&#xD;
+DeleteMany: 2&#xD;
+DeleteWhere: facts: 2&#xD;
+Reader: Error: Index was outside the bounds of the array.&#xD;
+Select: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }; ...]&#xD;
+SelectLimit: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }; ...]&#xD;
+SelectWhere: facts: seq&#xD;
+  [{ indexId = 1L&#xD;
+     id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = Some 1L&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None };&#xD;
+   { indexId = 1L&#xD;
+     id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+     name = "Gerry McGuire"&#xD;
+     timeStamp = "9/13/2023 22:37:03 "&#xD;
+     specialChar = "Δ"&#xD;
+     maybeSomething = "true"&#xD;
+     sometimesNothing = None&#xD;
+     biteSize = "!aBite"&#xD;
+     subFact = None }; { indexId = 1L&#xD;
+                         id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+                         name = "Gerry McGuire"&#xD;
+                         timeStamp = "9/13/2023 22:37:03 "&#xD;
+                         specialChar = "Δ"&#xD;
+                         maybeSomething = "true"&#xD;
+                         sometimesNothing = Some 1L&#xD;
+                         biteSize = "!aBite"&#xD;
+                         subFact = None }; ...]&#xD;
+TearDown: Transaction: None&#xD;
+Update: facts: 1&#xD;
+UpdateWhere: facts: 5&#xD;
+InsertUpdateSelect: You remembered the facts: { indexId = 1L&#xD;
+  id = "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:05 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = Some "sooper dooper secret fact" } - { indexId = 1L&#xD;
+  id = "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+  name = "All Facts, All the Time"&#xD;
+  timeStamp = "9/13/2023 22:37:05 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None } | seq [{ indexId = 1L&#xD;
+       id = "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+       name = "All Facts, All the Time"&#xD;
+       timeStamp = "9/13/2023 22:37:05 "&#xD;
+       specialChar = "Δ"&#xD;
+       maybeSomething = "true"&#xD;
+       sometimesNothing = Some 1L&#xD;
+       biteSize = "!aBite"&#xD;
+       subFact = None }]&#xD;
+ReaderWithTransaction: Error: Index was outside the bounds of the array.&#xD;
+NUnit Adapter 4.4.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.3012615-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.4015122-04:00">
+        <Text>Asynchronously Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "4bbe011a-557f-49e9-bed1-6206b6e96443"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:36:52 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.4044716-04:00">
+        <Text>Contest: "Data Source=./test.db;"&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.4554004-04:00">
+        <Text>Deleting...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.6000372-04:00">
+        <Text>Deleting Many...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.6505654-04:00">
+        <Text>Deleting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.7070384-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:03 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.9608384-04:00">
+        <Text>Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:03.9636012-04:00">
+        <Text>""Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId""&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.0129253-04:00">
+        <Text>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.1241808-04:00">
+        <Text>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.2304351-04:00">
+        <Text>Selecting All...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" limit 5&#xD;
+&#xD;
+&#xD;
+&#xD;
+{ indexId = 1L&#xD;
+  id = "25459455-aaa6-46fc-8309-3da136021ace"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "ae9f1dc4-8e45-4d83-9b11-871fe8efe3b3"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "f5ad8d51-69bf-4124-8af7-44450b00e59c"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = None&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "3a2db014-755f-489e-a718-ff2774488316"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+{ indexId = 1L&#xD;
+  id = "cdecbb91-9be5-40b5-98d6-9ef2fca08fd7"&#xD;
+  name = "Gerry McGuire"&#xD;
+  timeStamp = "9/13/2023 22:37:03 "&#xD;
+  specialChar = "Δ"&#xD;
+  maybeSomething = "true"&#xD;
+  sometimesNothing = Some 1L&#xD;
+  biteSize = "!aBite"&#xD;
+  subFact = None }&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" limit 5&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.2792931-04:00">
+        <Text>Selecting Where...&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where "maybeSomething" = 'true'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.3402591-04:00">
+        <Text>Updating...&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.6076578-04:00">
+        <Text>Updating many...&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Ok 2Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '3a2db014-755f-489e-a718-ff2774488316'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = 'f5ad8d51-69bf-4124-8af7-44450b00e59c'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.6619374-04:00">
+        <Text>Updating...&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "indexId" = 1&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:04.9293200-04:00">
+        <Text>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "03e540bd-77c5-46f2-b699-2711ea32ace7"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:04 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+delete from "Fact" where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '03e540bd-77c5-46f2-b699-2711ea32ace7'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:05.4610653-04:00">
+        <Text>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "6d80b2b0-fcc2-4de5-9b4a-6a1fb6127baa"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:05 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '6d80b2b0-fcc2-4de5-9b4a-6a1fb6127baa'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '6d80b2b0-fcc2-4de5-9b4a-6a1fb6127baa'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:06.1157626-04:00">
+        <Text>Do we have a transaction? Some Npgsql.NpgsqlTransaction&#xD;
+Query being generated:&#xD;
+&#xD;
+insert into "Fact" ( "indexId", "id", "psqlName", "timeStamp", "specialChar", "maybeSomething", "sometimesNothing", "biteSize" ) values ( @indexId, @id, @name, @timeStamp, @specialChar, @maybeSomething, @sometimesNothing, @biteSize )&#xD;
+&#xD;
+&#xD;
+&#xD;
+Param count: 8&#xD;
+Param 0 - "@indexId": 1L&#xD;
+Param 1 - "@id": "0eddaede-dc69-4cd5-8df0-21fddee100da"&#xD;
+Param 2 - "@name": "Gerry McGuire"&#xD;
+Param 3 - "@timeStamp": "9/13/2023 22:37:05 "&#xD;
+Param 4 - "@specialChar": "Δ"&#xD;
+Param 5 - "@maybeSomething": "true"&#xD;
+Param 6 - "@sometimesNothing": 1L&#xD;
+Param 7 - "@biteSize": "!aBite"&#xD;
+columns to update: [|{ Index = 0&#xD;
+    IsKey = false&#xD;
+    IsIndex = true&#xD;
+    JoinOn = Some ("SubFact", "factId")&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "indexId"&#xD;
+    QuotedSqlName = ""indexId""&#xD;
+    FSharpName = "indexId"&#xD;
+    Type = System.Int64&#xD;
+    PropertyInfo = Int64 indexId }; { Index = 2&#xD;
+                                      IsKey = false&#xD;
+                                      IsIndex = false&#xD;
+                                      JoinOn = None&#xD;
+                                      Source = ""Fact""&#xD;
+                                      QuotedSource = ""Fact""&#xD;
+                                      SqlName = "psqlName"&#xD;
+                                      QuotedSqlName = ""psqlName""&#xD;
+                                      FSharpName = "name"&#xD;
+                                      Type = System.String&#xD;
+                                      PropertyInfo = System.String name };&#xD;
+  { Index = 3&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "timeStamp"&#xD;
+    QuotedSqlName = ""timeStamp""&#xD;
+    FSharpName = "timeStamp"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String timeStamp };&#xD;
+  { Index = 4&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "specialChar"&#xD;
+    QuotedSqlName = ""specialChar""&#xD;
+    FSharpName = "specialChar"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String specialChar };&#xD;
+  { Index = 5&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "maybeSomething"&#xD;
+    QuotedSqlName = ""maybeSomething""&#xD;
+    FSharpName = "maybeSomething"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String maybeSomething };&#xD;
+  { Index = 6&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "sometimesNothing"&#xD;
+    QuotedSqlName = ""sometimesNothing""&#xD;
+    FSharpName = "sometimesNothing"&#xD;
+    Type = Microsoft.FSharp.Core.FSharpOption`1[System.Int64]&#xD;
+    PropertyInfo =&#xD;
+     Microsoft.FSharp.Core.FSharpOption`1[System.Int64] sometimesNothing };&#xD;
+  { Index = 7&#xD;
+    IsKey = false&#xD;
+    IsIndex = false&#xD;
+    JoinOn = None&#xD;
+    Source = ""Fact""&#xD;
+    QuotedSource = ""Fact""&#xD;
+    SqlName = "biteSize"&#xD;
+    QuotedSqlName = ""biteSize""&#xD;
+    FSharpName = "biteSize"&#xD;
+    Type = System.String&#xD;
+    PropertyInfo = System.String biteSize }|]&#xD;
+Query being generated:&#xD;
+&#xD;
+update "Fact" set "indexId" = @indexId, "psqlName" = @name, "timeStamp" = @timeStamp, "specialChar" = @specialChar, "maybeSomething" = @maybeSomething, "sometimesNothing" = @sometimesNothing, "biteSize" = @biteSize where "Fact"."id" = @id&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '0eddaede-dc69-4cd5-8df0-21fddee100da'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '0eddaede-dc69-4cd5-8df0-21fddee100da'&#xD;
+&#xD;
+&#xD;
+&#xD;
+Query being generated:&#xD;
+&#xD;
+select "Fact"."indexId", "Fact"."id", "Fact"."psqlName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" where id = '0eddaede-dc69-4cd5-8df0-21fddee100da'&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-BGD87SJ" outcome="Warning" timestamp="2023-09-13T22:37:06.5578903-04:00">
+        <Text>Reading...&#xD;
+Query being generated:&#xD;
+&#xD;
+select * from "Fact"&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

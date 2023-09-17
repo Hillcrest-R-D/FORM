@@ -1,24 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>0.9.28</Version>
-    <Authors>Evan Howlett, Mackenzie F. Libby</Authors>
-    <Company>Hillcrest Research and Development</Company>
-    <TargetFramework>net6.0</TargetFramework>
+    <Version>2.0.1-beta</Version>
+    <Authors>
+        <Author>Evan Howlett, HCRD</Author> 
+        <Author>Mackenzie F. Libby, HCRD</Author>
+    </Authors>
+    <Company>Hillcrest Research and Development LLC</Company>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="ORM.fs" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.0" />
-    <PackageReference Include="microsoft.data.sqlite" Version="7.0.3" />
-    <PackageReference Include="mysqlconnector" Version="2.2.5" />
-    <PackageReference Include="npgsql" Version="7.0.2" />
+    <PackageReference Include="Form.Attributes" Version="0.0.7" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.1" />
+    <PackageReference Include="microsoft.data.sqlite" Version="7.0.9" />
+    <PackageReference Include="mysqlconnector" Version="2.2.6" />
+    <PackageReference Include="npgsql" Version="7.0.4" />
   </ItemGroup>
 </Project>
