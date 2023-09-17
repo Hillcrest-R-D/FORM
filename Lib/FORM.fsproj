@@ -22,8 +22,8 @@
   <ItemGroup>
     <PackageReference Include="Form.Attributes" Version="0.0.7" />
     <PackageReference Include="microsoft.data.sqlclient" Version="5.1.1" />
-    <PackageReference Include="microsoft.data.sqlite" Version="7.0.9" />
-    <PackageReference Include="mysqlconnector" Version="2.2.6" />
-    <PackageReference Include="npgsql" Version="7.0.4" />
+    <PackageReference Include="mysqlconnector" Version="2.2.7" />
+    <PackageReference Include="npgsql" Version="7.0.6" />
+    <PackageReference Include="system.data.sqlite" Version="1.0.118" />
   </ItemGroup>
 </Project>

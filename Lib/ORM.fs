@@ -7,7 +7,7 @@ open FSharp.Reflection
 open Npgsql
 open NpgsqlTypes
 open Microsoft.Data.SqlClient
-open Microsoft.Data.Sqlite
+open System.Data.SQLite
 open MySqlConnector
 open System.Data.Common
 open Microsoft.FSharp.Core.LanguagePrimitives
@@ -23,7 +23,7 @@ module Orm =
             | MSSQL     ( str, _ ) -> new SqlConnection( str ) :> DbConnection
             | MySQL     ( str, _ ) -> new MySqlConnection( str ) :> DbConnection
             | PSQL      ( str, _ ) -> new NpgsqlConnection( str ) :> DbConnection
-            | SQLite    ( str, _ ) -> new SqliteConnection( str ) :> DbConnection
+            | SQLite    ( str, _ ) -> new SQLiteConnection( str ) :> DbConnection
             |> Ok
         with 
         | exn -> Error exn
@@ -302,7 +302,7 @@ module Orm =
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection )
         | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
-        | SQLite _ -> new SqliteCommand ( query, connection :?> SqliteConnection )
+        | SQLite _ -> new SQLiteCommand ( query, connection :?> SQLiteConnection )
 
     let inline withTransaction state transactionFunction noneFunction = 
         function 
@@ -397,8 +397,8 @@ module Orm =
         | :? Option<Decimal> as t -> tmp.Value <- t |> Option.get
         | :? Option<Double> as t -> tmp.Value <- t |> Option.get
         | :? Option<Int16> as t -> tmp.Value <- t |> Option.get
-        | :? Option<Int32> as t -> tmp.Value <- t |> Option.get
         | :? Option<Int64> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int32> as t -> tmp.Value <- t |> Option.get
         | :? Option<Int128> as t -> tmp.Value <- t |> Option.get
         | :? Option<SByte> as t -> tmp.Value <- t |> Option.get
         | :? Option<Single> as t -> tmp.Value <- t |> Option.get
@@ -561,7 +561,7 @@ module Orm =
         | MSSQL _ -> SqlParameter( )
         | MySQL _ -> MySqlParameter( )
         | PSQL _ -> NpgsqlParameter( )
-        | SQLite _ -> SqliteParameter( )
+        | SQLite _ -> SQLiteParameter( )
     
     
     let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instance : ^T ) =

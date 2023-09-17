@@ -7,7 +7,7 @@ open NUnit.Framework
 
 type FixtureArgs =
     static member Source : obj seq = seq {
-        // [| sqliteState |] 
+        [| sqliteState |] 
         [| psqlState |]
     }
     
@@ -35,7 +35,7 @@ type Orm (_testingState) =
 
     let intType = 
         match testingState with 
-        | SQLite _ -> "int"
+        | SQLite _ -> "integer"
         | PSQL _ -> "bigint"
         | _ -> "bigint"
     let transaction = 
@@ -98,7 +98,8 @@ type Orm (_testingState) =
                 System.Threading.Thread.Sleep(10000)
                 Assert.Pass() 
             | Error e -> Assert.Fail(e.ToString())
-        }
+        } 
+        |> Async.RunSynchronously
 
 
     [<Test>]
@@ -127,7 +128,9 @@ type Orm (_testingState) =
             | Ok facts -> 
                 // let newFacts = Seq.toList facts 
                 Seq.iter ( printfn  "%A") facts 
-                // System.Threading.Thread.Sleep(10000)
+                match testingState with 
+                | SQLite _ -> () 
+                | _ -> System.Threading.Thread.Sleep(10000)
                 Assert.Pass(sprintf "facts: %A" facts) 
             | Error e -> Assert.Fail(e.ToString())
         }
@@ -297,7 +300,7 @@ type OrmTransaction ( _testingState ) =
 
     let intType = 
         match testingState with 
-        | SQLite _ -> "int"
+        | SQLite _ -> "integer"
         | PSQL _ -> "bigint"
         | _ -> "bigint"
         
@@ -340,7 +343,9 @@ type OrmTransaction ( _testingState ) =
         // Orm.insert< SubFact > testingState true ({factId = theFact.indexId; subFact = "woooo"}) transaction |> ignore
         Orm.insert< Fact > testingState transaction true ( theFact ) 
         |> Result.bind ( fun _ -> 
+            printfn "We have inserted"
             Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'" 
+            |> fun x -> printfn "We have the facts: %A" x; x
             |> function 
             | Ok facts when Seq.length facts > 0 -> 
                 theBackFact <- Seq.head facts
@@ -354,8 +359,8 @@ type OrmTransaction ( _testingState ) =
         | Ok _ -> 
             if theFact = theBackFact 
             then Assert.Pass() 
-            else Assert.Fail(sprintf "%A %A" theFact theBackFact) 
-        | Error error -> Assert.Fail(error.ToString()) 
+            else Assert.Fail(sprintf "%A %A %A" testingState theFact theBackFact) 
+        | Error error -> Assert.Fail(sprintf "%A %A" testingState (error.ToString())) 
 
     
     

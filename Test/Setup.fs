@@ -87,13 +87,13 @@ type Fact =
 module Fact = 
     let init () = 
         {
-            indexId = 1
+            indexId = 1L
             id = System.Guid.NewGuid().ToString()
             name = "Gerry McGuire"
             timeStamp = System.DateTime.Now.ToString()
             specialChar = "Δ"
             maybeSomething = "true"
-            sometimesNothing = Some 1
+            sometimesNothing = Some 1L
             biteSize =  "!aBite"
             subFact = Some "sooper dooper secret fact"
         }
