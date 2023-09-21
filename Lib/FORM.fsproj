@@ -15,12 +15,14 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Utilities.fs" />
+    <!--<Compile Include="Relation.fs" />-->
     <Compile Include="ORM.fs" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Form.Attributes" Version="0.0.7" />
+    <PackageReference Include="Form.Attributes" Version="0.0.8" />
     <PackageReference Include="microsoft.data.sqlclient" Version="5.1.1" />
     <PackageReference Include="mysqlconnector" Version="2.2.7" />
     <PackageReference Include="npgsql" Version="7.0.6" />

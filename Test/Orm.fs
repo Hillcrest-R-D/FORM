@@ -2,6 +2,7 @@ module Test.Orm
 
 open Form
 open Form.Attributes
+open Form.Utilities
 open HCRD.FORM.Tests.Setup 
 open NUnit.Framework
 
@@ -105,7 +106,7 @@ type Orm (_testingState) =
     [<Test>]
     [<NonParallelizable>]
     member _.QueryBuild () =
-        printfn "%A" (Orm.queryBase< Fact > testingState)
+        printfn "%A" (queryBase< Fact > testingState)
         Assert.Pass()
 
 

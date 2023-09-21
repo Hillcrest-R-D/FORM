@@ -81,8 +81,8 @@ type Fact =
     // member Relationship (lookup) = 
     //     ^A 
 
-    static member Relation (id, indexId) =
-        { id =  Orm.Node (  {_type = typeof<int>; value = id }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
+    // static member Relation (id, indexId) =
+    //     { id =  Orm.Node (  {_type = typeof<int>; value = id }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
 
 module Fact = 
     let init () = 

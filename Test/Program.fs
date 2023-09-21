@@ -2,6 +2,7 @@ namespace HCRD.FORM.Tests
 open Form
 open Form.Orm
 open Form.Attributes
+open Form.Utilities
 open Setup
 module Main = 
     type Contexts =
@@ -28,10 +29,10 @@ module Main =
 
         // let rel : Orm.Relation<int64, Fact>  = { id = 1; value = None}
         // let test = (Orm.Relation<int64,Fact>.Value rel psqlState).value
-        Orm.columnMapping<Fact> <| sqliteState()
+        columnMapping<Fact> <| sqliteState()
         |> printfn "%A"
 
-        Orm.queryBase<Fact> <| sqliteState()
+        queryBase<Fact> <| sqliteState()
         |> printfn "%A"
 
         0
