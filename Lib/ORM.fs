@@ -20,9 +20,6 @@ module Orm =
         match connect state with 
         | Ok connection ->
             try 
-                if connection.State = ConnectionState.Closed 
-                then connection.Open()
-                else ()
                 Some ( connection.BeginTransaction() )
             with 
             | exn -> 
@@ -59,7 +56,6 @@ module Orm =
                 cmd.ExecuteNonQuery( )
             )
             ( fun connection -> 
-                connection.Open()
                 use cmd = makeCommand state sql connection  
                 let result = cmd.ExecuteNonQuery( )
                 connection.Close() 
@@ -75,7 +71,6 @@ module Orm =
         match connect state with
         | Ok conn -> 
             try 
-                conn.Open( )
                 use cmd = makeCommand state sql conn 
                 cmd.ExecuteReader( CommandBehavior.CloseConnection )
                 |> Ok
@@ -97,7 +92,6 @@ module Orm =
             )
             ( fun connection -> 
                 seq {
-                    connection.Open( )
                     use cmd = makeCommand state sql connection 
                     use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
                     yield! readerFunction reader
@@ -124,30 +118,27 @@ module Orm =
         transaction 
         |> withTransaction 
             state 
-            (
-                fun transaction ->
-                    use command = parameterizeCommand state query (transaction.Connection) instance //makeCommand query conn state
-                    log (fun _ -> 
-                        printfn "Param count: %A" command.Parameters.Count
-                        for i in [0..command.Parameters.Count-1] do 
-                            printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                    )  
-                    command.Transaction <- transaction
-                    command.ExecuteNonQuery ( ) 
+            ( fun transaction ->
+                use command = parameterizeCommand state query (transaction.Connection) instance //makeCommand query conn state
+                log (fun _ -> 
+                    printfn "Param count: %A" command.Parameters.Count
+                    for i in [0..command.Parameters.Count-1] do 
+                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                )  
+                command.Transaction <- transaction
+                command.ExecuteNonQuery ( ) 
             )
-            (
-                fun connection ->
-                    connection.Open( )
-                    let query = insertBase< ^T > state insertKeys 
-                    use command = parameterizeCommand state query connection instance //makeCommand query connection state
-                    log (fun _ -> 
-                        printfn "Param count: %A" command.Parameters.Count
-                        for i in [0..command.Parameters.Count-1] do 
-                            printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                    )   
-                    let result = command.ExecuteNonQuery ( )
-                    connection.Close( )
-                    result
+            ( fun connection ->
+                let query = insertBase< ^T > state insertKeys 
+                use command = parameterizeCommand state query connection instance //makeCommand query connection state
+                log (fun _ -> 
+                    printfn "Param count: %A" command.Parameters.Count
+                    for i in [0..command.Parameters.Count-1] do 
+                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                )   
+                let result = command.ExecuteNonQuery ( )
+                connection.Close( )
+                result
             )
             
     let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instances : ^T seq ) =
@@ -159,7 +150,6 @@ module Orm =
                 parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
             )
             ( fun connection -> 
-                connection.Open()
                 use transaction = connection.BeginTransaction()
                 parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
                 |> fun x -> transaction.Commit();connection.Close(); x
@@ -233,7 +223,6 @@ module Orm =
                 cmd.ExecuteNonQuery ( )
             )
             ( fun connection -> 
-                connection.Open( )
                 use cmd = makeCommand state query connection 
                 cmd.ExecuteNonQuery ( )
                 |> fun res -> connection.Close(); res

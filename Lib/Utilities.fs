@@ -16,6 +16,7 @@ module Utilities =
     open System.Data.SqlClient
     open System.Reflection
     open System.Data.Common
+    open System.Data
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
@@ -35,12 +36,14 @@ module Utilities =
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
-            match state with 
-            | MSSQL     ( str, _ ) -> new SqlConnection( str ) :> DbConnection
-            | MySQL     ( str, _ ) -> new MySqlConnection( str ) :> DbConnection
-            | PSQL      ( str, _ ) -> new NpgsqlConnection( str ) :> DbConnection
-            | SQLite    ( str, _ ) -> new SQLiteConnection( str ) :> DbConnection
-            |> Ok
+            let connection = 
+                match state with 
+                | MSSQL     ( str, _ ) -> new SqlConnection( str ) :> DbConnection
+                | MySQL     ( str, _ ) -> new MySqlConnection( str ) :> DbConnection
+                | PSQL      ( str, _ ) -> new NpgsqlConnection( str ) :> DbConnection
+                | SQLite    ( str, _ ) -> new SQLiteConnection( str ) :> DbConnection
+            connection.Open()
+            Ok connection
         with 
         | exn -> Error exn
 
@@ -295,17 +298,13 @@ module Utilities =
         | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
         | SQLite _ -> new SQLiteCommand ( query, connection :?> SQLiteConnection )
 
-    let inline withTransaction state transactionFunction noneFunction = 
-        function 
-        | Some ( transaction : DbTransaction ) ->
-            try 
-                transactionFunction transaction
-                |> Ok 
-            with 
-            | exn -> Error exn
-        | None -> 
-            connect state 
-            |> Result.map ( noneFunction )
+    let inline withTransaction state transactionFunction noneFunction transaction =
+        try 
+            match transaction with 
+            | Some ( transaction : DbTransaction ) -> transactionFunction transaction |> Ok 
+            | None -> connect state |> Result.map ( noneFunction )
+        with 
+        | exn -> Error exn
 
     let rec genericTypeName full ( _type : Type ) = 
         if not _type.IsGenericType 
@@ -327,7 +326,6 @@ module Utilities =
 
     let inline parameterizeCommand< ^T > state query conn ( instance : ^T ) =
         let cmd = makeCommand state query conn 
-        
         let paramChar = getParamChar state
         
         mapping< ^T > state
@@ -419,7 +417,9 @@ module Utilities =
         ( String.concat ", " cols ) + " from " + table< ^T > state
         + " " + joins
 
-    let inline select< ^T > ( state : OrmState ) (transaction : DbTransaction option) query = 
+    let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
+        let query = queryBase< ^T > state |> f
+        
         transaction
         |> withTransaction  
             state 
@@ -433,7 +433,6 @@ module Utilities =
             )
             ( fun ( connection : DbConnection ) -> 
                 seq {
-                    connection.Open()
                     use cmd = makeCommand state query connection 
                     use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection ) 
                     yield! consumeReader< ^T > state reader  
@@ -441,11 +440,6 @@ module Utilities =
                 }
                 
             )
-
-    let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
-        queryBase< ^T > state
-        |> f
-        |> select< ^T > state transaction
 
 
     let inline updateBase< ^T > ( state : OrmState ) = 
@@ -485,7 +479,6 @@ module Utilities =
                 command.ExecuteNonQuery ( )
             )
             ( fun connection -> 
-                connection.Open( )
                 use command = parameterizeCommand< ^T > state query connection instance 
                 let result = command.ExecuteNonQuery ( )
                 connection.Close( )
@@ -501,7 +494,6 @@ module Utilities =
                 parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) instances  
             )
             ( fun connection -> 
-                connection.Open( )
                 let transaction = connection.BeginTransaction() 
                 parameterizeSeqAndExecuteCommand< ^T > state query transaction instances 
                 |> fun x -> transaction.Commit();connection.Close(); x 
@@ -523,7 +515,6 @@ module Utilities =
                 command.ExecuteNonQuery ( )        
             )
             ( fun connection -> 
-                connection.Open( )
                 use cmd = parameterizeCommand< ^T > state query connection instance 
                 let result = cmd.ExecuteNonQuery ( )
                 connection.Close()
@@ -539,7 +530,6 @@ module Utilities =
                 parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) instances  
             )
             ( fun connection -> 
-                connection.Open( )
                 let transaction = connection.BeginTransaction() 
                 parameterizeSeqAndExecuteCommand< ^T > state query transaction instances 
                 |> fun x -> transaction.Commit();connection.Close(); x 
