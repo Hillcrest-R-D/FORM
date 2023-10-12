@@ -55,7 +55,7 @@ The connection strings should just be given as strings, deliver these however yo
 Now we can do some querying:
 
 ```fsharp
-selectAll<User> db1State |> printfn "%A"
+selectAll<User> db1State None |> printfn "%A"
 ```
 
 This should send a "select *" query to the db1./.User table, if everything was setup correctly. Keep in mind that our querying functions return **Result<'T seq, exn>**, so be prepared to handle those accordingly.
@@ -63,7 +63,7 @@ This should send a "select *" query to the db1./.User table, if everything was s
 We also allow you to run arbitrary SQL against your database.
 
 ```fsharp 
-execute db1State "create table User ( id int not null);" //returns Result<int, exn>
+execute db1State None "create table User ( id int not null);" //returns Result<int, exn>
 ```
 
 Or if you need to read the result, you can supply a function that takes an IDataReader and we'll consume that and pass the results back.
@@ -78,8 +78,8 @@ let query =
     This consumeReader function is used internally by Form but if you don't want to implement your own reader, you can use it.
     Make sure to align the column names in the hand-written sql with what's returned by mapping< ^T >.
 *)
-let reader = consumeReader<User> db1State  
-let result = executeWithReader db1State query reader  //Result<User seq, exn>
+let reader = consumeReader<User> db1State None
+let result = executeWithReader db1State None query reader  //Result<User seq, exn>
 ```
 
 We have implemented the basic CRUD operations along with some variations on them. If you'd like to see something, try to implement it yourself and open a pull request or make a request through the issues. 
