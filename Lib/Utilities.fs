@@ -17,6 +17,7 @@ module Utilities =
     open System.Reflection
     open System.Data.Common
     open System.Data
+    open Logging
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
@@ -47,11 +48,6 @@ module Utilities =
         with 
         | exn -> Error exn
 
-    let inline log f = 
-    #if DEBUG 
-            f()
-    #endif  
-            ()
 
     let inline sqlQuote ( state : OrmState ) str  =
         match state with 
@@ -215,19 +211,23 @@ module Utilities =
         match opt with 
         | :? Option<Byte>       as t -> tmp.Value <- t |> Option.get
         | :? Option<Char>       as t -> tmp.Value <- t |> Option.get
+        | :? Option<SByte>      as t -> tmp.Value <- t |> Option.get //Int8
         | :? Option<Int16>      as t -> tmp.Value <- t |> Option.get
-        | :? Option<Int64>      as t -> tmp.Value <- t |> Option.get
         | :? Option<Int32>      as t -> tmp.Value <- t |> Option.get
-        | :? Option<SByte>      as t -> tmp.Value <- t |> Option.get
-        | :? Option<Double>     as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int64>      as t -> tmp.Value <- t |> Option.get
+        #if NET7_0_OR_GREATER
         | :? Option<Int128>     as t -> tmp.Value <- t |> Option.get
+        #endif
+        | :? Option<Double>     as t -> tmp.Value <- t |> Option.get
         | :? Option<Single>     as t -> tmp.Value <- t |> Option.get
         | :? Option<String>     as t -> tmp.Value <- t |> Option.get
         | :? Option<UInt16>     as t -> tmp.Value <- t |> Option.get
         | :? Option<UInt32>     as t -> tmp.Value <- t |> Option.get
         | :? Option<UInt64>     as t -> tmp.Value <- t |> Option.get
-        | :? Option<Boolean>    as t -> tmp.Value <- t |> Option.get
+        #if NET7_0_OR_GREATER
         | :? Option<UInt128>    as t -> tmp.Value <- t |> Option.get
+        #endif
+        | :? Option<Boolean>    as t -> tmp.Value <- t |> Option.get
         | :? Option<Decimal>    as t -> tmp.Value <- t |> Option.get
         | :? Option<DateTime>   as t -> tmp.Value <- t |> Option.get
         | _ -> ()
@@ -291,7 +291,7 @@ module Utilities =
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
     
     let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
-        log (fun _ -> printfn "Query being generated:\n\n%s\n\n\n" query )
+        log ( sprintf "Query being generated:\n\n%s\n\n" query )
         match state with 
         | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection )
@@ -448,7 +448,7 @@ module Utilities =
             mapping< ^T > state
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Array.filter (fun col -> not col.IsKey) //Can't update keys
-        log ( fun _ -> printfn "columns to update: %A" cols )
+        log ( sprintf "columns to update: %A" cols )
         let queryParams = 
             cols 
             |> Array.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3

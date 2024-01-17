@@ -7,7 +7,7 @@
         <Author>Mackenzie F. Libby, HCRD</Author>
     </Authors>
     <Company>Hillcrest Research and Development LLC</Company>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -15,6 +15,7 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Logging.fs" />
     <Compile Include="Utilities.fs" />
     <!--<Compile Include="Relation.fs" />-->
     <Compile Include="ORM.fs" />
@@ -22,8 +23,9 @@
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Form.Attributes" Version="0.0.8" />
-    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.1" />
+    <PackageReference Include="Form.Attributes" Version="0.0.9" />
+    <PackageReference Include="microsoft.extensions.logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="mysqlconnector" Version="2.2.7" />
     <PackageReference Include="npgsql" Version="7.0.6" />
     <PackageReference Include="system.data.sqlite" Version="1.0.118" />

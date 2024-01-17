@@ -1,19 +1,25 @@
 ﻿namespace Form 
 
-open System
-open System.Data
-open FSharp.Reflection
-open Npgsql
-open Microsoft.Data.SqlClient
-open System.Data.SQLite
-open MySqlConnector
-open System.Data.Common
-open Form.Attributes
-    
+
 module Orm = 
+    open System
+    open System.Data
+    open FSharp.Reflection
+    open Npgsql
+    open System.Data.SQLite
+    open MySqlConnector
+    open System.Data.Common
+    open Form.Attributes
+    open System.Text.RegularExpressions
     open Utilities
-    ///<Description>Stores the flavor And context used for a particular connection.</Description>
+    open Logging
     
+    
+    
+    let escape subject = 
+        Regex.Replace( subject, @"'", @"''" )
+    
+    ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( state : OrmState ) = Utilities.connect state
 
     let inline beginTransaction ( state : OrmState ) =
@@ -23,14 +29,12 @@ module Orm =
                 Some ( connection.BeginTransaction() )
             with 
             | exn -> 
-                log ( fun _ -> printfn "Exception when beginning transaction: %A" exn )
+                log ( sprintf "Exception when beginning transaction: %A" exn )
                 None
         | Error e -> 
-            log ( fun _ -> printfn "Error when beginning transaction: %A" e )
+            log ( sprintf "Error when beginning transaction: %A" e )
             None
-    
 
- 
     let commitTransaction = 
         Option.map ( fun ( transaction : DbTransaction ) -> transaction.Commit() )
     let rollbackTransaction = 
@@ -106,7 +110,7 @@ module Orm =
             | _ -> $"select {x} limit {lim}" 
         ) 
 
-    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where   = 
+    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x} where {where}" ) 
         
     let inline selectAll< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) = 
@@ -120,10 +124,12 @@ module Orm =
             state 
             ( fun transaction ->
                 use command = parameterizeCommand state query (transaction.Connection) instance //makeCommand query conn state
-                log (fun _ -> 
-                    printfn "Param count: %A" command.Parameters.Count
-                    for i in [0..command.Parameters.Count-1] do 
-                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                log ( 
+                    sprintf "Param count: %A" command.Parameters.Count :: 
+                    [ for i in [0..command.Parameters.Count-1] do 
+                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value 
+                    ]
+                    |> String.concat "\n"
                 )  
                 command.Transaction <- transaction
                 command.ExecuteNonQuery ( ) 
@@ -131,10 +137,11 @@ module Orm =
             ( fun connection ->
                 let query = insertBase< ^T > state insertKeys 
                 use command = parameterizeCommand state query connection instance //makeCommand query connection state
-                log (fun _ -> 
-                    printfn "Param count: %A" command.Parameters.Count
-                    for i in [0..command.Parameters.Count-1] do 
-                        printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                log (
+                    sprintf "Param count: %A" command.Parameters.Count ::
+                    [ for i in [0..command.Parameters.Count-1] do 
+                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                    ] |> String.concat "\n"
                 )   
                 let result = command.ExecuteNonQuery ( )
                 connection.Close( )
@@ -170,7 +177,6 @@ module Orm =
         )
         
     let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
-        // Array.map ( fun instance -> update<^T> state transaction instance ) instances 
         let table = table<^T> state
         let paramChar = getParamChar state
         
