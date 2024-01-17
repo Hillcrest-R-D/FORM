@@ -71,6 +71,11 @@ type SQLTypeAttribute( definition : string, context : obj ) =
 type UniqueAttribute( group : string,context : obj ) = 
     inherit DbAttribute( )
     override _.Value = (group,  ( context :?> DbContext )  |> EnumToValue)
+
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = false )>]
+type LazyAttribute() = 
+    inherit DbAttribute( )
+    override _.Value = ("lazy",  -1)
     
 ///<Description>An attribute type which specifies a Column name</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
