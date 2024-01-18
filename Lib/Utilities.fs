@@ -3,9 +3,7 @@ namespace Form
 module Utilities = 
     open Form.Attributes
     open System.Collections.Generic
-    open FSharp.Reflection.FSharpReflectionExtensions
     open Microsoft.FSharp.Reflection
-    open System.Collections.Generic
     open Microsoft.FSharp.Core.LanguagePrimitives
     open NpgsqlTypes
     open System
@@ -16,8 +14,8 @@ module Utilities =
     open System.Data.SqlClient
     open System.Reflection
     open System.Data.Common
-    open System.Data
     open Logging
+    open System.Data.Odbc
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
@@ -43,17 +41,19 @@ module Utilities =
                 | MySQL     ( str, _ ) -> new MySqlConnection( str ) :> DbConnection
                 | PSQL      ( str, _ ) -> new NpgsqlConnection( str ) :> DbConnection
                 | SQLite    ( str, _ ) -> new SQLiteConnection( str ) :> DbConnection
+                | ODBC      ( str, _ ) -> new OdbcConnection( str ) :> DbConnection
             connection.Open()
             Ok connection
         with 
         | exn -> Error exn
 
-
     let inline sqlQuote ( state : OrmState ) str  =
         match state with 
         | MSSQL _ -> $"[{str}]"
         | MySQL _ -> $"`{str}`"
-        | PSQL _ | SQLite _ -> $"\"{str}\""
+        | PSQL _ 
+        | SQLite _ 
+        | ODBC _ -> $"\"{str}\""
 
     let inline context< ^T > ( state : OrmState ) = 
         match state with 
@@ -61,6 +61,7 @@ module Utilities =
         | MySQL     ( _, c ) -> c 
         | PSQL      ( _, c ) -> c 
         | SQLite    ( _, c ) -> c 
+        | ODBC      ( _, c ) -> c 
     let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
         Array.fold ( fun s ( x : DbAttribute ) ->  
                 if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
@@ -183,10 +184,11 @@ module Utilities =
         
     let inline makeParameter ( state : OrmState ) : DbParameter =
         match state with
-        | MSSQL _ -> SqlParameter( )
-        | MySQL _ -> MySqlParameter( )
-        | PSQL _ -> NpgsqlParameter( )
-        | SQLite _ -> SQLiteParameter( )
+        | MSSQL     _ -> SqlParameter( )
+        | MySQL     _ -> MySqlParameter( )
+        | PSQL      _ -> NpgsqlParameter( )
+        | SQLite    _ -> SQLiteParameter( )
+        | ODBC      _ -> OdbcParameter( )
         
     let toDbType ( typeCode : TypeCode ) = 
         match typeCode with 
@@ -238,12 +240,7 @@ module Utilities =
         with 
         | exn -> Error exn
     
-    let inline getParamChar state = 
-        match state with
-        | MSSQL _ -> "@"
-        | MySQL _ -> "$"
-        | PSQL _ -> "@"
-        | SQLite _ -> "@"   
+    let inline getParamChar _ = "@"
 
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
@@ -293,10 +290,11 @@ module Utilities =
     let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
         log ( sprintf "Query being generated:\n\n%s\n\n" query )
         match state with 
-        | MSSQL _ -> new SqlCommand ( query, connection :?> SqlConnection )
-        | MySQL _ -> new MySqlCommand ( query, connection :?> MySqlConnection )
-        | PSQL _ -> new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
-        | SQLite _ -> new SQLiteCommand ( query, connection :?> SQLiteConnection )
+        | MSSQL _ ->    new SqlCommand ( query, connection :?> SqlConnection )
+        | MySQL _ ->    new MySqlCommand ( query, connection :?> MySqlConnection )
+        | PSQL _ ->     new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
+        | SQLite _ ->   new SQLiteCommand ( query, connection :?> SQLiteConnection )
+        | ODBC _ ->     new OdbcCommand ( query, connection :?> OdbcConnection )
 
     let inline withTransaction state transactionFunction noneFunction transaction =
         try 

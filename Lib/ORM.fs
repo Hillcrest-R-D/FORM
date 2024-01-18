@@ -103,11 +103,11 @@ module Orm =
                 }
             )
             
-    let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) lim = 
+    let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( limit : int ) = 
         selectHelper< ^T > state transaction ( fun x -> 
             match state with 
-            | MSSQL _ -> $"select top {lim} {x}" 
-            | _ -> $"select {x} limit {lim}" 
+            | MSSQL _ -> $"select top {limit} {x}" 
+            | _ -> $"select {x} limit {limit}" 
         ) 
 
     let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where = 

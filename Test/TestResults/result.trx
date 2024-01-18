@@ -1,0 +1,568 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2aba8339-9095-4032-aaa0-ece6a90cf799" name="Evan@THE-BIG-RIG 2024-01-17 21:37:53" runUser="THE-BIG-RIG\Evan" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2024-01-17T21:37:53.9272767-05:00" queuing="2024-01-17T21:37:53.9272769-05:00" start="2024-01-17T21:37:52.1309615-05:00" finish="2024-01-17T21:37:54.5066185-05:00" />
+  <TestSettings name="default" id="30234cf0-89da-423a-b018-9c1d98ec716a">
+    <Deployment runDeploymentRoot="Evan_THE-BIG-RIG_2024-01-17_21_37_53" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="f64111cc-bcae-4295-bd12-7c08d4722880" testId="dee87abb-278d-d264-a309-bb627f5a5a16" testName="Reader" computerName="THE-BIG-RIG" duration="00:00:00.0011280" startTime="2024-01-17T21:37:53.8873594-05:00" endTime="2024-01-17T21:37:53.8884871-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f64111cc-bcae-4295-bd12-7c08d4722880">
+      <Output>
+        <StdOut>Reading...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.Reader() in C:\hcrd\FORM\Test\Orm.fs:line 264</Message>
+          <StackTrace>   at Test.Orm.Orm.Reader() in C:\hcrd\FORM\Test\Orm.fs:line 267&#xD;
+
+1)    at Test.Orm.Orm.Reader() in C:\hcrd\FORM\Test\Orm.fs:line 267&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="162087f0-23ad-4012-9925-34db7ca782fe" testId="2c876ad9-ab07-8c8e-7308-8c0fa5a0f606" testName="UpdateMany" computerName="THE-BIG-RIG" duration="00:00:00.0105850" startTime="2024-01-17T21:37:54.4305246-05:00" endTime="2024-01-17T21:37:54.4411094-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="162087f0-23ad-4012-9925-34db7ca782fe">
+      <Output>
+        <StdOut>Updating many...&#xD;
+Error&#xD;
+  System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Pipe #1 input at line 183@183-1.Invoke(SqlMapping[] sqlMapping)</StdOut>
+        <ErrorInfo>
+          <Message>Couldn't verify update happened</Message>
+          <StackTrace>   at Test.Orm.Orm.UpdateMany() in C:\hcrd\FORM\Test\Orm.fs:line 194&#xD;
+
+1)    at Test.Orm.Orm.UpdateMany() in C:\hcrd\FORM\Test\Orm.fs:line 194&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9ed490ff-6279-4bc2-9a99-e56f2a57e421" testId="bf6fa0c8-26fc-e7b5-d851-6afe8e40678c" testName="TearDown" computerName="THE-BIG-RIG" duration="00:00:00.0007780" startTime="2024-01-17T21:37:53.8949144-05:00" endTime="2024-01-17T21:37:53.8956919-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ed490ff-6279-4bc2-9a99-e56f2a57e421">
+      <Output>
+        <StdOut>Transaction: None</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6e8946cf-600b-4fb5-b9b0-de88e84baafe" testId="616282d1-d095-5218-7762-30ced8a4a5ba" testName="InsertMany" computerName="THE-BIG-RIG" duration="00:00:00.0018450" startTime="2024-01-17T21:37:53.8840143-05:00" endTime="2024-01-17T21:37:53.8858592-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6e8946cf-600b-4fb5-b9b0-de88e84baafe">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.InsertMany() in C:\hcrd\FORM\Test\Orm.fs:line 92</Message>
+          <StackTrace>   at Test.Orm.Orm.InsertMany() in C:\hcrd\FORM\Test\Orm.fs:line 94&#xD;
+
+1)    at Test.Orm.Orm.InsertMany() in C:\hcrd\FORM\Test\Orm.fs:line 94&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="50473154-ba60-4eac-b125-53e96c537bd6" testId="f05ddcd0-ac50-dcb6-ba4b-6ed67f274aa6" testName="Delete" computerName="THE-BIG-RIG" duration="00:00:00.0039500" startTime="2024-01-17T21:37:53.8735408-05:00" endTime="2024-01-17T21:37:53.8774909-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="50473154-ba60-4eac-b125-53e96c537bd6">
+      <Output>
+        <StdOut>Deleting...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Delete@228.Invoke(SqlMapping[] sqlMapping)</Message>
+          <StackTrace>   at Test.Orm.Orm.Delete() in C:\hcrd\FORM\Test\Orm.fs:line 231&#xD;
+
+1)    at Test.Orm.Orm.Delete() in C:\hcrd\FORM\Test\Orm.fs:line 231&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="023ac107-e301-4510-8f04-6ababea9368c" testId="62c436ef-9adc-74c1-a7d8-3f3e68803c8e" testName="Connect" computerName="THE-BIG-RIG" duration="00:00:00.0011999" startTime="2024-01-17T21:37:53.8723326-05:00" endTime="2024-01-17T21:37:53.8735323-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="023ac107-e301-4510-8f04-6ababea9368c">
+      <Output>
+        <StdOut>Contest: &lt;null&gt;</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.Connect() in C:\hcrd\FORM\Test\Orm.fs:line 76</Message>
+          <StackTrace>   at Test.Orm.Orm.Connect() in C:\hcrd\FORM\Test\Orm.fs:line 78&#xD;
+
+1)    at Test.Orm.Orm.Connect() in C:\hcrd\FORM\Test\Orm.fs:line 78&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d7263d00-6845-4c6b-a9db-f5ca443a6af6" testId="9824ae67-cd51-7e05-9ab3-639a0f77df6b" testName="AsyncSelect" computerName="THE-BIG-RIG" duration="00:00:00.0053510" startTime="2024-01-17T21:37:53.8669657-05:00" endTime="2024-01-17T21:37:53.8723164-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d7263d00-6845-4c6b-a9db-f5ca443a6af6">
+      <Output>
+        <StdOut>Asynchronously Selecting All...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Pipe #1 input at line 131@132.Invoke(Unit unitVar) in C:\hcrd\FORM\Test\Orm.fs:line 132</Message>
+          <StackTrace>   at Test.Orm.Pipe #1 input at line 131@132.Invoke(Unit unitVar) in C:\hcrd\FORM\Test\Orm.fs:line 140&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.CallThenInvoke[T,TResult](AsyncActivation`1 ctxt, TResult result1, FSharpFunc`2 part2) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 510&#xD;
+   at Microsoft.FSharp.Control.Trampoline.Execute(FSharpFunc`2 firstAction) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 112&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.FSharp.Control.AsyncResult`1.Commit() in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 454&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.QueueAsyncAndWaitForResultSynchronously[a](CancellationToken token, FSharpAsync`1 computation, FSharpOption`1 timeout) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 1140&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.RunSynchronously[T](CancellationToken cancellationToken, FSharpAsync`1 computation, FSharpOption`1 timeout) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 1167&#xD;
+   at Microsoft.FSharp.Control.FSharpAsync.RunSynchronously[T](FSharpAsync`1 computation, FSharpOption`1 timeout, FSharpOption`1 cancellationToken) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 1511&#xD;
+   at Test.Orm.Orm.AsyncSelect() in C:\hcrd\FORM\Test\Orm.fs:line 142&#xD;
+
+1)    at Test.Orm.Pipe #1 input at line 131@132.Invoke(Unit unitVar) in C:\hcrd\FORM\Test\Orm.fs:line 140&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.CallThenInvoke[T,TResult](AsyncActivation`1 ctxt, TResult result1, FSharpFunc`2 part2) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 510&#xD;
+   at Microsoft.FSharp.Control.Trampoline.Execute(FSharpFunc`2 firstAction) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 112&#xD;
+   at &lt;StartupCode$FSharp-Core&gt;.$Async.clo@193-15.Invoke(Object o) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 195&#xD;
+   at System.Threading.QueueUserWorkItemCallback.Execute()&#xD;
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()&#xD;
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9a5c03bd-521e-4d44-94f7-b8a63d49ed30" testId="efc486a7-73e1-dc9e-aaed-a66f9e554fa5" testName="SelectLimit" computerName="THE-BIG-RIG" duration="00:00:00.0020970" startTime="2024-01-17T21:37:53.8906557-05:00" endTime="2024-01-17T21:37:53.8927525-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9a5c03bd-521e-4d44-94f7-b8a63d49ed30">
+      <Output>
+        <StdOut>Selecting All...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.SelectLimit() in C:\hcrd\FORM\Test\Orm.fs:line 148</Message>
+          <StackTrace>   at Test.Orm.Orm.SelectLimit() in C:\hcrd\FORM\Test\Orm.fs:line 152&#xD;
+
+1)    at Test.Orm.Orm.SelectLimit() in C:\hcrd\FORM\Test\Orm.fs:line 152&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="09f9137a-c60c-490e-8d91-e69a350b4fcd" testId="5ada5574-62e3-d934-c529-539c64e0a354" testName="DeleteMany" computerName="THE-BIG-RIG" duration="00:00:00.0027169" startTime="2024-01-17T21:37:53.8775033-05:00" endTime="2024-01-17T21:37:53.8802200-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="09f9137a-c60c-490e-8d91-e69a350b4fcd">
+      <Output>
+        <StdOut>Deleting Many...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Pipe #1 input at line 252@252.Invoke(SqlMapping[] sqlMapping)</Message>
+          <StackTrace>   at Test.Orm.Orm.DeleteMany() in C:\hcrd\FORM\Test\Orm.fs:line 255&#xD;
+
+1)    at Test.Orm.Orm.DeleteMany() in C:\hcrd\FORM\Test\Orm.fs:line 255&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e7e52faf-e9d2-410b-93cb-7d3d2ed8ebc9" testId="e97fba11-f558-2f85-dd1f-feefafd54456" testName="SelectWhere" computerName="THE-BIG-RIG" duration="00:00:00.0021450" startTime="2024-01-17T21:37:53.8927609-05:00" endTime="2024-01-17T21:37:53.8949052-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e7e52faf-e9d2-410b-93cb-7d3d2ed8ebc9">
+      <Output>
+        <StdOut>Selecting Where...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.SelectWhere() in C:\hcrd\FORM\Test\Orm.fs:line 158</Message>
+          <StackTrace>   at Test.Orm.Orm.SelectWhere() in C:\hcrd\FORM\Test\Orm.fs:line 161&#xD;
+
+1)    at Test.Orm.Orm.SelectWhere() in C:\hcrd\FORM\Test\Orm.fs:line 161&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="25c591c2-1e31-44a2-8dfc-1ce94f8fea2f" testId="dc92b01b-03be-17e1-2289-c8300d806470" testName="Select" computerName="THE-BIG-RIG" duration="00:00:00.0021500" startTime="2024-01-17T21:37:53.8884970-05:00" endTime="2024-01-17T21:37:53.8906468-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="25c591c2-1e31-44a2-8dfc-1ce94f8fea2f">
+      <Output>
+        <StdOut>Selecting All...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.Select() in C:\hcrd\FORM\Test\Orm.fs:line 121</Message>
+          <StackTrace>   at Test.Orm.Orm.Select() in C:\hcrd\FORM\Test\Orm.fs:line 125&#xD;
+
+1)    at Test.Orm.Orm.Select() in C:\hcrd\FORM\Test\Orm.fs:line 125&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e11da1b5-f108-4155-9409-7464b530ac74" testId="ff216cba-df32-a039-2ddb-c8dafedef395" testName="AsyncInsertMany" computerName="THE-BIG-RIG" duration="00:00:00.1012220" startTime="2024-01-17T21:37:53.7647652-05:00" endTime="2024-01-17T21:37:53.8659538-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e11da1b5-f108-4155-9409-7464b530ac74">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Pipe #1 input at line 99@100.Invoke(Unit unitVar) in C:\hcrd\FORM\Test\Orm.fs:line 101</Message>
+          <StackTrace>   at Test.Orm.Pipe #1 input at line 99@100.Invoke(Unit unitVar) in C:\hcrd\FORM\Test\Orm.fs:line 105&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.CallThenInvoke[T,TResult](AsyncActivation`1 ctxt, TResult result1, FSharpFunc`2 part2) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 510&#xD;
+   at Microsoft.FSharp.Control.Trampoline.Execute(FSharpFunc`2 firstAction) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 112&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.FSharp.Control.AsyncResult`1.Commit() in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 454&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.QueueAsyncAndWaitForResultSynchronously[a](CancellationToken token, FSharpAsync`1 computation, FSharpOption`1 timeout) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 1140&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.RunSynchronously[T](CancellationToken cancellationToken, FSharpAsync`1 computation, FSharpOption`1 timeout) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 1167&#xD;
+   at Microsoft.FSharp.Control.FSharpAsync.RunSynchronously[T](FSharpAsync`1 computation, FSharpOption`1 timeout, FSharpOption`1 cancellationToken) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 1511&#xD;
+   at Test.Orm.Orm.AsyncInsertMany() in C:\hcrd\FORM\Test\Orm.fs:line 107&#xD;
+
+1)    at Test.Orm.Pipe #1 input at line 99@100.Invoke(Unit unitVar) in C:\hcrd\FORM\Test\Orm.fs:line 105&#xD;
+   at Microsoft.FSharp.Control.AsyncPrimitives.CallThenInvoke[T,TResult](AsyncActivation`1 ctxt, TResult result1, FSharpFunc`2 part2) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 510&#xD;
+   at Microsoft.FSharp.Control.Trampoline.Execute(FSharpFunc`2 firstAction) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 112&#xD;
+   at &lt;StartupCode$FSharp-Core&gt;.$Async.clo@193-15.Invoke(Object o) in D:\a\_work\1\s\src\FSharp.Core\async.fs:line 195&#xD;
+   at System.Threading.QueueUserWorkItemCallback.Execute()&#xD;
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()&#xD;
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ed70545a-0519-402f-abae-d66147f65ae9" testId="c06b26c7-3880-a7a5-295d-094447998fcb" testName="InsertDeleteSelect" computerName="THE-BIG-RIG" duration="00:00:00.0042560" startTime="2024-01-17T21:37:54.4481310-05:00" endTime="2024-01-17T21:37:54.4523871-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ed70545a-0519-402f-abae-d66147f65ae9">
+      <Output>
+        <StdOut>Do we have a transaction? None</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.OrmTransaction.InsertDeleteSelect() in C:\hcrd\FORM\Test\Orm.fs:line 382</Message>
+          <StackTrace>   at Test.Orm.OrmTransaction.InsertDeleteSelect() in C:\hcrd\FORM\Test\Orm.fs:line 399&#xD;
+
+1)    at Test.Orm.OrmTransaction.InsertDeleteSelect() in C:\hcrd\FORM\Test\Orm.fs:line 399&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a060e8f3-2ef8-4d80-8317-2b0c8788b45b" testId="cff8b2af-f2c6-aedd-de60-3c318f0bcf0e" testName="Insert" computerName="THE-BIG-RIG" duration="00:00:00.0022200" startTime="2024-01-17T21:37:53.8817804-05:00" endTime="2024-01-17T21:37:53.8839998-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a060e8f3-2ef8-4d80-8317-2b0c8788b45b">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.Insert() in C:\hcrd\FORM\Test\Orm.fs:line 84</Message>
+          <StackTrace>   at Test.Orm.Orm.Insert() in C:\hcrd\FORM\Test\Orm.fs:line 86&#xD;
+
+1)    at Test.Orm.Orm.Insert() in C:\hcrd\FORM\Test\Orm.fs:line 86&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ebad9bac-d733-4ad3-a21d-818e5a4e1325" testId="d103a85b-e5b1-b6de-fa29-b6c1d04ab077" testName="InsertUpdateSelect" computerName="THE-BIG-RIG" duration="00:00:00.0042990" startTime="2024-01-17T21:37:54.4577668-05:00" endTime="2024-01-17T21:37:54.4620652-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ebad9bac-d733-4ad3-a21d-818e5a4e1325">
+      <Output>
+        <StdOut>Do we have a transaction? None</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.OrmTransaction.InsertUpdateSelect() in C:\hcrd\FORM\Test\Orm.fs:line 413</Message>
+          <StackTrace>   at Test.Orm.OrmTransaction.InsertUpdateSelect() in C:\hcrd\FORM\Test\Orm.fs:line 433&#xD;
+
+1)    at Test.Orm.OrmTransaction.InsertUpdateSelect() in C:\hcrd\FORM\Test\Orm.fs:line 433&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="837347a3-7775-4cae-8837-9a0b27edd4cd" testId="b9460c40-1e0e-8c62-436c-b6e2aad1b702" testName="Update" computerName="THE-BIG-RIG" duration="00:00:00.5348020" startTime="2024-01-17T21:37:53.8957023-05:00" endTime="2024-01-17T21:37:54.4305033-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="837347a3-7775-4cae-8837-9a0b27edd4cd">
+      <Output>
+        <StdOut>Updating...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Update@170-1.Invoke(SqlMapping[] sqlMapping)</Message>
+          <StackTrace>   at Test.Orm.Orm.Update() in C:\hcrd\FORM\Test\Orm.fs:line 173&#xD;
+
+1)    at Test.Orm.Orm.Update() in C:\hcrd\FORM\Test\Orm.fs:line 173&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="db502e5b-2e96-487d-b96a-8e08478fd023" testId="23a461f4-b816-b63f-5f4d-b121a49eeef1" testName="InsertSelect" computerName="THE-BIG-RIG" duration="00:00:00.0053450" startTime="2024-01-17T21:37:54.4524031-05:00" endTime="2024-01-17T21:37:54.4577477-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="db502e5b-2e96-487d-b96a-8e08478fd023">
+      <Output>
+        <StdOut>Do we have a transaction? None</StdOut>
+        <ErrorInfo>
+          <Message>System.NullReferenceException : Object reference not set to an instance of an object.</Message>
+          <StackTrace>   at Test.Orm.OrmTransaction.InsertSelect() in C:\hcrd\FORM\Test\Orm.fs:line 368&#xD;
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="482251b2-f360-4aaf-b499-3203a1d0ecf9" testId="17c8bba8-cc65-759e-b5fa-fcd024529114" testName="DeleteWhere" computerName="THE-BIG-RIG" duration="00:00:00.0015440" startTime="2024-01-17T21:37:53.8802285-05:00" endTime="2024-01-17T21:37:53.8817720-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="482251b2-f360-4aaf-b499-3203a1d0ecf9">
+      <Output>
+        <StdOut>Deleting Where...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.DeleteWhere() in C:\hcrd\FORM\Test\Orm.fs:line 239</Message>
+          <StackTrace>   at Test.Orm.Orm.DeleteWhere() in C:\hcrd\FORM\Test\Orm.fs:line 242&#xD;
+
+1)    at Test.Orm.Orm.DeleteWhere() in C:\hcrd\FORM\Test\Orm.fs:line 242&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="38a3519b-17ed-4f54-908e-cdd767ff7b84" testId="fa3eba4c-d3e1-efe3-e38b-66e04f688542" testName="UpdateWhere" computerName="THE-BIG-RIG" duration="00:00:00.0040270" startTime="2024-01-17T21:37:54.4411293-05:00" endTime="2024-01-17T21:37:54.4451564-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="38a3519b-17ed-4f54-908e-cdd767ff7b84">
+      <Output>
+        <StdOut>Updating...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Orm.UpdateWhere() in C:\hcrd\FORM\Test\Orm.fs:line 216</Message>
+          <StackTrace>   at Test.Orm.Orm.UpdateWhere() in C:\hcrd\FORM\Test\Orm.fs:line 219&#xD;
+
+1)    at Test.Orm.Orm.UpdateWhere() in C:\hcrd\FORM\Test\Orm.fs:line 219&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="96f9658a-915a-41c4-8ff5-d21e5c626c60" testId="2715f22b-f859-cd49-8251-6507a1af0fd9" testName="ReaderWithTransaction" computerName="THE-BIG-RIG" duration="00:00:00.0053040" startTime="2024-01-17T21:37:54.4620908-05:00" endTime="2024-01-17T21:37:54.4673946-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="96f9658a-915a-41c4-8ff5-d21e5c626c60">
+      <Output>
+        <StdOut>Reading...</StdOut>
+        <ErrorInfo>
+          <Message>System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.OrmTransaction.ReaderWithTransaction() in C:\hcrd\FORM\Test\Orm.fs:line 441</Message>
+          <StackTrace>   at Test.Orm.OrmTransaction.ReaderWithTransaction() in C:\hcrd\FORM\Test\Orm.fs:line 445&#xD;
+
+1)    at Test.Orm.OrmTransaction.ReaderWithTransaction() in C:\hcrd\FORM\Test\Orm.fs:line 445&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3d69100b-6020-4406-b703-fb08d2e426eb" testId="3006f958-e329-81b7-26c1-ed441fd374aa" testName="QueryBuild" computerName="THE-BIG-RIG" duration="00:00:00.0014740" startTime="2024-01-17T21:37:53.8858732-05:00" endTime="2024-01-17T21:37:53.8873471-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d69100b-6020-4406-b703-fb08d2e426eb">
+      <Output>
+        <StdOut>""Fact"."indexId", "Fact"."id", "Fact"."sqliteName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId""</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="UpdateMany" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="2c876ad9-ab07-8c8e-7308-8c0fa5a0f606">
+      <Execution id="162087f0-23ad-4012-9925-34db7ca782fe" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="UpdateMany" />
+    </UnitTest>
+    <UnitTest name="Update" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="b9460c40-1e0e-8c62-436c-b6e2aad1b702">
+      <Execution id="837347a3-7775-4cae-8837-9a0b27edd4cd" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="Update" />
+    </UnitTest>
+    <UnitTest name="DeleteWhere" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="17c8bba8-cc65-759e-b5fa-fcd024529114">
+      <Execution id="482251b2-f360-4aaf-b499-3203a1d0ecf9" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="DeleteWhere" />
+    </UnitTest>
+    <UnitTest name="Connect" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="62c436ef-9adc-74c1-a7d8-3f3e68803c8e">
+      <Execution id="023ac107-e301-4510-8f04-6ababea9368c" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="Connect" />
+    </UnitTest>
+    <UnitTest name="SelectLimit" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="efc486a7-73e1-dc9e-aaed-a66f9e554fa5">
+      <Execution id="9a5c03bd-521e-4d44-94f7-b8a63d49ed30" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="SelectLimit" />
+    </UnitTest>
+    <UnitTest name="DeleteMany" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="5ada5574-62e3-d934-c529-539c64e0a354">
+      <Execution id="09f9137a-c60c-490e-8d91-e69a350b4fcd" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="DeleteMany" />
+    </UnitTest>
+    <UnitTest name="UpdateWhere" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="fa3eba4c-d3e1-efe3-e38b-66e04f688542">
+      <Execution id="38a3519b-17ed-4f54-908e-cdd767ff7b84" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="UpdateWhere" />
+    </UnitTest>
+    <UnitTest name="QueryBuild" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="3006f958-e329-81b7-26c1-ed441fd374aa">
+      <Execution id="3d69100b-6020-4406-b703-fb08d2e426eb" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="QueryBuild" />
+    </UnitTest>
+    <UnitTest name="InsertMany" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="616282d1-d095-5218-7762-30ced8a4a5ba">
+      <Execution id="6e8946cf-600b-4fb5-b9b0-de88e84baafe" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="InsertMany" />
+    </UnitTest>
+    <UnitTest name="Insert" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="cff8b2af-f2c6-aedd-de60-3c318f0bcf0e">
+      <Execution id="a060e8f3-2ef8-4d80-8317-2b0c8788b45b" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="Insert" />
+    </UnitTest>
+    <UnitTest name="Reader" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="dee87abb-278d-d264-a309-bb627f5a5a16">
+      <Execution id="f64111cc-bcae-4295-bd12-7c08d4722880" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="Reader" />
+    </UnitTest>
+    <UnitTest name="ReaderWithTransaction" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="2715f22b-f859-cd49-8251-6507a1af0fd9">
+      <Execution id="96f9658a-915a-41c4-8ff5-d21e5c626c60" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@12-1)" name="ReaderWithTransaction" />
+    </UnitTest>
+    <UnitTest name="InsertUpdateSelect" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="d103a85b-e5b1-b6de-fa29-b6c1d04ab077">
+      <Execution id="ebad9bac-d733-4ad3-a21d-818e5a4e1325" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@12-1)" name="InsertUpdateSelect" />
+    </UnitTest>
+    <UnitTest name="InsertSelect" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="23a461f4-b816-b63f-5f4d-b121a49eeef1">
+      <Execution id="db502e5b-2e96-487d-b96a-8e08478fd023" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@12-1)" name="InsertSelect" />
+    </UnitTest>
+    <UnitTest name="TearDown" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="bf6fa0c8-26fc-e7b5-d851-6afe8e40678c">
+      <Execution id="9ed490ff-6279-4bc2-9a99-e56f2a57e421" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="TearDown" />
+    </UnitTest>
+    <UnitTest name="AsyncSelect" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="9824ae67-cd51-7e05-9ab3-639a0f77df6b">
+      <Execution id="d7263d00-6845-4c6b-a9db-f5ca443a6af6" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="AsyncSelect" />
+    </UnitTest>
+    <UnitTest name="InsertDeleteSelect" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="c06b26c7-3880-a7a5-295d-094447998fcb">
+      <Execution id="ed70545a-0519-402f-abae-d66147f65ae9" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+OrmTransaction(Test.Orm+get_Source@12-1)" name="InsertDeleteSelect" />
+    </UnitTest>
+    <UnitTest name="AsyncInsertMany" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="ff216cba-df32-a039-2ddb-c8dafedef395">
+      <Execution id="e11da1b5-f108-4155-9409-7464b530ac74" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="AsyncInsertMany" />
+    </UnitTest>
+    <UnitTest name="Delete" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="f05ddcd0-ac50-dcb6-ba4b-6ed67f274aa6">
+      <Execution id="50473154-ba60-4eac-b125-53e96c537bd6" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="Delete" />
+    </UnitTest>
+    <UnitTest name="SelectWhere" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="e97fba11-f558-2f85-dd1f-feefafd54456">
+      <Execution id="e7e52faf-e9d2-410b-93cb-7d3d2ed8ebc9" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="SelectWhere" />
+    </UnitTest>
+    <UnitTest name="Select" storage="c:\hcrd\form\test\bin\debug\net8.0\test.dll" id="dc92b01b-03be-17e1-2289-c8300d806470">
+      <Execution id="25c591c2-1e31-44a2-8dfc-1ce94f8fea2f" />
+      <TestMethod codeBase="C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll" adapterTypeName="executor://nunit3testexecutor/" className="Test.Orm+Orm(Test.Orm+get_Source@12-1)" name="Select" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="dee87abb-278d-d264-a309-bb627f5a5a16" executionId="f64111cc-bcae-4295-bd12-7c08d4722880" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2c876ad9-ab07-8c8e-7308-8c0fa5a0f606" executionId="162087f0-23ad-4012-9925-34db7ca782fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bf6fa0c8-26fc-e7b5-d851-6afe8e40678c" executionId="9ed490ff-6279-4bc2-9a99-e56f2a57e421" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="616282d1-d095-5218-7762-30ced8a4a5ba" executionId="6e8946cf-600b-4fb5-b9b0-de88e84baafe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f05ddcd0-ac50-dcb6-ba4b-6ed67f274aa6" executionId="50473154-ba60-4eac-b125-53e96c537bd6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="62c436ef-9adc-74c1-a7d8-3f3e68803c8e" executionId="023ac107-e301-4510-8f04-6ababea9368c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9824ae67-cd51-7e05-9ab3-639a0f77df6b" executionId="d7263d00-6845-4c6b-a9db-f5ca443a6af6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="efc486a7-73e1-dc9e-aaed-a66f9e554fa5" executionId="9a5c03bd-521e-4d44-94f7-b8a63d49ed30" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5ada5574-62e3-d934-c529-539c64e0a354" executionId="09f9137a-c60c-490e-8d91-e69a350b4fcd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e97fba11-f558-2f85-dd1f-feefafd54456" executionId="e7e52faf-e9d2-410b-93cb-7d3d2ed8ebc9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dc92b01b-03be-17e1-2289-c8300d806470" executionId="25c591c2-1e31-44a2-8dfc-1ce94f8fea2f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ff216cba-df32-a039-2ddb-c8dafedef395" executionId="e11da1b5-f108-4155-9409-7464b530ac74" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c06b26c7-3880-a7a5-295d-094447998fcb" executionId="ed70545a-0519-402f-abae-d66147f65ae9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cff8b2af-f2c6-aedd-de60-3c318f0bcf0e" executionId="a060e8f3-2ef8-4d80-8317-2b0c8788b45b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d103a85b-e5b1-b6de-fa29-b6c1d04ab077" executionId="ebad9bac-d733-4ad3-a21d-818e5a4e1325" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b9460c40-1e0e-8c62-436c-b6e2aad1b702" executionId="837347a3-7775-4cae-8837-9a0b27edd4cd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="23a461f4-b816-b63f-5f4d-b121a49eeef1" executionId="db502e5b-2e96-487d-b96a-8e08478fd023" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17c8bba8-cc65-759e-b5fa-fcd024529114" executionId="482251b2-f360-4aaf-b499-3203a1d0ecf9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa3eba4c-d3e1-efe3-e38b-66e04f688542" executionId="38a3519b-17ed-4f54-908e-cdd767ff7b84" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2715f22b-f859-cd49-8251-6507a1af0fd9" executionId="96f9658a-915a-41c4-8ff5-d21e5c626c60" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3006f958-e329-81b7-26c1-ed441fd374aa" executionId="3d69100b-6020-4406-b703-fb08d2e426eb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="21" executed="21" passed="2" failed="19" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 4.4.0.0: Test execution started&#xD;
+Running all tests in C:\hcrd\FORM\Test\bin\Debug\net8.0\Test.dll&#xD;
+   NUnit3TestExecutor discovered 21 of 21 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+TearDown: Transaction: None&#xD;
+NUnit Adapter 4.4.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.8823600-05:00">
+        <Text>Asynchronously Selecting All...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.8827784-05:00">
+        <Text>Contest: &lt;null&gt;&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.8830905-05:00">
+        <Text>Deleting...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.8832655-05:00">
+        <Text>Deleting Many...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.8834613-05:00">
+        <Text>Deleting Where...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.8876189-05:00">
+        <Text>""Fact"."indexId", "Fact"."id", "Fact"."sqliteName", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId""&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.9425787-05:00">
+        <Text>Reading...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.9427382-05:00">
+        <Text>Selecting All...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.9428989-05:00">
+        <Text>Selecting All...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:53.9430591-05:00">
+        <Text>Selecting Where...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4310896-05:00">
+        <Text>Updating...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4416408-05:00">
+        <Text>Updating many...&#xD;
+Error&#xD;
+  System.ArgumentException: Invalid ConnectionString format, cannot parse: string value to split cannot be null&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean allowNameOnly)&#xD;
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(SQLiteConnection connection, String connectionString, Boolean parseViaFramework, Boolean allowNameOnly, Boolean strict)&#xD;
+   at System.Data.SQLite.SQLiteConnection.Open()&#xD;
+   at Test.Orm.Pipe #1 input at line 183@183-1.Invoke(SqlMapping[] sqlMapping)</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4456423-05:00">
+        <Text>Updating...&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4528358-05:00">
+        <Text>Do we have a transaction? None&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4678546-05:00">
+        <Text>Do we have a transaction? None&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4680437-05:00">
+        <Text>Do we have a transaction? None&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="THE-BIG-RIG" outcome="Warning" timestamp="2024-01-17T21:37:54.4682704-05:00">
+        <Text>Reading...&#xD;
+</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

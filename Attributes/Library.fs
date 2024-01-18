@@ -2,7 +2,6 @@ namespace Form.Attributes
 
 open System
 open System.Reflection
-open FSharp.Reflection
 open Microsoft.FSharp.Core.LanguagePrimitives
 
 
@@ -91,26 +90,6 @@ type JoinDirection =
     | Right = 1
     | Inner = 2
     | Outer = 3
-// [<Table("Article", Contexts.Main)>]
-// type Article = 
-//     {
-//         id : string
-//         specialId : string
-//         body : string
-//         [<Join("Comments", [("id", "commentId"), ("specialId", "specialId")], kind, Contexts.Main)>]
-//         comments : Comment seq
-//     }
-
-// [<Table("Article", Contexts.Main)>]
-// type ArticleByProxy = 
-//     {
-//         id : string
-//         specialId : string
-//         body : string
-//         [<Join( ( "Lookup", [( "articleId", "id")]), ("Comments", [("id", "commentId")]), kind, Contexts.Main)>]
-//         comments : Comment seq
-//     }
-
 
 ///<Description>An attribute type which allows the specification of some FSharp Record Type fields being sourced via joinery</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
@@ -147,31 +126,6 @@ type SqlMapping = {
     PropertyInfo: PropertyInfo
 }
 
-// type 
-// let db = {connectionString = conn; context = Contexts.Main; transaction = None }
-
-// let db = Orm.beginTransaction db
-// let selectResult = Orm.selectAll<User> db //Result<^T seq, exn>
-// let deleteResult = Orm.delete<user> db ""
-
-// db 
-// |> Orm.beginTransaction
-// |> Orm.selectAll<user>
-// |> fun (res, db) -> (Orm.delete<User> db "", res) // -> ((res,db), res)   
-// |> fun ((secondResult, db), firstResult) -> (firstResult, secondResult, Orm.commitTransaction db ) // (Result<User,exn>, Result<int, exn>, Result<int,exn>)
-
-
-// let Orm.selectAll<^T> db = fun ( transaction : IDbTransaction option) -> { computation  }; 
-
-// let tran = Orm.beginTransaction db 
-
-
-// Orm.selectAll<User> db tran
-// Orm.delete<User> "" db tran
-
-// Orm.commitTransaction tran
-
-
 ///<Description>Stores the flavor And context used for a particular connection.
 /// Takes the connection string and context.
 ///</Description>
@@ -180,11 +134,5 @@ type OrmState =
     | MySQL     of ( string * Enum )
     | PSQL      of ( string * Enum )
     | SQLite    of ( string * Enum )
-    // | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
-    
-// type OrmState2 =
-//     {
-//         connectionString : string 
-//         context : Enum 
-//         transaction : Data.IDbTransaction option
-//     }
+    | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
+  

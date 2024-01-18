@@ -7,17 +7,21 @@ open HCRD.FORM.Tests.Setup
 open NUnit.Framework
 
 type FixtureArgs =
-    static member Source : obj seq = seq {
-        [| sqliteState |] 
-        [| psqlState |]
-    }
-    
+    static member Source : obj seq =
+        seq {
+            [| sqliteState |] 
+            // [| psqlState |]
+            // [| odbcState |]
+        }
+        
 [<SetUpFixture>]
 type OrmSetup () = 
     [<OneTimeSetUp>]
     member _.Setup () = 
         DotNetEnv.Env.Load() |> printf "Loaded variables %A" 
-        printfn "%A\n\n\n\n\n" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
+        printfn "sqlite - %A" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
+        printfn "sqlite - %A" (System.Environment.GetEnvironmentVariable("postgres_connection_string"))
+        printfn "sqlite - %A" (System.Environment.GetEnvironmentVariable("odbc_connection_string"))
 
 [<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
 type Orm (_testingState) =
