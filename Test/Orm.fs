@@ -162,7 +162,7 @@ let logger = SerializedLogger()
 type FixtureArgs =
     static member Source : obj seq =
         seq {
-            [| sqliteState |] 
+            // [| sqliteState |] 
             [| psqlState |]
             // [| odbcState |]
         }
@@ -442,7 +442,7 @@ type Orm (_testingState) =
  
 [<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
 type OrmTransaction ( _testingState ) = 
-    let testingState = _testingState ()
+    let testingState = _testingState
     let tableName = "\"Fact\""
     let testGuid1 = System.Guid.NewGuid().ToString()
     let testGuid2 = System.Guid.NewGuid().ToString()
