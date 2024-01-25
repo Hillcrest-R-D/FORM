@@ -6,11 +6,6 @@ module Main =
     open Form
     open Form.Attributes
     open Expecto
-    open Hopac
-    open Logary
-    open Logary.Configuration
-    open Logary.Adapters.Facade
-    open Logary.Targets
 
     let constructTest name message f =
         test name {
@@ -121,7 +116,7 @@ module Main =
                 (fun _ ->
                     let initial = { Fact.init() with id = testGuid1 }
                     let changed = { initial with name = "Evan Towlett"}
-                    Orm.update< Fact > testingState None changed
+                    Orm.update< Fact > testingState None false changed
                 )
 
         let updateMany () =
@@ -132,7 +127,7 @@ module Main =
                 let initial = Fact.init() 
                 let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
                 let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
-                Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
+                Orm.updateMany< Fact > testingState None false [changed;changed2]  |> printf "%A"
 
                 let evan = Orm.selectWhere<Fact> testingState None $"id = '{testGuid3}'" 
                 let mac = Orm.selectWhere<Fact> testingState None $"id = '{testGuid2}'" 
@@ -169,7 +164,7 @@ module Main =
                 (fun _ -> 
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
-                    Orm.updateWhere< Fact > testingState None "\"indexId\" = 1" changed 
+                    Orm.updateWhere< Fact > testingState None "\"indexId\" = 1" false changed 
                 )
 
         let delete () =
@@ -379,7 +374,7 @@ module Main =
                     let err = exn "No data returned by select, you forgot the facts!"
         
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
-                    |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
+                    |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction false theNewFact )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'"  
                         |> function 
@@ -461,12 +456,33 @@ module Main =
         let sqliteState = SQLite( sqliteConnectionString , Contexts.SQLite )
         let odbcState = ODBC(  odbcConnectionString , Contexts.ODBC )
 
-        let states = [ odbcState; ] //mysqlState; mssqlState; sqliteState;  sqliteState
+        let states = 
+            [ 
+            odbcState
+            // ; psqlState
+            // ; sqliteState
+            ] //mysqlState
         
-        states
-        |> List.map ( fun state -> 
-            orm state |> runTestsWithCLIArgs [] argv  
-        )
+        // states
+        // |> List.map ( fun state -> 
+        //     orm state |> runTestsWithCLIArgs [] argv  
+        // )
+        // |> printfn "%A"
+
+        printfn "inserting..."
+        Orm.insert<Fact> odbcState None true (Fact.init()) |> printfn "%A"
+        printfn "inserted."
+
+        printfn "modifying..."
+        Orm.selectLimit<Fact> odbcState None 1 
+        |> Result.map Seq.head
+        |> fun x -> printfn "received: %A" x; x
+        |> Result.map ( fun ( fact : Fact ) -> { fact with name = "test" } )
+        |> fun x -> printfn "updating..."; x
+        |> Result.bind ( Orm.update<Fact> odbcState None false )
+        |> fun x -> printfn "result of updating: %A" x; x
         |> printfn "%A"
+
+        // printfn "%A" ( Utilities.mapping<Fact> odbcState )
 
         0
