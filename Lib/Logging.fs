@@ -12,6 +12,6 @@ module Logging =
     
     let inline log msg = 
         #if DEBUG 
-            logger.LogDebug msg
+            printfn "%s" msg
         #endif  
             ()

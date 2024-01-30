@@ -6,30 +6,30 @@ module Main =
     open Form
     open Form.Attributes
     open Expecto
+    open System.IO
 
+    let outputPath = "./console.log"
     let constructTest name message f =
         test name {
             Expect.wantOk ( f () ) message 
             |> printfn "%A"
         }
     let tableName = "\"Fact\""
+    let nameCol = function 
+        | SQLite _ -> "sqliteName"
+        | PSQL _ -> "psqlName"
+        | ODBC _ -> "psqlName"
+        | _ -> "idk"
+    let intType = function 
+        | SQLite _ -> "integer"
+        | _ -> "bigint"
+
     let orm testingState = 
         let testGuid1 = System.Guid.NewGuid().ToString()
         let testGuid2 = System.Guid.NewGuid().ToString()
         let testGuid3 = System.Guid.NewGuid().ToString()
         let testGuid4 = System.Guid.NewGuid().ToString()
 
-        let nameCol = 
-            match testingState with
-            | SQLite _ -> "sqliteName"
-            | PSQL _ -> "psqlName"
-            | ODBC _ -> "psqlName"
-            | _ -> "idk"
-
-        let intType = 
-            match testingState with 
-            | SQLite _ -> "integer"
-            | _ -> "bigint"
         let transaction = 
             None// Orm.beginTransaction testingState
     
@@ -43,17 +43,17 @@ module Main =
                         $"DROP TABLE IF EXISTS {tableName};
                         DROP TABLE IF EXISTS \"SubFact\";
                         CREATE TABLE {tableName} (
-                            \"indexId\" {intType} not null,
+                            \"indexId\" {intType testingState} not null,
                             \"id\" text primary key,
-                            \"{nameCol}\" text null,
+                            \"{nameCol testingState}\" text null,
                             \"timeStamp\" text,
                             \"specialChar\" text,
                             \"maybeSomething\" text,
-                            \"sometimesNothing\" {intType} null,
+                            \"sometimesNothing\" {intType testingState} null,
                             \"biteSize\" text
                         );
                         CREATE TABLE \"SubFact\" (
-                            \"factId\" {intType} not null,
+                            \"factId\" {intType testingState} not null,
                             \"subFact\" text not null
                         );
                         "
@@ -116,7 +116,7 @@ module Main =
                 (fun _ ->
                     let initial = { Fact.init() with id = testGuid1 }
                     let changed = { initial with name = "Evan Towlett"}
-                    Orm.update< Fact > testingState None false changed
+                    Orm.update< Fact > testingState None changed
                 )
 
         let updateMany () =
@@ -127,7 +127,7 @@ module Main =
                 let initial = Fact.init() 
                 let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
                 let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
-                Orm.updateMany< Fact > testingState None false [changed;changed2]  |> printf "%A"
+                Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
                 let evan = Orm.selectWhere<Fact> testingState None $"id = '{testGuid3}'" 
                 let mac = Orm.selectWhere<Fact> testingState None $"id = '{testGuid2}'" 
@@ -164,7 +164,7 @@ module Main =
                 (fun _ -> 
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
-                    Orm.updateWhere< Fact > testingState None "\"indexId\" = 1" false changed 
+                    Orm.updateWhere< Fact > testingState None "\"indexId\" = 1" changed 
                 )
 
         let delete () =
@@ -251,58 +251,45 @@ module Main =
         
     
     
-    type OrmTransaction ( _testingState ) = 
-        let testingState = _testingState
+    let transaction testingState = 
         let tableName = "\"Fact\""
         let testGuid1 = System.Guid.NewGuid().ToString()
         let testGuid2 = System.Guid.NewGuid().ToString()
         let testGuid3 = System.Guid.NewGuid().ToString()
         let testGuid4 = System.Guid.NewGuid().ToString()
-
-        let nameCol = 
-            match testingState with
-            | SQLite _ -> "sqliteName"
-            | PSQL _ -> "psqlName"
-            | _ -> "sqliteName"
-
-        let intType = 
-            match testingState with 
-            | SQLite _ -> "integer"
-            | PSQL _ -> "bigint"
-            | _ -> "bigint"
             
         let sleep () = System.Threading.Thread.Sleep(500)
 
         let commit transaction x = Orm.tryCommit transaction |> ignore; x 
-
         
-        member _.Setup () =
-            let createTable = 
-                $"DROP TABLE IF EXISTS {tableName};
-                DROP TABLE IF EXISTS \"SubFact\";
-                CREATE TABLE {tableName} (
-                    \"indexId\" {intType} not null,
-                    \"id\" text primary key,
-                    \"{nameCol}\" text null,
-                    \"timeStamp\" text,
-                    \"specialChar\" text,
-                    \"maybeSomething\" text,
-                    \"sometimesNothing\" {intType} null,
-                    \"biteSize\" text
-                );
-                CREATE TABLE \"SubFact\" (
-                    \"factId\" {intType} not null,
-                    \"subFact\" text not null
-                );"
+        let setup () =
+            constructTest 
+                    "" 
+                    ""
+                    ( fun _ ->
+                        let createTable = 
+                            $"DROP TABLE IF EXISTS {tableName};
+                            DROP TABLE IF EXISTS \"SubFact\";
+                            CREATE TABLE {tableName} (
+                                \"indexId\" {intType testingState} not null,
+                                \"id\" text primary key,
+                                \"{nameCol testingState}\" text null,
+                                \"timeStamp\" text,
+                                \"specialChar\" text,
+                                \"maybeSomething\" text,
+                                \"sometimesNothing\" {intType testingState} null,
+                                \"biteSize\" text
+                            );
+                            CREATE TABLE \"SubFact\" (
+                                \"factId\" {intType testingState} not null,
+                                \"subFact\" text not null
+                            );
+                            "
 
-            
-            Orm.execute testingState None createTable |> printfn "Create Table Returns: %A"
-
-
+                        Orm.execute testingState None createTable
+                    )        
         
-        
-        member _.InsertSelect () =
-            // sleep ()
+        let insertSelect () =
             constructTest
                 "InsertSelect"
                 "InsertSelect succeeded"
@@ -332,7 +319,7 @@ module Main =
                     | Result.Error error -> Result.Error (sprintf "%A %A" testingState (error.ToString())) 
                 )
 
-        member _.InsertDeleteSelect () =
+        let insertDeleteSelect () =
             constructTest 
                 "InsertDeleteSelect"
                 "InsertDeleteSelect succeeded"
@@ -362,7 +349,7 @@ module Main =
                         else Result.Error(error.ToString()) 
                 )
 
-        member _.InsertUpdateSelect () =
+        let insertUpdateSelect () =
             constructTest
                 "InsertUpdateSelect"
                 "InsertUpdateSelect succeeded"
@@ -374,7 +361,7 @@ module Main =
                     let err = exn "No data returned by select, you forgot the facts!"
         
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
-                    |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction false theNewFact )
+                    |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'"  
                         |> function 
@@ -396,9 +383,7 @@ module Main =
                         Result.Error(error.ToString()) 
                 )
         
-        
-        
-        member _.ReaderWithTransaction () =
+        let readerWithTransaction () =
             constructTest
                 "Reader-Transaction"
                 "Reader with Transaction succeeded"
@@ -409,14 +394,15 @@ module Main =
                     |> commit transaction 
                 )
 
-        // // 
-        // 
-        // 
-        // member _.TearDown () = 
-        //     transaction
-        //     |> Option.map ( Orm.commitTransaction )
-        //     |> sprintf "Transaction: %A"
-        //     |> Assert.Pass
+        testSequenced <| testList "Base ORM tests" [
+            setup ()
+            testSequenced <| testList "Tests" [
+                insertSelect ()
+                insertDeleteSelect ()
+                insertUpdateSelect ()
+                readerWithTransaction ()
+            ]
+        ]
 
 
     [<EntryPoint>]
@@ -430,19 +416,6 @@ module Main =
             System.Environment.SetEnvironmentVariable(variable, value)
         )
         
-        // let logary =
-        //     let config = 
-        //         File.create 
-        //             { File.FileConf.create "./" (File.Naming ("{date}", "txt")) with flushToDisk = true }  
-        //             "logabetical"
-                    
-        //     Config.create "Form.Test" ""
-        //     |> Config.targets [ config ]
-        //     |> Config.processing (Events.events |> Events.sink ["console";])
-        //     |> Config.build
-        //     |> run
-        
-        // LogaryFacadeAdapter.initialise<Expecto.Logging.Logger> logary
         
         let psqlConnectionString  = System.Environment.GetEnvironmentVariable("postgres_connection_string")
         let odbcConnectionString  = System.Environment.GetEnvironmentVariable("odbc_connection_string")
@@ -459,30 +432,32 @@ module Main =
         let states = 
             [ 
             odbcState
-            // ; psqlState
-            // ; sqliteState
-            ] //mysqlState
-        
-        // states
-        // |> List.map ( fun state -> 
-        //     orm state |> runTestsWithCLIArgs [] argv  
-        // )
-        // |> printfn "%A"
+            ; psqlState
+            ; sqliteState
+            // ; mysqlState
+            // ; mssqlstate
+            ]
 
-        printfn "inserting..."
-        Orm.insert<Fact> odbcState None true (Fact.init()) |> printfn "%A"
-        printfn "inserted."
+        use fs = new FileStream(outputPath, FileMode.Create)
+        use writer = new StreamWriter( fs, System.Text.Encoding.UTF8 )
 
-        printfn "modifying..."
-        Orm.selectLimit<Fact> odbcState None 1 
-        |> Result.map Seq.head
-        |> fun x -> printfn "received: %A" x; x
-        |> Result.map ( fun ( fact : Fact ) -> { fact with name = "test" } )
-        |> fun x -> printfn "updating..."; x
-        |> Result.bind ( Orm.update<Fact> odbcState None false )
-        |> fun x -> printfn "result of updating: %A" x; x
+        writer.AutoFlush <- true
+
+        System.Console.SetOut(writer)
+        System.Console.SetError(writer)
+
+        states
+        |> List.map ( 
+            orm  
+            >> runTestsWithCLIArgs [] argv 
+        )
         |> printfn "%A"
 
-        // printfn "%A" ( Utilities.mapping<Fact> odbcState )
+        states 
+        |> List.map ( 
+            transaction 
+            >> runTestsWithCLIArgs [] argv 
+        )
+        |> printfn "%A"
 
         0

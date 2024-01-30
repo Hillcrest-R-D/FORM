@@ -107,7 +107,11 @@ module Orm =
         selectHelper< ^T > state transaction ( fun x -> 
             match state with 
             | MSSQL _ -> $"select top {limit} {x}" 
-            | _ -> $"select {x} limit {limit}" 
+            | MySQL _ 
+            | PSQL _ 
+            | SQLite _ 
+            | ODBC _ -> $"select {x} limit {limit} " 
+            // | ODBC _ -> $"select {x} order by 1 fetch first {limit} rows only" 
         ) 
 
     let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where = 
@@ -117,13 +121,14 @@ module Orm =
         selectHelper< ^T > state transaction ( fun x -> $"select {x}" ) 
     
     
-    let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instance : ^T ) =
-        let query = insertBase< ^T > state insertKeys 
+    let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instance : ^T ) =
+        let query = insertBase< ^T > state includeKeys 
+        log $"Insert Query Generated: {query}"
         transaction 
         |> withTransaction 
             state 
             ( fun transaction ->
-                use command = parameterizeCommand state query (transaction.Connection) instance //makeCommand query conn state
+                use command = parameterizeCommand state query (transaction.Connection) includeKeys Insert instance //makeCommand query conn state
                 log ( 
                     sprintf "Param count: %A" command.Parameters.Count :: 
                     [ for i in [0..command.Parameters.Count-1] do 
@@ -135,8 +140,8 @@ module Orm =
                 command.ExecuteNonQuery ( ) 
             )
             ( fun connection ->
-                let query = insertBase< ^T > state insertKeys 
-                use command = parameterizeCommand state query connection instance //makeCommand query connection state
+                let query = insertBase< ^T > state includeKeys 
+                use command = parameterizeCommand state query connection includeKeys Insert instance //makeCommand query connection state
                 log (
                     sprintf "Param count: %A" command.Parameters.Count ::
                     [ for i in [0..command.Parameters.Count-1] do 
@@ -148,18 +153,23 @@ module Orm =
                 result
             )
             
-    let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instances : ^T seq ) =
-        let query = insertBase< ^T > state insertKeys 
+    let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instances : ^T seq ) =
+        let query = insertBase< ^T > state includeKeys 
         transaction
         |> withTransaction 
             state 
-            ( fun transaction ->  
-                parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
+            ( fun transaction -> 
+                seq {
+                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
+                }
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction()
-                parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
-                |> fun x -> transaction.Commit();connection.Close(); x
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
+                    transaction.Commit()
+                    connection.Close()
+                }
             )
 
     
@@ -171,20 +181,28 @@ module Orm =
         |> Result.bind (fun sqlMapping ->
             sqlMapping
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" table x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName 
+            )
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
         
     let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
-        let table = table<^T> state
+        let tableName = table<^T> state
         let paramChar = getParamChar state
         
         ensureId< ^T > state 
         |> Result.bind (fun sqlMapping ->
             sqlMapping
-            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName  ) //! Filter out joins for non-select queries
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" tableName x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
+            ) 
             |> String.concat " and "
             |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
@@ -199,7 +217,11 @@ module Orm =
             let paramChar = getParamChar state
             sqlMapping
             |> Array.filter ( fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" tableName x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
+            ) 
             |> String.concat " and "
             |> fun where -> deleteHelper< ^T > state transaction where instance  
         )
@@ -211,7 +233,11 @@ module Orm =
             let paramChar = getParamChar state
             sqlMapping
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName)
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" tableName x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
+            ) 
             |> String.concat " and " // id1 = @id1 AND id2 = @id2
             |> fun where -> deleteManyHelper< ^T > state transaction where instances 
         )        

@@ -17,6 +17,11 @@ module Utilities =
     open Logging
     open System.Data.Odbc
 
+    type Behavior = 
+        | Update
+        | Insert 
+        | Delete
+
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _tableNames = Dictionary<Type * OrmState, string>()
@@ -87,10 +92,9 @@ module Utilities =
                 |> Array.map ( fun x -> x :?> DbAttribute )
             
             let tName = 
-                if attrs = Array.empty then
-                    typedefof< ^T >.Name
-                else 
-                    attrFold attrs ( context< ^T > state )
+                if attrs = Array.empty 
+                then typedefof< ^T >.Name
+                else attrFold attrs ( context< ^T > state )
                 |> fun x -> x.Split( "." )
                 |> Array.map ( fun x -> sqlQuote state x )
                 |> String.concat "."
@@ -240,7 +244,10 @@ module Utilities =
         with 
         | exn -> Error exn
     
-    let inline getParamChar _ = "@"
+    let inline getParamChar state = 
+        match state with
+        | ODBC _ -> "?"
+        | _ -> "@"
 
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
@@ -275,10 +282,14 @@ module Utilities =
         let cols = 
             mapping< ^T > state
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries 
-            |> Array.filter (fun col -> insertKeys || not col.IsKey )
+            |> Array.filter (fun col -> not col.IsKey || insertKeys )
         let placeHolders = 
             cols
-            |> Array.mapi ( fun i x -> sprintf "%s%s" paramChar x.FSharpName )
+            |> Array.map ( fun col ->  
+                match state with 
+                | ODBC _ -> paramChar
+                | _ -> sprintf "%s%s" paramChar col.FSharpName
+            )
             |> String.concat ", "
         let columnNames = 
             cols
@@ -322,31 +333,38 @@ module Utilities =
                 
                 sprintf "%s<%s>" typeName args
 
-    let inline parameterizeCommand< ^T > state query conn ( instance : ^T ) =
+    let inline parameterizeCommand< ^T > state query conn includeKeys behavior ( instance : ^T ) =
         let cmd = makeCommand state query conn 
         let paramChar = getParamChar state
+        let allColumns = 
+            mapping< ^T > state
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
         
-        mapping< ^T > state
-        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
-        |> Array.iter ( fun mappedInstance -> 
-            let param =  
+        match behavior with 
+        | Insert -> allColumns |> Array.filter (fun col ->  not col.IsKey || includeKeys )
+        | Update -> allColumns |> Array.filter (fun col ->  not col.IsKey || includeKeys ) |> fun x -> Array.append x ( Array.filter (fun col -> col.IsKey ) allColumns )
+        | Delete -> allColumns |> Array.filter (fun col ->  col.IsKey )
+        |> Array.iteri ( fun i mappedInstance -> 
+            log (sprintf "binding value %s(%A) to position %i - " mappedInstance.FSharpName (mappedInstance.PropertyInfo.GetValue( instance )) i )
+            let param =
                 let mutable tmp = cmd.CreateParameter( )    
                 let mappedValue = mappedInstance.PropertyInfo.GetValue( instance )
-                tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
+                match state with 
+                | ODBC _ -> ()
+                | _ -> tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
                 if
                     mappedValue = null 
                 then
                     tmp.IsNullable <- true
                     tmp.Value <- DBNull.Value
                 else
-                    if genericTypeName false mappedInstance.Type = "FSharpOption"
+                    if 
+                        genericTypeName false mappedInstance.Type = "FSharpOption"
                     then
                         tmp.IsNullable <- true
                         unwrapOption tmp (mappedValue) ()
-                        
                     else
-                        tmp.Value <- 
-                            mappedValue // Some 1
+                        tmp.Value <- mappedValue // Some 1
                 tmp
 
             cmd.Parameters.Add ( param ) |> ignore
@@ -354,19 +372,28 @@ module Utilities =
         
         cmd
 
-    let inline parameterizeSeqAndExecuteCommand< ^T > state query (transaction : DbTransaction) ( instances : ^T seq ) =
+    let inline parameterizeSeqAndExecuteCommand< ^T > state query (transaction : DbTransaction) includeKeys behavior ( instances : ^T seq ) =
         let cmd = makeCommand state query transaction.Connection
-        let mapp = 
-            mapping< ^T > state
-            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries 
         cmd.Transaction <- transaction 
+        let mapp = 
+            let tmp = 
+                mapping< ^T > state
+                |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries 
+            
+            match behavior with 
+            | Insert -> tmp |> Array.filter (fun col ->  not col.IsKey || includeKeys )
+            | Update -> tmp |> Array.filter (fun col ->  not col.IsKey || includeKeys ) |> fun x -> Array.append x ( Array.filter (fun col -> col.IsKey ) tmp )
+            | Delete -> tmp |> Array.filter (fun col ->  col.IsKey )
+
         let paramChar = getParamChar state        
         let mutable cmdParams = 
             mapp 
             |> Array.map (
                 fun (mappedInstance : SqlMapping ) ->
                     let mutable tmp = cmd.CreateParameter( ) 
-                    tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
+                    match state with 
+                    | ODBC _ -> ()
+                    | _ -> tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
                     cmd.Parameters.Add ( tmp ) |> ignore
                     tmp
                 )
@@ -440,8 +467,8 @@ module Utilities =
             )
 
 
-    let inline updateBase< ^T > ( state : OrmState ) = 
-        let pchar = getParamChar state
+    let inline updateBase< ^T > ( state : OrmState )  = 
+        let paramChar = getParamChar state
         let cols = 
             mapping< ^T > state
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
@@ -449,7 +476,10 @@ module Utilities =
         log ( sprintf "columns to update: %A" cols )
         let queryParams = 
             cols 
-            |> Array.map (fun col -> pchar + col.FSharpName ) // @col1, @col2, @col3
+            |> Array.map (fun col -> 
+                match state with 
+                | ODBC _ -> paramChar
+                | _ -> sprintf "%s%s" paramChar col.FSharpName ) // @col1, @col2, @col3
             
 
         let table = table< ^T > state 
@@ -472,12 +502,12 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction ->  
-                use command = parameterizeCommand< ^T > state query ( transaction.Connection ) instance 
+                use command = parameterizeCommand< ^T > state query ( transaction.Connection ) false Update instance 
                 command.Transaction <- transaction
                 command.ExecuteNonQuery ( )
             )
             ( fun connection -> 
-                use command = parameterizeCommand< ^T > state query connection instance 
+                use command = parameterizeCommand< ^T > state query connection false Update instance 
                 let result = command.ExecuteNonQuery ( )
                 connection.Close( )
                 result 
@@ -489,11 +519,11 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) instances  
+                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances  
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction() 
-                parameterizeSeqAndExecuteCommand< ^T > state query transaction instances 
+                parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances 
                 |> fun x -> transaction.Commit();connection.Close(); x 
             )
         
@@ -508,12 +538,12 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                use command = parameterizeCommand< ^T > state query ( transaction.Connection ) instance 
+                use command = parameterizeCommand< ^T > state query ( transaction.Connection ) false Delete instance 
                 command.Transaction <- transaction
                 command.ExecuteNonQuery ( )        
             )
             ( fun connection -> 
-                use cmd = parameterizeCommand< ^T > state query connection instance 
+                use cmd = parameterizeCommand< ^T > state query connection false Delete instance 
                 let result = cmd.ExecuteNonQuery ( )
                 connection.Close()
                 result
@@ -525,10 +555,10 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) instances  
+                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances  
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction() 
-                parameterizeSeqAndExecuteCommand< ^T > state query transaction instances 
+                parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances 
                 |> fun x -> transaction.Commit();connection.Close(); x 
             )
