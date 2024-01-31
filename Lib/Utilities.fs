@@ -16,6 +16,8 @@ module Utilities =
     open System.Data.Common
     open Logging
     open System.Data.Odbc
+    
+    open System.Text.RegularExpressions
 
     type Behavior = 
         | Update
@@ -60,6 +62,25 @@ module Utilities =
         | SQLite _ 
         | ODBC _ -> $"\"{str}\""
 
+    let pattern = fun t -> Regex.Replace(t, @"'", @"''" )
+    //         function 
+    //         | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
+    //         | t -> t
+    // [| ("customerType = %s", "retail"); ( "and (hasSaleWithinPastYear = %s", "true" ); ( "or boughtTiresAYearAgo = %s)", "true" ) |]
+
+    // "customerType = :1 and (hasSaleWithinPastYear = :2 or boughtTiresAYearAgo = :2)" [| "retail"; "true" |]
+    let escape ( where : string * string[] )= 
+        let format, values = where  
+        let mutable i = 0
+        values  
+        |> Array.fold 
+            (fun accumulator item -> 
+                i <- i+1
+                let ret = Regex.Replace(accumulator, $":{i}", pattern item)
+                printfn "This is the regex replace result: %A" ret 
+                ret
+            )
+            format 
     let inline context< ^T > ( state : OrmState ) = 
         match state with 
         | MSSQL     ( _, c ) -> c 
@@ -67,6 +88,7 @@ module Utilities =
         | PSQL      ( _, c ) -> c 
         | SQLite    ( _, c ) -> c 
         | ODBC      ( _, c ) -> c 
+
     let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
         Array.fold ( fun s ( x : DbAttribute ) ->  
                 if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
@@ -299,7 +321,7 @@ module Utilities =
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
     
     let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
-        log ( sprintf "Query being generated:\n\n%s\n\n" query )
+        log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
         match state with 
         | MSSQL _ ->    new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ ->    new MySqlCommand ( query, connection :?> MySqlConnection )
@@ -497,7 +519,7 @@ module Utilities =
         |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
     
     let inline updateHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instance : ^T ) = 
-        let query = ( updateBase< ^T > state ) + whereClause 
+        let query = ( updateBase< ^T > state ) + (whereClause) 
         transaction
         |> withTransaction 
             state 
@@ -514,7 +536,7 @@ module Utilities =
             )
 
     let inline updateManyHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) = 
-        let query = ( updateBase< ^T > state ) + whereClause 
+        let query = ( updateBase< ^T > state ) + (whereClause) 
         transaction
         |> withTransaction 
             state 
@@ -533,7 +555,7 @@ module Utilities =
         |> sprintf "delete from %s where "
 
     let inline deleteHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instance : ^T ) =
-        let query = deleteBase< ^T > state + whereClause 
+        let query = deleteBase< ^T > state + (whereClause) 
         transaction
         |> withTransaction 
             state 
@@ -550,7 +572,7 @@ module Utilities =
             )
     
     let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
-        let query = deleteBase< ^T > state + whereClause 
+        let query = deleteBase< ^T > state + (whereClause) 
         transaction 
         |> withTransaction 
             state 

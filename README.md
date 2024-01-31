@@ -62,11 +62,15 @@ This should send a "select *" query to the db1./.User table, if everything was s
 
 We also allow you to run arbitrary SQL against your database.
 
+# WARNING -- This is not safe. Make sure all sql used this way is either properly escaped or not generated with user input data.
+
 ```fsharp 
 execute db1State "create table User ( id int not null);" //returns Result<int, exn>
 ```
 
 Or if you need to read the result, you can supply a function that takes an IDataReader and we'll consume that and pass the results back.
+
+# WARNING -- This is not safe. Make sure all sql used this way is either properly escaped or not generated with user input data.
 
 ```fsharp
 let query = 
@@ -78,11 +82,26 @@ let query =
     This consumeReader function is used internally by Form but if you don't want to implement your own reader, you can use it.
     Make sure to align the column names in the hand-written sql with what's returned by mapping< ^T >.
 *)
-let reader = consumeReader<User> db1State  
-let result = executeWithReader db1State query reader  //Result<User seq, exn>
+let readerConsumer = consumeReader<User> db1State  
+let result = executeWithReader db1State None query readerConsumer  //Result<User seq, exn>
 ```
 
-We have implemented the basic CRUD operations along with some variations on them. If you'd like to see something, try to implement it yourself and open a pull request or make a request through the issues. 
+We also provide functions that allow arbitrary filtering with *Where functions. The reason they are in this format is to prevent sql injection attacks. We do some basic escaping for you but you should always make sure you're using sanitized data:
+```fsharp
+selectWhere<User> db1State None ("(\"Id\" = :1 and \"Name\" = ':2') OR (\"Id\" != :1 + 1)", [|42, "Jimothy"|])
+//Executes "SELECT {column list} FROM accounts.User WHERE ("Id" = 42 and "Name" = 'Jimothy') OR ("Id" != 42 + 1) "
+
+updateWhere<User> db1State None ("(\"Id\" = :1 and \"Name\" = ':2') OR (\"Id\" != :1 + 1)", [|42, "Jimothy"|]) modifiedUser
+//Executes an update statement against all columns in accounts.User with "WHERE ("Id" = 42 and "Name" = 'Jimothy') OR ("Id" != 42 + 1)""
+
+deleteWhere<User> db1State None ("(\"Id\" = :1 and \"Name\" = ':2') OR (\"Id\" != :1 + 1)", [|42, "Jimothy"|])
+//Executes a delete statement against accounts.User with "WHERE ("Id" = 42 and "Name" = 'Jimothy') OR ("Id" != 42 + 1)""
+```
+
+Yes we realize these are the dumbest SQL statements you've ever seen, we hope you got a laugh. 😊 It should get the point across of how the format specification works.
+
+
+In short, have implemented the basic CRUD operations along with some variations on them. If you'd like to see something, try to implement it yourself and open a pull request or make a request through the issues. 
 
 ## Performance
 

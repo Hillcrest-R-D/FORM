@@ -10,14 +10,8 @@ module Orm =
     open MySqlConnector
     open System.Data.Common
     open Form.Attributes
-    open System.Text.RegularExpressions
     open Utilities
     open Logging
-    
-    
-    
-    let escape subject = 
-        Regex.Replace( subject, @"'", @"''" )
     
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( state : OrmState ) = Utilities.connect state
@@ -50,6 +44,7 @@ module Orm =
 
     let inline consumeReader<^T > ( state : OrmState ) ( reader : IDataReader ) = Utilities.consumeReader<^T> state reader
 
+    ///<description>WARNING! Execute takes a raw string literal to execute against the specified DB state, which is inherently unsafe and exposed to SQL injection, do not use this in a context where strings aren't being escaped properly before hand.</description>
     let inline execute ( state : OrmState ) ( transaction : DbTransaction option ) sql =
         transaction 
         |> withTransaction 
@@ -75,7 +70,7 @@ module Orm =
         match connect state with
         | Ok conn -> 
             try 
-                use cmd = makeCommand state sql conn 
+                use cmd = makeCommand state (sql) conn 
                 cmd.ExecuteReader( CommandBehavior.CloseConnection )
                 |> Ok
             with 
@@ -88,7 +83,7 @@ module Orm =
             state
             ( fun transaction -> 
                 seq {
-                    use cmd = makeCommand state sql <| transaction.Connection
+                    use cmd = makeCommand state (sql) <| transaction.Connection
                     cmd.Transaction <- transaction
                     use reader = cmd.ExecuteReader( )
                     yield! readerFunction reader
@@ -96,7 +91,7 @@ module Orm =
             )
             ( fun connection -> 
                 seq {
-                    use cmd = makeCommand state sql connection 
+                    use cmd = makeCommand state (sql) connection 
                     use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
                     yield! readerFunction reader
                     connection.Close()
@@ -114,8 +109,8 @@ module Orm =
             // | ODBC _ -> $"select {x} order by 1 fetch first {limit} rows only" 
         ) 
 
-    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where = 
-        selectHelper< ^T > state transaction ( fun x -> $"select {x} where {where}" ) 
+    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) (where) = 
+        selectHelper< ^T > state transaction ( fun x -> $"select {x} where {escape where}" ) 
         
     let inline selectAll< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x}" ) 
@@ -207,8 +202,8 @@ module Orm =
             |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
 
-    let inline updateWhere< ^T > ( state : OrmState ) transaction ( where : string ) ( instance: ^T )  = 
-        updateHelper< ^T > state transaction ( sprintf " where %s" where ) instance 
+    let inline updateWhere< ^T > ( state : OrmState ) transaction ( where ) ( instance: ^T )  = 
+        updateHelper< ^T > state transaction ( sprintf " where %s" (escape where) ) instance 
         
     let inline delete< ^T > state ( transaction : DbTransaction option )  instance = 
         ensureId< ^T > state 
@@ -243,9 +238,9 @@ module Orm =
         )        
         
     /// <Warning> Running this function is equivalent to DELETE 
-    /// FROM table WHERE whereClause </Warning>
-    let inline deleteWhere< ^T > state ( transaction : DbTransaction option ) whereClause = 
-        let query =  (deleteBase< ^T > state) + whereClause
+    /// FROM table WHERE where </Warning>
+    let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * string[]) ) = 
+        let query = $"{deleteBase< ^T > state} {escape where}"
         transaction 
         |> withTransaction
             state

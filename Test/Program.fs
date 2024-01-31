@@ -107,7 +107,7 @@ module Main =
             constructTest 
                 "SelectWhere"
                 "SelectWhere succeeded"
-                (fun _ -> Orm.selectWhere< Fact > testingState None "\"maybeSomething\" = 'true'") 
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) )
                 
         let update () =
             constructTest 
@@ -129,8 +129,8 @@ module Main =
                 let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
                 Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
-                let evan = Orm.selectWhere<Fact> testingState None $"id = '{testGuid3}'" 
-                let mac = Orm.selectWhere<Fact> testingState None $"id = '{testGuid2}'" 
+                let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] )
+                let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] )
 
                 match evan, mac with 
                 | Ok e, Ok m -> 
@@ -164,7 +164,7 @@ module Main =
                 (fun _ -> 
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
-                    Orm.updateWhere< Fact > testingState None "\"indexId\" = 1" changed 
+                    Orm.updateWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) changed 
                 )
 
         let delete () =
@@ -180,7 +180,7 @@ module Main =
             constructTest
                 "DeleteWhere"
                 "DeleteWhere succeeded"
-                (fun _ -> Orm.deleteWhere< Fact > testingState None "\"indexId\" = 1")
+                (fun _ -> Orm.deleteWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) )
                 
         let deleteMany () =
             constructTest
@@ -300,7 +300,7 @@ module Main =
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> 
                         printfn "We have inserted"
-                        Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'" 
+                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
                         |> fun x -> printfn "We have the facts: %A" x; x
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
@@ -332,7 +332,7 @@ module Main =
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> Orm.delete< Fact > testingState transaction theFact  )
                     |> Result.bind ( fun _ -> 
-                        Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'" 
+                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -363,7 +363,7 @@ module Main =
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
                     |> Result.bind ( fun _ -> 
-                        Orm.selectWhere< Fact > testingState transaction $"id = '{theFact.id}'"  
+                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])  
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -427,7 +427,7 @@ module Main =
         let mysqlState = MySQL( mysqlConnectionString , Contexts.MySQL )
         let mssqlState = MSSQL( mssqlConnectionString , Contexts.MSSQL )
         let sqliteState = SQLite( sqliteConnectionString , Contexts.SQLite )
-        let odbcState = ODBC(  odbcConnectionString , Contexts.ODBC )
+        let odbcState = ODBC( odbcConnectionString , Contexts.ODBC )
 
         let states = 
             [ 
@@ -438,13 +438,13 @@ module Main =
             // ; mssqlstate
             ]
 
-        use fs = new FileStream(outputPath, FileMode.Create)
-        use writer = new StreamWriter( fs, System.Text.Encoding.UTF8 )
+        // use fs = new FileStream(outputPath, FileMode.Create)
+        // use writer = new StreamWriter( fs, System.Text.Encoding.UTF8 )
 
-        writer.AutoFlush <- true
+        // writer.AutoFlush <- true
 
-        System.Console.SetOut(writer)
-        System.Console.SetError(writer)
+        // System.Console.SetOut(writer)
+        // System.Console.SetError(writer)
 
         states
         |> List.map ( 
