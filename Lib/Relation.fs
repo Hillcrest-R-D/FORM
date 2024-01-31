@@ -9,33 +9,35 @@ module Relation =
         |> Array.filter (fun col -> col.IsKey) 
         |> Array.map (fun keyCol -> keyCol.QuotedSqlName)
 
-    type SqlValueDescriptor = 
-        {
-            _type : Type
-            value : obj
-        }
+    // type SqlValueDescriptor = 
+    //     {
+    //         _type : Type
+    //         value : obj
+    //     }
     
-    let inline sqlWrap (item : SqlValueDescriptor) : string =
-        if item._type = typedefof<string> 
-        then $"'{item.value}'"
-        else $"{item.value}"
+    // let inline sqlWrap (item : SqlValueDescriptor) : string =
+    //     if item._type = typedefof<string> 
+    //     then $"'{item.value}'"
+    //     else $"{item.value}"
     
-    type RelationshipCell = 
-        | Leaf of SqlValueDescriptor
-        | Node of SqlValueDescriptor * RelationshipCell
-    module RelationshipCell = 
-        let rec fold ( f : 'a -> SqlValueDescriptor -> 'a ) ( acc : 'a ) state =  
-            match state with 
-            | Leaf l -> f acc l
-            | Node ( l, n ) -> f ( fold f acc n ) l
+    // type RelationshipCell = 
+    //     | Leaf of SqlValueDescriptor
+    //     | Node of SqlValueDescriptor * RelationshipCell
+        
+    // module RelationshipCell = 
+    //     let rec fold ( f : 'a -> SqlValueDescriptor -> 'a ) ( acc : 'a ) state =  
+    //         match state with 
+    //         | Leaf l -> f acc l
+    //         | Node ( l, n ) -> f ( fold f acc n ) l
        
-    type Relation<^S> =
+    type Relation<^T, ^S> =
         {
-            id : RelationshipCell 
+            id : ^T //RelationshipCell 
             // Relation<Fact> {id = Node ( {_type = typeof<int>; value = 0 }, Leaf { _type= typeof<string>; value = "42" } ); None}
             value : ^S option    
+            private state : OrmState
         }
-        static member inline Value (inst) state =
+        member Value (inst) state =
             let id = lookupId<^S> state
             let idValueSeq = 
                 RelationshipCell.fold ( 
@@ -52,8 +54,8 @@ module Relation =
                 |> String.concat " and " 
 
             log ( fun _ -> 
-                printfn "lookupId Id Column Name: %A" id 
-                printfn "Where Clause: %A" whereClause 
+                sprintfn "lookupId Id Column Name: %A" id 
+                + sprintf "Where Clause: %A" whereClause 
             )
             if Seq.isEmpty id then {inst with value = None} 
             else 
@@ -64,3 +66,26 @@ module Relation =
                 | _ -> 
                     Option.None 
                 |> fun (v : option<'S>) -> { inst with value = v}
+
+
+    type JoinType =
+        | Direct
+        | Relation
+
+    [<Table("auth.User", Contexts.Something)>]
+    type User = 
+        {
+            id : int
+            username : string
+            [<Join(Direct)>]
+            tenant : Tenant 
+            [<Eager>]
+            biography : Relation<Biography>
+            artPortfolioId : Relation<ArtPortfolio>
+        }
+
+    { user with biography = Relation.Value user.biography ormState }
+    user.biography.otherwiseHiddenOrmState => exception
+    match user.biography.Value with 
+    | Some bio
+    | None

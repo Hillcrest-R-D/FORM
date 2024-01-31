@@ -1,39 +1,34 @@
 ﻿namespace Form 
 
-open System
-open System.Data
-open FSharp.Reflection
-open Npgsql
-open Microsoft.Data.SqlClient
-open System.Data.SQLite
-open MySqlConnector
-open System.Data.Common
-open Form.Attributes
-    
+
 module Orm = 
+    open System
+    open System.Data
+    open FSharp.Reflection
+    open Npgsql
+    open System.Data.SQLite
+    open MySqlConnector
+    open System.Data.Common
+    open Form.Attributes
     open Utilities
-    ///<Description>Stores the flavor And context used for a particular connection.</Description>
+    open Logging
     
+    ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( state : OrmState ) = Utilities.connect state
 
     let inline beginTransaction ( state : OrmState ) =
         match connect state with 
         | Ok connection ->
             try 
-                if connection.State = ConnectionState.Closed 
-                then connection.Open()
-                else ()
                 Some ( connection.BeginTransaction() )
             with 
             | exn -> 
-                log ( fun _ -> printfn "Exception when beginning transaction: %A" exn )
+                log ( sprintf "Exception when beginning transaction: %A" exn )
                 None
         | Error e -> 
-            log ( fun _ -> printfn "Error when beginning transaction: %A" e )
+            log ( sprintf "Error when beginning transaction: %A" e )
             None
-    
 
- 
     let commitTransaction = 
         Option.map ( fun ( transaction : DbTransaction ) -> transaction.Commit() )
     let rollbackTransaction = 
@@ -49,6 +44,7 @@ module Orm =
 
     let inline consumeReader<^T > ( state : OrmState ) ( reader : IDataReader ) = Utilities.consumeReader<^T> state reader
 
+    ///<description>WARNING! Execute takes a raw string literal to execute against the specified DB state, which is inherently unsafe and exposed to SQL injection, do not use this in a context where strings aren't being escaped properly before hand.</description>
     let inline execute ( state : OrmState ) ( transaction : DbTransaction option ) sql =
         transaction 
         |> withTransaction 
@@ -59,7 +55,6 @@ module Orm =
                 cmd.ExecuteNonQuery( )
             )
             ( fun connection -> 
-                connection.Open()
                 use cmd = makeCommand state sql connection  
                 let result = cmd.ExecuteNonQuery( )
                 connection.Close() 
@@ -75,8 +70,7 @@ module Orm =
         match connect state with
         | Ok conn -> 
             try 
-                conn.Open( )
-                use cmd = makeCommand state sql conn 
+                use cmd = makeCommand state (sql) conn 
                 cmd.ExecuteReader( CommandBehavior.CloseConnection )
                 |> Ok
             with 
@@ -89,7 +83,7 @@ module Orm =
             state
             ( fun transaction -> 
                 seq {
-                    use cmd = makeCommand state sql <| transaction.Connection
+                    use cmd = makeCommand state (sql) <| transaction.Connection
                     cmd.Transaction <- transaction
                     use reader = cmd.ExecuteReader( )
                     yield! readerFunction reader
@@ -97,72 +91,80 @@ module Orm =
             )
             ( fun connection -> 
                 seq {
-                    connection.Open( )
-                    use cmd = makeCommand state sql connection 
+                    use cmd = makeCommand state (sql) connection 
                     use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
                     yield! readerFunction reader
                     connection.Close()
                 }
             )
             
-    let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) lim = 
+    let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( limit : int ) = 
         selectHelper< ^T > state transaction ( fun x -> 
             match state with 
-            | MSSQL _ -> $"select top {lim} {x}" 
-            | _ -> $"select {x} limit {lim}" 
+            | MSSQL _ -> $"select top {limit} {x}" 
+            | MySQL _ 
+            | PSQL _ 
+            | SQLite _ 
+            | ODBC _ -> $"select {x} limit {limit} " 
+            // | ODBC _ -> $"select {x} order by 1 fetch first {limit} rows only" 
         ) 
 
-    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) where   = 
-        selectHelper< ^T > state transaction ( fun x -> $"select {x} where {where}" ) 
+    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) (where) = 
+        selectHelper< ^T > state transaction ( fun x -> $"select {x} where {escape where}" ) 
         
     let inline selectAll< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x}" ) 
     
     
-    let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instance : ^T ) =
-        let query = insertBase< ^T > state insertKeys 
+    let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instance : ^T ) =
+        let query = insertBase< ^T > state includeKeys 
+        log $"Insert Query Generated: {query}"
         transaction 
         |> withTransaction 
             state 
-            (
-                fun transaction ->
-                    use command = parameterizeCommand state query (transaction.Connection) instance //makeCommand query conn state
-                    log (fun _ -> 
-                        printfn "Param count: %A" command.Parameters.Count
-                        for i in [0..command.Parameters.Count-1] do 
-                            printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                    )  
-                    command.Transaction <- transaction
-                    command.ExecuteNonQuery ( ) 
+            ( fun transaction ->
+                use command = parameterizeCommand state query (transaction.Connection) includeKeys Insert instance //makeCommand query conn state
+                log ( 
+                    sprintf "Param count: %A" command.Parameters.Count :: 
+                    [ for i in [0..command.Parameters.Count-1] do 
+                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value 
+                    ]
+                    |> String.concat "\n"
+                )  
+                command.Transaction <- transaction
+                command.ExecuteNonQuery ( ) 
             )
-            (
-                fun connection ->
-                    connection.Open( )
-                    let query = insertBase< ^T > state insertKeys 
-                    use command = parameterizeCommand state query connection instance //makeCommand query connection state
-                    log (fun _ -> 
-                        printfn "Param count: %A" command.Parameters.Count
-                        for i in [0..command.Parameters.Count-1] do 
-                            printfn "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                    )   
-                    let result = command.ExecuteNonQuery ( )
-                    connection.Close( )
-                    result
+            ( fun connection ->
+                let query = insertBase< ^T > state includeKeys 
+                use command = parameterizeCommand state query connection includeKeys Insert instance //makeCommand query connection state
+                log (
+                    sprintf "Param count: %A" command.Parameters.Count ::
+                    [ for i in [0..command.Parameters.Count-1] do 
+                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                    ] |> String.concat "\n"
+                )   
+                let result = command.ExecuteNonQuery ( )
+                connection.Close( )
+                result
             )
             
-    let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) insertKeys ( instances : ^T seq ) =
-        let query = insertBase< ^T > state insertKeys 
+    let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instances : ^T seq ) =
+        let query = insertBase< ^T > state includeKeys 
         transaction
         |> withTransaction 
             state 
-            ( fun transaction ->  
-                parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
+            ( fun transaction -> 
+                seq {
+                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
+                }
             )
             ( fun connection -> 
-                connection.Open()
-                use transaction = connection.BeginTransaction()
-                parameterizeSeqAndExecuteCommand state query transaction instances //makeCommand query connection state
-                |> fun x -> transaction.Commit();connection.Close(); x
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
+                    transaction.Commit()
+                    connection.Close()
+                }
             )
 
     
@@ -174,27 +176,34 @@ module Orm =
         |> Result.bind (fun sqlMapping ->
             sqlMapping
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" table x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName 
+            )
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
         
     let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
-        // Array.map ( fun instance -> update<^T> state transaction instance ) instances 
-        let table = table<^T> state
+        let tableName = table<^T> state
         let paramChar = getParamChar state
         
         ensureId< ^T > state 
         |> Result.bind (fun sqlMapping ->
             sqlMapping
-            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" table x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName  ) //! Filter out joins for non-select queries
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" tableName x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
+            ) 
             |> String.concat " and "
             |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
 
-    let inline updateWhere< ^T > ( state : OrmState ) transaction ( where : string ) ( instance: ^T )  = 
-        updateHelper< ^T > state transaction ( sprintf " where %s" where ) instance 
+    let inline updateWhere< ^T > ( state : OrmState ) transaction ( where ) ( instance: ^T )  = 
+        updateHelper< ^T > state transaction ( sprintf " where %s" (escape where) ) instance 
         
     let inline delete< ^T > state ( transaction : DbTransaction option )  instance = 
         ensureId< ^T > state 
@@ -203,7 +212,11 @@ module Orm =
             let paramChar = getParamChar state
             sqlMapping
             |> Array.filter ( fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName )
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" tableName x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
+            ) 
             |> String.concat " and "
             |> fun where -> deleteHelper< ^T > state transaction where instance  
         )
@@ -215,15 +228,19 @@ module Orm =
             let paramChar = getParamChar state
             sqlMapping
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries
-            |> Array.map ( fun x -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName)
+            |> Array.map ( fun x -> 
+                match state with 
+                | ODBC _ -> sprintf "%s.%s = %s" tableName x.QuotedSqlName paramChar 
+                | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
+            ) 
             |> String.concat " and " // id1 = @id1 AND id2 = @id2
             |> fun where -> deleteManyHelper< ^T > state transaction where instances 
         )        
         
     /// <Warning> Running this function is equivalent to DELETE 
-    /// FROM table WHERE whereClause </Warning>
-    let inline deleteWhere< ^T > state ( transaction : DbTransaction option ) whereClause = 
-        let query =  (deleteBase< ^T > state) + whereClause
+    /// FROM table WHERE where </Warning>
+    let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * string[]) ) = 
+        let query = $"{deleteBase< ^T > state} {escape where}"
         transaction 
         |> withTransaction
             state
@@ -233,7 +250,6 @@ module Orm =
                 cmd.ExecuteNonQuery ( )
             )
             ( fun connection -> 
-                connection.Open( )
                 use cmd = makeCommand state query connection 
                 cmd.ExecuteNonQuery ( )
                 |> fun res -> connection.Close(); res

@@ -3,25 +3,29 @@ module Test.Orm
 open Form
 open Form.Attributes
 open Form.Utilities
-open HCRD.FORM.Tests.Setup 
 open NUnit.Framework
+open HCRD.FORM.Tests.Setup
+
 
 type FixtureArgs =
-    static member Source : obj seq = seq {
-        [| sqliteState |] 
-        [| psqlState |]
-    }
-    
+    static member Source : obj seq =
+        seq {
+            // [| sqliteState |] 
+            [| psqlState |]
+            // [| odbcState |]
+        }
+        
 [<SetUpFixture>]
 type OrmSetup () = 
     [<OneTimeSetUp>]
     member _.Setup () = 
-        DotNetEnv.Env.Load() |> printf "Loaded variables %A" 
-        printfn "%A\n\n\n\n\n" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
+        printfn "sqlite - %A" (System.Environment.GetEnvironmentVariable("sqlite_connection_string"))
+        printfn "postgres - %A" (System.Environment.GetEnvironmentVariable("postgres_connection_string"))
+        printfn "odbc - %A" (System.Environment.GetEnvironmentVariable("odbc_connection_string"))
 
 [<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
 type Orm (_testingState) =
-    let testingState = _testingState ()
+    let testingState = _testingState
     let tableName = "\"Fact\""
     let testGuid1 = System.Guid.NewGuid().ToString()
     let testGuid2 = System.Guid.NewGuid().ToString()
@@ -286,7 +290,7 @@ type Orm (_testingState) =
  
 [<TestFixtureSource(typeof<FixtureArgs>, "Source")>]
 type OrmTransaction ( _testingState ) = 
-    let testingState = _testingState ()
+    let testingState = _testingState
     let tableName = "\"Fact\""
     let testGuid1 = System.Guid.NewGuid().ToString()
     let testGuid2 = System.Guid.NewGuid().ToString()
