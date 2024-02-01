@@ -112,10 +112,29 @@ module Orm =
     let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) (where) = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x} where {escape where}" ) 
         
+    ///<summary>Select * from the table ^T @ OrmState</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="includeKeys"></param>
+    ///<param name="instances"></param>
+    ///<remarks><para></para>
+    ///<para></para></remarks>
+    ///<example>
+    ///     <code>selectAll&lt;^T&gt; someState None</code>
+    ///</example>
     let inline selectAll< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x}" ) 
     
-    
+    ///<summary>Insert an <paramref name="instance"/> of ^T into the table ^T @ OrmState.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="includeKeys"></param>
+    ///<param name="instance"></param>
+    ///<remarks><para>Using <paramref name="includeKeys"/> = true will likely be the default behavior desired in most instances - it should be set to false only in circumstances where you have default behavior on the table generating keys for you.</para>
+    ///<para></para></remarks>
+    ///<example>
+    ///     <code>insert&lt;^T&gt; someState None true anInstanceOfT</code>
+    ///</example>
     let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instance : ^T ) =
         let query = insertBase< ^T > state includeKeys 
         log $"Insert Query Generated: {query}"
@@ -147,7 +166,14 @@ module Orm =
                 connection.Close( )
                 result
             )
-            
+    
+    ///<summary>Insert a seq&lt;^T&gt; <paramref name="instances"/> into the table ^T @ OrmState.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="includeKeys"></param>
+    ///<param name="instances"></param>
+    ///<remarks><para>Using <paramref name="includeKeys"/> = true will likely be the default behavior desired in most instances - it should be set to false only in circumstances where you have default behavior on the table generating keys for you.</para>
+    ///<para></para></remarks>
     let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instances : ^T seq ) =
         let query = insertBase< ^T > state includeKeys 
         transaction
