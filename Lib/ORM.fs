@@ -97,7 +97,17 @@ module Orm =
                     connection.Close()
                 }
             )
-            
+    
+    ///<summary>Select <paramref name="limit"/> records <typeparamref name="^T"/> from the table <typeparamref name="^T"/> @ <paramref name="state"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="limit"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks>
+    /// </remarks>
+    ///<example>
+    ///     <code>selectlimit&lt;^T&gt; someState None 5</code>
+    ///</example>
     let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( limit : int ) = 
         selectHelper< ^T > state transaction ( fun x -> 
             match state with 
@@ -109,14 +119,25 @@ module Orm =
             // | ODBC _ -> $"select {x} order by 1 fetch first {limit} rows only" 
         ) 
 
+    ///<summary>Select all records <typeparamref name="^T"/> from the table <typeparamref name="^T"/> @ <paramref name="state"/> using the conditional <paramref name="where"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="where"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks>
+    /// </remarks>
+    ///<example>
+    ///     <code>selectWhere&lt;^T&gt; someState None where</code>
+    ///</example>
     let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) (where) = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x} where {escape where}" ) 
         
-    ///<summary>Select * from the table ^T @ OrmState</summary>
+    ///<summary>Select all records from the table <typeparamref name="^T"/> @ <paramref name="state"/></summary>
     ///<param name="state"></param>
     ///<param name="transaction"></param>
     ///<param name="includeKeys"></param>
     ///<param name="instances"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
     ///<remarks><para></para>
     ///<para></para></remarks>
     ///<example>
@@ -125,11 +146,12 @@ module Orm =
     let inline selectAll< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x}" ) 
     
-    ///<summary>Insert an <paramref name="instance"/> of ^T into the table ^T @ OrmState.</summary>
+    ///<summary>Insert an <paramref name="instance"/> of <typeparamref name="^T"/> into the table <typeparamref name="^T"/> @ <paramref name="state"/>.</summary>
     ///<param name="state"></param>
     ///<param name="transaction"></param>
     ///<param name="includeKeys"></param>
     ///<param name="instance"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
     ///<remarks><para>Using <paramref name="includeKeys"/> = true will likely be the default behavior desired in most instances - it should be set to false only in circumstances where you have default behavior on the table generating keys for you.</para>
     ///<para></para></remarks>
     ///<example>
@@ -167,13 +189,17 @@ module Orm =
                 result
             )
     
-    ///<summary>Insert a seq&lt;^T&gt; <paramref name="instances"/> into the table ^T @ OrmState.</summary>
+    ///<summary>Insert a seq&lt;<typeparamref name="^T"/>&gt; <paramref name="instances"/> into the table <typeparamref name="^T"/> @ <paramref name="state"/>.</summary>
     ///<param name="state"></param>
     ///<param name="transaction"></param>
     ///<param name="includeKeys"></param>
     ///<param name="instances"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
     ///<remarks><para>Using <paramref name="includeKeys"/> = true will likely be the default behavior desired in most instances - it should be set to false only in circumstances where you have default behavior on the table generating keys for you.</para>
     ///<para></para></remarks>
+    ///<example>
+    ///     <code>insertMany&lt;^T&gt; someState None true instancesOfT</code>
+    ///</example>
     let inline insertMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instances : ^T seq ) =
         let query = insertBase< ^T > state includeKeys 
         transaction
@@ -193,7 +219,16 @@ module Orm =
                 }
             )
 
-    
+    ///<summary>Update a record <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="instance"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks><para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for an update call to succeed.</para>
+    ///<para></para></remarks>
+    ///<example>
+    ///     <code>update&lt;^T&gt; someState None instanceOfT</code>
+    ///</example>
     let inline update< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instance: ^T ) = 
         let table = table< ^T > state 
         let paramChar = getParamChar state
@@ -210,7 +245,18 @@ module Orm =
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
-        
+    
+    ///<summary>Update a seq&lt;<typeparamref name="^T"/>&gt; of <paramref name="instances"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="includeKeys"></param>
+    ///<param name="instances"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks><para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for an update call to succeed.</para>
+    ///<para></para></remarks>
+    ///<example>
+    ///     <code>updateMany&lt;^T&gt; someState None instancesOfT</code>
+    ///</example>
     let inline updateMany< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( instances: ^T seq )  = 
         let tableName = table<^T> state
         let paramChar = getParamChar state
@@ -228,9 +274,34 @@ module Orm =
             |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
 
+    ///<summary>Update an <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the conditional <paramref name="where"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="where"></param>
+    ///<param name="instance"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks>
+    ///   <para>While <see cref="update">update</see> and <see cref="updateMany">updateMany</see> require key/id attributes on the record types of interest, this function uses conditionals to perform the update. Be careful to fully qualify your where clause to avoid undesired data mutation!</para>
+    ///   <para>While the <paramref name="where"/> clause is handled to avoid the possibility of sql injection, it is always a good idea to escape any user input you are passing into your conditions.</para>
+    /// </remarks>
+    ///<example>
+    ///     <code>updateWhere&lt;^T&gt; someState None where instancesOfT</code>
+    ///</example>
     let inline updateWhere< ^T > ( state : OrmState ) transaction ( where ) ( instance: ^T )  = 
         updateHelper< ^T > state transaction ( sprintf " where %s" (escape where) ) instance 
         
+    ///<summary>Delete an <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the key/id attributes on <typeparamref name="^T"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="instance"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks>
+    ///   <para>Just like with delete statements in plain SQL, be careful when using this - it deletes stuff!</para>
+    ///   <para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for a delete call to succeed.</para>
+    /// </remarks>
+    ///<example>
+    ///     <code>delete&lt;^T&gt; someState None instanceOfT</code>
+    ///</example>
     let inline delete< ^T > state ( transaction : DbTransaction option )  instance = 
         ensureId< ^T > state 
         |> Result.bind ( fun sqlMapping -> 
@@ -247,6 +318,17 @@ module Orm =
             |> fun where -> deleteHelper< ^T > state transaction where instance  
         )
 
+    ///<summary>Delete a seq&lt;<typeparamref name="^T"/>&gt; of <paramref name="instances"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="includeKeys"></param>
+    ///<param name="instances"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks><para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for a delete call to succeed.</para>
+    ///<para></para></remarks>
+    ///<example>
+    ///     <code>deleteMany&lt;^T&gt; someState None instancesOfT</code>
+    ///</example>
     let inline deleteMany< ^T > state ( transaction : DbTransaction option ) instances  =
         ensureId< ^T > state 
         |> Result.bind ( fun sqlMapping -> 
@@ -263,8 +345,19 @@ module Orm =
             |> fun where -> deleteManyHelper< ^T > state transaction where instances 
         )        
         
-    /// <Warning> Running this function is equivalent to DELETE 
-    /// FROM table WHERE where </Warning>
+    ///<summary>Delete an <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the conditional <paramref name="where"/>.</summary>
+    ///<param name="state"></param>
+    ///<param name="transaction"></param>
+    ///<param name="where"></param>
+    ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
+    ///<remarks>
+    ///   <para>While <see cref="delete">delete</see> and <see cref="deleteMany">deleteMany</see> require key/id attributes on the record types of interest, this function uses conditionals to perform the delete. Be careful to fully qualify your where clause to avoid undesired data loss!</para>
+    ///   <para>While the <paramref name="where"/> clause is handled to avoid the possibility of sql injection, it is always a good idea to escape any user input you are passing into your conditions.</para>
+    ///   <para>Other opWhere functions in <see cref="Form">FORM</see> also take an instance of the desired type (i.e. <see cref="updateWhere">updateWhere</see>), the difference comes from the fact that we don't need any reference data here, where as in the update we need to know what we are updating stuff to.</para>
+    /// </remarks>
+    ///<example>
+    ///     <code>deleteWhere&lt;^T&gt; someState None where</code>
+    ///</example>
     let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * string[]) ) = 
         let query = $"{deleteBase< ^T > state} {escape where}"
         transaction 
