@@ -164,7 +164,7 @@ module Orm =
         |> withTransaction 
             state 
             ( fun transaction ->
-                use command = parameterizeCommand state query (transaction.Connection) includeKeys Insert instance //makeCommand query conn state
+                use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query conn state
                 log ( 
                     sprintf "Param count: %A" command.Parameters.Count :: 
                     [ for i in [0..command.Parameters.Count-1] do 
@@ -177,16 +177,16 @@ module Orm =
             )
             ( fun connection ->
                 let query = insertBase< ^T > state includeKeys 
-                use command = parameterizeCommand state query connection includeKeys Insert instance //makeCommand query connection state
+                use transaction = connection.BeginTransaction()
+                use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
                 log (
                     sprintf "Param count: %A" command.Parameters.Count ::
                     [ for i in [0..command.Parameters.Count-1] do 
                         yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
                     ] |> String.concat "\n"
                 )   
-                let result = command.ExecuteNonQuery ( )
-                connection.Close( )
-                result
+                command.ExecuteNonQuery ( )
+                |> fun x -> transaction.Commit(); connection.Close(); x
             )
     
     ///<summary>Insert a seq&lt;<typeparamref name="^T"/>&gt; <paramref name="instances"/> into the table <typeparamref name="^T"/> @ <paramref name="state"/>.</summary>

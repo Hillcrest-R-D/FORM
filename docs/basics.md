@@ -60,7 +60,8 @@ let myUsers = [
     { id = 3; first = "Michael"; last = "McDoesn'tExist" }
 ]
 
-Form.Orm.insertMany state None false myUsers
+myUsers
+|> Seq.map ( Form.Orm.insert state None true )
 |> printfn "%A"
 
 Form.Orm.selectAll<User> state None
@@ -147,3 +148,45 @@ Form.Orm.selectWhere<User> state None ( """"id"=:1""", [| "3" |] )
 ```
 
 Here, we are using the selectWhere function and passing arbitrary string to the where clause of the query. When we call the *Where functions, we need to separate out the string format and the data so that form is able to do some escaping to prevent sql injection. You can tell the formatter to place items based on preceding which element of the list it is with a colon. IE ":1" for the first element of the array, which, in this case, gets replaced by "3".
+
+Now, let's do something a bit more complex. Let's take this record, update it, save it back to the db, and then read it back just to be sure.
+
+```fs
+Form.Orm.selectWhere<User> state None ( """"id"=:1""", [| "3" |] ) 
+|> Result.map ( Seq.head >> fun x -> { x with first = "Michelle" }  )
+|> Result.bind ( Form.Orm.update<User> state None  ) 
+|> printfn "%A"
+
+Form.Orm.selectWhere<User> state None ( """"id"=:1""", [| "3" |] ) 
+|> printfn "%A"
+(*
+    Ok (seq [{ id = 3
+           first = "Michelle"
+           last = "McDoesn'tExist"
+           email = Some "doesexist@doesntexist.com" }])
+*)
+```
+
+That's great, but what if I want to make sure nothing affects my data until all changes are set? Well, we have support for transactions! See that `None`? That's a `DbTransaction Option`. So we simply need to call `Form.Orm.beginTransaction`. 
+
+    Note, because the transactions take a DbTransaction Option, the return of this method is a DbTransaction Option.
+
+
+```fs
+let transaction = Form.Orm.beginTransaction state
+
+Form.Orm.selectWhere<User> state transaction ( """"id"=:1""", [| "3" |] ) 
+|> Result.map ( Seq.head >> fun x -> { x with first = "Michelle" }  )
+|> Result.bind ( Form.Orm.update<User> state transaction ) 
+|> printfn "%A"
+
+Form.Orm.commitTransaction transaction
+|> printfn "%A"
+
+Form.Orm.selectWhere<User> state None ( """"id"=:1""", [| "3" |] ) 
+|> printfn "%A"
+```
+
+It's also important to know that the delete, insert, and update functions establish their own transactions that are automatically committed once they're done executing when passing None as the DbTransaction Option's state. If passing in a Some DbTransaction, then it wont auto-commit the transaction and it need to be explicitly committed by calling `Form.Orm.commitTransaction` function.
+
+With this info, you can get started using FORM. There's just one more thing to cover around batch-style commands [here](./advanced.md) if you'd like to read it.

@@ -3,7 +3,7 @@
 open System
 open Form 
 open Form.Attributes
-open Microsoft.Data.Sqlite
+open System.Data.SQLite
 open Dapper
 open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
@@ -54,7 +54,7 @@ type InsertBenchmark() =
         
     [<Benchmark>]
     member _.Dapper () = 
-        use connection = new SqliteConnection( Data.sqliteConnectionString() )
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
         connection.Execute("insert into \"Sanic\" values (@id, @name, @optional, @modified)", _data, transaction) |> ignore
@@ -63,20 +63,20 @@ type InsertBenchmark() =
     
     
     [<Benchmark(Baseline = true)>]
-    member _.Microsoft () = 
-        use connection = new SqliteConnection( Data.sqliteConnectionString() )
+    member _.System () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
-        use cmd = new SqliteCommand( "insert into \"Sanic\" values (@id, @name, @optional, @modified)", connection )
+        use cmd = new SQLiteCommand( "insert into \"Sanic\" values (@id, @name, @optional, @modified)", connection )
         cmd.Transaction <- transaction
-        let paramId = SqliteParameter()
+        let paramId = SQLiteParameter()
         paramId.ParameterName <- "@id"
-        let paramName = SqliteParameter()
+        let paramName = SQLiteParameter()
         paramName.ParameterName <- "@name"
-        let paramOptional = SqliteParameter()
+        let paramOptional = SQLiteParameter()
         paramOptional.ParameterName <- "@optional"
         paramOptional.IsNullable <- true
-        let paramModified = SqliteParameter()
+        let paramModified = SQLiteParameter()
         paramModified.ParameterName <- "@modified"
         cmd.Parameters.Add(paramId) |> ignore
         cmd.Parameters.Add(paramName) |> ignore
@@ -133,7 +133,7 @@ type UpdateBenchmark() =
 
     [<Benchmark>]
     member _.Dapper () = 
-        use connection = new SqliteConnection( Data.sqliteConnectionString() )
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
         connection.Execute("update \"Sanic\" set name = @name, optional = @optional, modified = @modified where id = @id",  _data, transaction) |> ignore
@@ -141,20 +141,20 @@ type UpdateBenchmark() =
         connection.Close()
     
     [<Benchmark(Baseline = true)>]
-    member _.Microsoft () = 
-        use connection = new SqliteConnection( Data.sqliteConnectionString() )
+    member _.System () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
-        use cmd = new SqliteCommand( "update \"Sanic\" set name = @name, optional = @optional, modified = @modified where id = @id", connection )
+        use cmd = new SQLiteCommand( "update \"Sanic\" set name = @name, optional = @optional, modified = @modified where id = @id", connection )
         cmd.Transaction <- transaction
-        let paramId = SqliteParameter()
+        let paramId = SQLiteParameter()
         paramId.ParameterName <- "@id"
-        let paramName = SqliteParameter()
+        let paramName = SQLiteParameter()
         paramName.ParameterName <- "@name"
-        let paramOptional = SqliteParameter()
+        let paramOptional = SQLiteParameter()
         paramOptional.ParameterName <- "@optional"
         paramOptional.IsNullable <- true
-        let paramModified = SqliteParameter()
+        let paramModified = SQLiteParameter()
         paramModified.ParameterName <- "@modified"
         cmd.Parameters.Add(paramId) |> ignore
         cmd.Parameters.Add(paramName) |> ignore
@@ -210,14 +210,14 @@ type SelectBenchmark() =
 
     [<Benchmark>]
     member _.Dapper () = 
-        use connection = new SqliteConnection( Data.sqliteConnectionString() )
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         for _ in connection.Query<Data.Sanic>($"select * from Sanic limit {_data};") do () 
     
     [<Benchmark(Baseline = true)>]
-    member _.Microsoft () = 
-        use connection = new SqliteConnection( Data.sqliteConnectionString() )
+    member _.System () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
-        use cmd = new SqliteCommand( $"select * from \"Sanic\" limit {_data}", connection )
+        use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )
         let reader = cmd.ExecuteReader()
         seq {
             while (reader.Read()) do

@@ -355,8 +355,9 @@ module Utilities =
                 
                 sprintf "%s<%s>" typeName args
 
-    let inline parameterizeCommand< ^T > state query conn includeKeys behavior ( instance : ^T ) =
-        let cmd = makeCommand state query conn 
+    let inline parameterizeCommand< ^T > state query (transaction : DbTransaction) includeKeys behavior ( instance : ^T ) =
+        let cmd = makeCommand state query transaction.Connection
+        cmd.Transaction <- transaction
         let paramChar = getParamChar state
         let allColumns = 
             mapping< ^T > state
@@ -524,15 +525,15 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction ->  
-                use command = parameterizeCommand< ^T > state query ( transaction.Connection ) false Update instance 
+                use command = parameterizeCommand< ^T > state query transaction false Update instance 
                 command.Transaction <- transaction
                 command.ExecuteNonQuery ( )
             )
             ( fun connection -> 
-                use command = parameterizeCommand< ^T > state query connection false Update instance 
-                let result = command.ExecuteNonQuery ( )
-                connection.Close( )
-                result 
+                use transaction = connection.BeginTransaction()
+                use command = parameterizeCommand< ^T > state query transaction false Update instance 
+                command.ExecuteNonQuery ( )
+                |> fun x -> transaction.Commit();connection.Close(); x 
             )
 
     let inline updateManyHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) = 
@@ -544,7 +545,7 @@ module Utilities =
                 parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances  
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction() 
+                use transaction = connection.BeginTransaction() 
                 parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances 
                 |> fun x -> transaction.Commit();connection.Close(); x 
             )
@@ -560,15 +561,15 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                use command = parameterizeCommand< ^T > state query ( transaction.Connection ) false Delete instance 
+                use command = parameterizeCommand< ^T > state query transaction false Delete instance 
                 command.Transaction <- transaction
                 command.ExecuteNonQuery ( )        
             )
             ( fun connection -> 
-                use cmd = parameterizeCommand< ^T > state query connection false Delete instance 
-                let result = cmd.ExecuteNonQuery ( )
-                connection.Close()
-                result
+                use transaction = connection.BeginTransaction()
+                use cmd = parameterizeCommand< ^T > state query transaction false Delete instance 
+                cmd.ExecuteNonQuery ( )
+                |> fun x -> transaction.Commit();connection.Close(); x                
             )
     
     let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
