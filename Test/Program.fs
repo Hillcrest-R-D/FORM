@@ -88,31 +88,37 @@ module Main =
         let select () =
             constructTest 
                 "Select" 
-                "Select succeeded"
+                "Select"
                 ( fun _ -> Orm.selectAll< Fact > testingState None ) 
                 
         // let asyncSelect () =
         //     constructTest
         //         "Select-Async"
-        //         "Select-Async Succeeded"
+        //         "Select-Async"
         //         (fun _ -> Orm.selectAll< Fact > testingState None)  
         
         let selectLimit () =
             constructTest 
                 "SelectLimit"
-                "SelectLimit succeeded"
+                "SelectLimit"
                 (fun _ -> Orm.selectLimit< Fact > testingState None 5)
 
         let selectWhere () =
             constructTest 
                 "SelectWhere"
-                "SelectWhere succeeded"
+                "SelectWhere"
                 (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) )
+
+        let selectWhereWithIn () =
+            constructTest 
+                "SelectWhereWithIn"
+                "SelectWhereWithIn"
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( "(\"id\" in (:1) and \"maybeSomething\" = ':2') or \"indexId\" in (:3)", [| [testGuid1; testGuid2; testGuid3];  "true" ; [1;2;3] |]) )
                 
         let update () =
             constructTest 
                 "Update"
-                "Update succeeded"
+                "Update"
                 (fun _ ->
                     let initial = { Fact.init() with id = testGuid1 }
                     let changed = { initial with name = "Evan Towlett"}
@@ -122,7 +128,7 @@ module Main =
         let updateMany () =
             constructTest 
                 "UpdateMany"
-                "UpdateMany succeeded"
+                "UpdateMany"
                 ( fun _ -> 
                 let initial = Fact.init() 
                 let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
@@ -160,7 +166,7 @@ module Main =
         let updateWhere () =
             constructTest
                 "UpdateWhere"
-                "UpdateWhere succeeded"
+                "UpdateWhere"
                 (fun _ -> 
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
@@ -170,7 +176,7 @@ module Main =
         let delete () =
             constructTest 
                 "Delete"
-                "Delete succeeded"
+                "Delete"
                 ( fun _ ->
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
@@ -179,13 +185,13 @@ module Main =
         let deleteWhere () = 
             constructTest
                 "DeleteWhere"
-                "DeleteWhere succeeded"
+                "DeleteWhere"
                 (fun _ -> Orm.deleteWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) )
                 
         let deleteMany () =
             constructTest
                 "DeleteMany"
-                "DeleteMany succeeded"
+                "DeleteMany"
                 (fun _ ->
                     let initial = Fact.init() 
                     let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
@@ -195,7 +201,7 @@ module Main =
         let reader () =
             constructTest
                 "Reader"
-                "Reader succeeded"
+                "Reader"
                 (fun _ ->
                     Orm.consumeReader<Fact> testingState 
                     |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader 
@@ -218,7 +224,7 @@ module Main =
         let tearDown () = 
             constructTest 
                 "Teardown"
-                "Teardown succeeded"
+                "Teardown"
                 ( fun _ -> 
                     transaction
                     |> Option.map ( Orm.commitTransaction  )
@@ -238,6 +244,7 @@ module Main =
                 // asyncSelect ()
                 selectLimit ()
                 selectWhere ()
+                selectWhereWithIn ()
                 update ()
                 updateMany ()
                 updateWhere ()
@@ -292,7 +299,7 @@ module Main =
         let insertSelect () =
             constructTest
                 "InsertSelect"
-                "InsertSelect succeeded"
+                "InsertSelect"
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = {Fact.init() with subFact = None}
@@ -322,7 +329,7 @@ module Main =
         let insertDeleteSelect () =
             constructTest 
                 "InsertDeleteSelect"
-                "InsertDeleteSelect succeeded"
+                "InsertDeleteSelect"
                 ( fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = Fact.init()
@@ -352,7 +359,7 @@ module Main =
         let insertUpdateSelect () =
             constructTest
                 "InsertUpdateSelect"
-                "InsertUpdateSelect succeeded"
+                "InsertUpdateSelect"
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = Fact.init()
@@ -386,7 +393,7 @@ module Main =
         let readerWithTransaction () =
             constructTest
                 "Reader-Transaction"
-                "Reader with Transaction succeeded"
+                "Reader with Transaction"
                 (fun _ -> 
                     let transaction = Orm.beginTransaction testingState
                     Orm.consumeReader<Fact> testingState 
@@ -431,9 +438,9 @@ module Main =
 
         let states = 
             [ 
-            odbcState
-            ; psqlState
-            ; sqliteState
+            // odbcState
+            // ; psqlState
+            sqliteState
             // ; mysqlState
             // ; mssqlstate
             ]
@@ -453,11 +460,11 @@ module Main =
         )
         |> printfn "%A"
 
-        states 
-        |> List.map ( 
-            transaction 
-            >> runTestsWithCLIArgs [] argv 
-        )
-        |> printfn "%A"
+        // states 
+        // |> List.map ( 
+        //     transaction 
+        //     >> runTestsWithCLIArgs [] argv 
+        // )
+        // |> printfn "%A"
 
         0

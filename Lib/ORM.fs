@@ -358,7 +358,7 @@ module Orm =
     ///<example>
     ///     <code>deleteWhere&lt;^T&gt; someState None where</code>
     ///</example>
-    let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * string[]) ) = 
+    let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * obj seq) ) = 
         let query = $"{deleteBase< ^T > state} {escape where}"
         transaction 
         |> withTransaction

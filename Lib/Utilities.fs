@@ -81,8 +81,8 @@ module Utilities =
                     match item with 
                     | :? seq<string> as t -> 
                         System.String.Join( ", ", Seq.map ( fun innerItem -> $"'{pattern innerItem}'" ) t )
-                    | :? seq<obj> as t ->
-                        System.String.Join( ", ", Seq.map (fun innerItem -> pattern <| innerItem.ToString()) t ) 
+                    | :? seq<int> as t ->
+                        System.String.Join( ", ", Seq.map (fun innerItem -> $"{innerItem}") t ) 
                     | _ -> pattern <| item.ToString()
                 
                 Regex.Replace(accumulator, $":{i}", sanitizedInput)
