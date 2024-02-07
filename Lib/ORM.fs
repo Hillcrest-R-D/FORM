@@ -61,11 +61,11 @@ module Orm =
                 result
             )
     
-    ///<Description>
-    /// Takes a function of IDataReader -> Result< 't seq, exn> (see FORMs consumeReader function as example) to 
+    ///<summary>
+    /// Takes a function of IDataReader -> Result&lt; 't seq, exn&gt; (see FORMs consumeReader function as example) to 
     /// transfer the results of executing the specified sql against the specified database given by state into an 
     /// arbitrary type 't, defined by you in the readerFunction.
-    /// </Description>
+    /// </summary>
     let inline generateReader state sql =
         match connect state with
         | Ok conn -> 
@@ -104,10 +104,10 @@ module Orm =
     ///<param name="limit"></param>
     ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
     ///<remarks>
-    /// </remarks>
     ///<example>
     ///     <code>selectlimit&lt;^T&gt; someState None 5</code>
     ///</example>
+    /// </remarks>
     let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( limit : int ) = 
         selectHelper< ^T > state transaction ( fun x -> 
             match state with 

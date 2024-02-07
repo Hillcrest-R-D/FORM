@@ -63,22 +63,29 @@ module Utilities =
         | ODBC _ -> $"\"{str}\""
 
     let pattern = fun t -> Regex.Replace(t, @"'", @"''" )
-    //         function 
-    //         | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
-    //         | t -> t
+        // function 
+        // | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
+        // | t when t :?> seq -> t
     // [| ("customerType = %s", "retail"); ( "and (hasSaleWithinPastYear = %s", "true" ); ( "or boughtTiresAYearAgo = %s)", "true" ) |]
 
     // "customerType = :1 and (hasSaleWithinPastYear = :2 or boughtTiresAYearAgo = :2)" [| "retail"; "true" |]
-    let escape ( where : string * string[] )= 
+    let inline escape( where : string * obj seq )= 
         let format, values = where  
         let mutable i = 0
         values  
-        |> Array.fold 
+        |> Seq.fold 
             (fun accumulator item -> 
                 i <- i+1
-                let ret = Regex.Replace(accumulator, $":{i}", pattern item)
-                printfn "This is the regex replace result: %A" ret 
-                ret
+
+                let sanitizedInput = 
+                    match item with 
+                    | :? seq<string> as t -> 
+                        System.String.Join( ", ", Seq.map ( fun innerItem -> $"'{pattern innerItem}'" ) t )
+                    | :? seq<obj> as t ->
+                        System.String.Join( ", ", Seq.map (fun innerItem -> pattern <| innerItem.ToString()) t ) 
+                    | _ -> pattern <| item.ToString()
+                
+                Regex.Replace(accumulator, $":{i}", sanitizedInput)
             )
             format 
     let inline context< ^T > ( state : OrmState ) = 
