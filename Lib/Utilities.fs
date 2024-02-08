@@ -81,9 +81,9 @@ module Utilities =
                     match item with 
                     | :? seq<string> as t -> 
                         System.String.Join( ", ", Seq.map ( fun innerItem -> $"'{pattern innerItem}'" ) t )
-                    | :? seq<int> as t ->
-                        System.String.Join( ", ", Seq.map (fun innerItem -> $"{innerItem}") t ) 
-                    | _ -> pattern <| item.ToString()
+                    | :? string as t -> pattern <| t.ToString()
+                    | :? System.Collections.IEnumerable as t -> //seq of non string type (for numeric sequences, and any others that will behave in an interpolated string. May need to adjust to get desirable behavior generically)
+                        System.String.Join( ", ", Seq.map (fun innerItem -> $"{innerItem}") [for i in t do yield i] ) 
                 
                 Regex.Replace(accumulator, $":{i}", sanitizedInput)
             )
