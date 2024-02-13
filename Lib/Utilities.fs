@@ -267,12 +267,6 @@ module Utilities =
         | :? Option<Decimal>    as t -> tmp.Value <- t |> Option.get
         | :? Option<DateTime>   as t -> tmp.Value <- t |> Option.get
         | _ -> ()
-
-    let inline exceptionHandler f =
-        try 
-            Ok <| f( )
-        with 
-        | exn -> Error exn
     
     let inline getParamChar state = 
         match state with
@@ -281,7 +275,7 @@ module Utilities =
 
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
-    let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
+    let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = seq { 
         let reifiedType = typeof< ^T >
         let constructor = 
             let mutable tmp = fun _ -> obj()
@@ -297,14 +291,14 @@ module Utilities =
                 | Some _type -> toOption _type 
                 | None -> id
             |]
-        seq { 
-            while reader.Read( ) do
-                constructor 
-                    [| for i in 0..reader.FieldCount-1 do 
-                        options[i] <| reader.GetValue( i ) 
-                    |] 
-                :?> ^T // dang ol' class factory man
-        }  
+        
+        while reader.Read( ) do
+            constructor 
+                [| for i in 0..reader.FieldCount-1 do 
+                    options[i] <| reader.GetValue( i ) 
+                |] 
+            :?> ^T // dang ol' class factory man
+        }
 
     let inline insertBase< ^T > ( state : OrmState ) insertKeys =
         let paramChar = getParamChar state
@@ -329,7 +323,7 @@ module Utilities =
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
     
     let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
-        log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
+        // log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
         match state with 
         | MSSQL _ ->    new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ ->    new MySqlCommand ( query, connection :?> MySqlConnection )
@@ -340,10 +334,15 @@ module Utilities =
     let inline withTransaction state transactionFunction noneFunction transaction =
         try 
             match transaction with 
-            | Some ( transaction : DbTransaction ) -> transactionFunction transaction |> Ok 
-            | None -> connect state |> Result.map ( noneFunction )
+            | Some ( transaction : DbTransaction ) -> transactionFunction transaction
+            | None -> 
+                connect state
+                |> Result.map ( noneFunction )
+                |> fun x -> printfn "Result of noneFunction: %A" x; x
         with 
-        | exn -> Error exn
+        | exn -> 
+            printfn "An Error has been encountered: %A" exn
+            Error exn
 
     let rec genericTypeName full ( _type : Type ) = 
         if not _type.IsGenericType 
@@ -485,18 +484,18 @@ module Utilities =
                     cmd.Transaction <- transaction 
                     use reader = cmd.ExecuteReader( ) 
                     yield! consumeReader< ^T > state reader  
-                }
+                } |> Ok
             )
             ( fun ( connection : DbConnection ) -> 
                 seq {
-                    use cmd = makeCommand state query connection 
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection ) 
-                    yield! consumeReader< ^T > state reader  
+                    use cmd = makeCommand state query connection  
+                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                    yield! consumeReader< ^T > state reader
                     connection.Close()
-                }
+                } 
+                |> fun x -> printfn "result: %A" x; x
                 
             )
-
 
     let inline updateBase< ^T > ( state : OrmState )  = 
         let paramChar = getParamChar state
@@ -535,7 +534,8 @@ module Utilities =
             ( fun transaction ->  
                 use command = parameterizeCommand< ^T > state query transaction false Update instance 
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( )
+                command.ExecuteNonQuery ( ) 
+                |> Ok
             )
             ( fun connection -> 
                 use transaction = connection.BeginTransaction()
@@ -550,7 +550,7 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances  
+                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances |> Ok
             )
             ( fun connection -> 
                 use transaction = connection.BeginTransaction() 
@@ -571,7 +571,8 @@ module Utilities =
             ( fun transaction -> 
                 use command = parameterizeCommand< ^T > state query transaction false Delete instance 
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( )        
+                command.ExecuteNonQuery ( )   
+                |> Ok     
             )
             ( fun connection -> 
                 use transaction = connection.BeginTransaction()
@@ -586,7 +587,8 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances  
+                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances 
+                |> Ok 
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction() 

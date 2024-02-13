@@ -53,6 +53,7 @@ module Orm =
                 use cmd = makeCommand state sql ( transaction.Connection )
                 cmd.Transaction <- transaction  
                 cmd.ExecuteNonQuery( )
+                |> Ok 
             )
             ( fun connection -> 
                 use cmd = makeCommand state sql connection  
@@ -88,6 +89,7 @@ module Orm =
                     use reader = cmd.ExecuteReader( )
                     yield! readerFunction reader
                 } 
+                |> Ok
             )
             ( fun connection -> 
                 seq {
@@ -174,6 +176,7 @@ module Orm =
                 )  
                 command.Transaction <- transaction
                 command.ExecuteNonQuery ( ) 
+                |> Ok
             )
             ( fun connection ->
                 let query = insertBase< ^T > state includeKeys 
@@ -208,7 +211,7 @@ module Orm =
             ( fun transaction -> 
                 seq {
                     yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
-                }
+                } |> Ok 
             )
             ( fun connection -> 
                 seq {
@@ -367,6 +370,7 @@ module Orm =
                 use cmd = makeCommand state query ( transaction.Connection ) 
                 cmd.Transaction <- transaction
                 cmd.ExecuteNonQuery ( )
+                |> Ok
             )
             ( fun connection -> 
                 use cmd = makeCommand state query connection 

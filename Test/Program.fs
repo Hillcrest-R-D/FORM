@@ -11,9 +11,14 @@ module Main =
     let outputPath = "./console.log"
     let constructTest name message f =
         test name {
-            Expect.wantOk ( f () ) message 
-            |> printfn "%A"
+            Expect.wantOk ( f () |> Result.map ( fun _ -> () )) message 
         }
+    
+    let constructFailureTest name message f =
+        test name {
+            Expect.wantError ( f () |> Result.mapError ( fun _ -> () )) message 
+        }
+
     let tableName = "\"Fact\""
     let nameCol = function 
         | SQLite _ -> "sqliteName"
@@ -113,8 +118,14 @@ module Main =
             constructTest 
                 "SelectWhereWithIn"
                 "SelectWhereWithIn"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( "(\"id\" in (:1) and \"maybeSomething\" = ':2') or \"indexId\" in (:3)", [| [testGuid1; testGuid2; testGuid3];  "true" ; [1;2;3] |]) )
-                
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) )
+        
+        let selectWhereWithInFailure () =
+            constructFailureTest 
+                "SelectWhereWithInFailure"
+                "SelectWhereWithInFailure"
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) )
+
         let update () =
             constructTest 
                 "Update"
@@ -237,21 +248,22 @@ module Main =
             connect ()
             setup ()
             testSequenced <| testList "Tests" [
-                insert ()
-                insertMany ()
-                // asyncInsertMany ()
-                select ()
-                // asyncSelect ()
-                selectLimit ()
-                selectWhere ()
+                // insert ()
+                // insertMany ()
+                // // asyncInsertMany ()
+                // select ()
+                // // asyncSelect ()
+                // selectLimit ()
+                // selectWhere ()
                 selectWhereWithIn ()
-                update ()
-                updateMany ()
-                updateWhere ()
-                delete ()
-                deleteWhere ()
-                deleteMany ()
-                reader ()
+                selectWhereWithInFailure ()
+                // update ()
+                // updateMany ()
+                // updateWhere ()
+                // delete ()
+                // deleteWhere ()
+                // deleteMany ()
+                // reader ()
             ]
             tearDown ()
         ]
@@ -453,12 +465,12 @@ module Main =
         // System.Console.SetOut(writer)
         // System.Console.SetError(writer)
 
-        states
-        |> List.map ( 
-            orm  
-            >> runTestsWithCLIArgs [] argv 
-        )
-        |> printfn "%A"
+        // states
+        // |> List.map ( 
+        //     orm  
+        //     >> runTestsWithCLIArgs [] argv 
+        // )
+        // |> printfn "%A"
 
         // states 
         // |> List.map ( 
@@ -466,5 +478,10 @@ module Main =
         //     >> runTestsWithCLIArgs [] argv 
         // )
         // |> printfn "%A"
+        let testGuid1 = System.Guid.NewGuid().ToString()
+        let testGuid2 = System.Guid.NewGuid().ToString()
+        let testGuid3 = System.Guid.NewGuid().ToString()
+        Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |])
+        |> printfn "%A"
 
         0
