@@ -52,15 +52,24 @@ module Orm =
             ( fun transaction -> 
                 use cmd = makeCommand state sql ( transaction.Connection )
                 cmd.Transaction <- transaction  
-                cmd.ExecuteNonQuery( )
-                |> Ok 
+                seq { 
+                    try cmd.ExecuteNonQuery( ) |> Ok 
+                    with exn -> Error exn
+                }
             )
             ( fun connection -> 
-                use cmd = makeCommand state sql connection  
-                let result = cmd.ExecuteNonQuery( )
-                connection.Close() 
-                result
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use cmd = makeCommand state sql connection  
+                    try 
+                        yield cmd.ExecuteNonQuery( ) |> Ok
+                        transaction.Commit()
+                    with exn -> 
+                        transaction.Rollback()
+                        yield Error exn
+                }
             )
+        |> Seq.head
     
     ///<summary>
     /// Takes a function of IDataReader -> Result&lt; 't seq, exn&gt; (see FORMs consumeReader function as example) to 
@@ -72,7 +81,7 @@ module Orm =
         | Ok conn -> 
             try 
                 use cmd = makeCommand state (sql) conn 
-                cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                cmd.ExecuteReader( )
                 |> Ok
             with 
             | exn -> Error exn
@@ -86,17 +95,20 @@ module Orm =
                 seq {
                     use cmd = makeCommand state (sql) <| transaction.Connection
                     cmd.Transaction <- transaction
-                    use reader = cmd.ExecuteReader( )
-                    yield! readerFunction reader
+                    try 
+                        use reader = cmd.ExecuteReader( )
+                        yield! readerFunction reader
+                    with exn -> Error exn 
                 } 
-                |> Ok
             )
             ( fun connection -> 
                 seq {
+                    
                     use cmd = makeCommand state (sql) connection 
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-                    yield! readerFunction reader
-                    connection.Close()
+                    try 
+                        use reader = cmd.ExecuteReader( )
+                        yield! readerFunction reader
+                    with exn -> Error exn
                 }
             )
     
@@ -175,22 +187,33 @@ module Orm =
                     |> String.concat "\n"
                 )  
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( ) 
-                |> Ok
+                seq {
+                    try command.ExecuteNonQuery ( ) |> Ok 
+                    with exn -> Error exn 
+                }
             )
             ( fun connection ->
-                let query = insertBase< ^T > state includeKeys 
-                use transaction = connection.BeginTransaction()
-                use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
-                log (
-                    sprintf "Param count: %A" command.Parameters.Count ::
-                    [ for i in [0..command.Parameters.Count-1] do 
-                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                    ] |> String.concat "\n"
-                )   
-                command.ExecuteNonQuery ( )
-                |> fun x -> transaction.Commit(); connection.Close(); x
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
+                    log (
+                        sprintf "Param count: %A" command.Parameters.Count ::
+                        [ for i in [0..command.Parameters.Count-1] do 
+                            yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                        ] |> String.concat "\n"
+                    )   
+                    try 
+                        command.ExecuteNonQuery ( )
+                        |> fun x -> 
+                            transaction.Commit()
+                            connection.Close() 
+                            Ok x 
+                    with exn ->    
+                        transaction.Rollback()
+                        Error exn
+                }
             )
+        |> Seq.head
     
     ///<summary>Insert a seq&lt;<typeparamref name="^T"/>&gt; <paramref name="instances"/> into the table <typeparamref name="^T"/> @ <paramref name="state"/>.</summary>
     ///<param name="state"></param>
@@ -211,16 +234,22 @@ module Orm =
             ( fun transaction -> 
                 seq {
                     yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
-                } |> Ok 
+                } 
             )
             ( fun connection -> 
                 seq {
                     use transaction = connection.BeginTransaction()
-                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
-                    transaction.Commit()
-                    connection.Close()
+                    try 
+                        yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
+                        transaction.Commit()
+                    with 
+                    | exn ->
+                        transaction.Rollback()
+                        yield Error exn
                 }
-            )
+            )  
+        |> Seq.head
+        
 
     ///<summary>Update a record <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
     ///<param name="state"></param>
@@ -248,7 +277,7 @@ module Orm =
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
-    
+
     ///<summary>Update a seq&lt;<typeparamref name="^T"/>&gt; of <paramref name="instances"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
     ///<param name="state"></param>
     ///<param name="transaction"></param>
@@ -369,11 +398,60 @@ module Orm =
             ( fun transaction -> 
                 use cmd = makeCommand state query ( transaction.Connection ) 
                 cmd.Transaction <- transaction
-                cmd.ExecuteNonQuery ( )
-                |> Ok
+                seq { cmd.ExecuteNonQuery ( ) |> Ok }
             )
             ( fun connection -> 
-                use cmd = makeCommand state query connection 
-                cmd.ExecuteNonQuery ( )
-                |> fun res -> connection.Close(); res
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use cmd = makeCommand state query connection    
+                    try 
+                        yield cmd.ExecuteNonQuery ( ) |> Ok 
+                        transaction.Commit()
+                    with exn -> 
+                        transaction.Rollback() 
+                        yield Error exn
+                }
             )
+        |> Seq.head
+
+    
+    
+    // {Ok a; Ok b; Ok c} -> Ok {a; b; c}
+    // {Ok a; Ok b; Ok c; Error e} -> Error e
+    
+    ///<summary>A utility function which takes a query result and returns a result of <c>Ok seq&lt;'a&gt;</c> or <c>Error e</c>, where <c>'a</c> would be the static type parameter <c>^T</c> fed to a previously called query function (e.g. selectAll, selectWhere, etc)</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toResultSeq (results : seq<Result<'a,'b>>) = 
+        Seq.fold 
+            ( fun accumulator item -> 
+                match accumulator, item with 
+                | Ok state, Ok i -> Ok ( seq { yield! state; yield i } )
+                | Error e, _  
+                | _, Error e -> Error e 
+            ) 
+            ( Ok Seq.empty )
+            results
+
+    
+    ///<summary>A utility function which takes a query result and returns a sequence of the unwrapped Ok results.</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeq (results : seq<Result<'a,'b>>) = 
+        results
+        |> Seq.takeWhile ( Result.isOk ) 
+        |> Seq.map ( Result.defaultValue Unchecked.defaultof<'a> ) 
+
+    
+    ///<summary>A utility function which takes a query result and returns a tuple whose first element is the unwrapped Ok results and second element is the unwrapped Error results</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeqs (results : seq<Result<'a,'b>>) : (seq<'a> * seq<'b>) = 
+        Seq.fold 
+            ( fun (okAcc, errAcc) item -> 
+                match item with 
+                | Ok i -> ( seq { yield! okAcc; yield i } , errAcc)
+                | Error e -> ( okAcc , seq { yield! errAcc; yield e}) 
+            ) 
+            ( Seq.empty, Seq.empty )
+            results

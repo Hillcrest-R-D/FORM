@@ -70,7 +70,7 @@ module Main =
             constructTest "Connect" "Successfully connected." ( fun _ -> Orm.connect testingState )
 
         let insert () =
-                constructTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
+            constructTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
                 
         let insertMany () =
             constructTest 
@@ -94,7 +94,7 @@ module Main =
             constructTest 
                 "Select" 
                 "Select"
-                ( fun _ -> Orm.selectAll< Fact > testingState None ) 
+                ( fun _ -> Orm.selectAll< Fact > testingState None |> Orm.toResultSeq ) 
                 
         // let asyncSelect () =
         //     constructTest
@@ -106,26 +106,25 @@ module Main =
             constructTest 
                 "SelectLimit"
                 "SelectLimit"
-                (fun _ -> Orm.selectLimit< Fact > testingState None 5)
+                (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Orm.toResultSeq)
 
         let selectWhere () =
             constructTest 
                 "SelectWhere"
                 "SelectWhere"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) )
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Orm.toResultSeq )
 
         let selectWhereWithIn () =
             constructTest 
                 "SelectWhereWithIn"
                 "SelectWhereWithIn"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) )
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) |> Orm.toResultSeq )
         
         let selectWhereWithInFailure () =
-            constructFailureTest 
-                "SelectWhereWithInFailure"
-                "SelectWhereWithInFailure"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) )
-
+            test "SelectWhereWithInFailure" {
+                Expect.wantError (Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Orm.toResultSeq ) "SelectWhereWithInFailure" 
+                |> ignore
+            }
         let update () =
             constructTest 
                 "Update"
@@ -146,8 +145,8 @@ module Main =
                 let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
                 Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
-                let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] )
-                let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] )
+                let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Orm.toResultSeq
+                let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Orm.toResultSeq
 
                 match evan, mac with 
                 | Ok e, Ok m -> 
@@ -215,7 +214,7 @@ module Main =
                 "Reader"
                 (fun _ ->
                     Orm.consumeReader<Fact> testingState 
-                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader 
+                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader |> Orm.toResultSeq
                 )
 
         // 
@@ -248,22 +247,22 @@ module Main =
             connect ()
             setup ()
             testSequenced <| testList "Tests" [
-                // insert ()
-                // insertMany ()
-                // // asyncInsertMany ()
-                // select ()
-                // // asyncSelect ()
-                // selectLimit ()
-                // selectWhere ()
+                insert ()
+                insertMany ()
+                // asyncInsertMany ()
+                select ()
+                // asyncSelect ()
+                selectLimit ()
+                selectWhere ()
                 selectWhereWithIn ()
                 selectWhereWithInFailure ()
-                // update ()
-                // updateMany ()
-                // updateWhere ()
-                // delete ()
-                // deleteWhere ()
-                // deleteMany ()
-                // reader ()
+                update ()
+                updateMany ()
+                updateWhere ()
+                delete ()
+                deleteWhere ()
+                deleteMany ()
+                reader ()
             ]
             tearDown ()
         ]
@@ -305,8 +304,8 @@ module Main =
                             );
                             "
 
-                        Orm.execute testingState None createTable
-                    )        
+                        Orm.execute testingState None createTable 
+                    )         
         
         let insertSelect () =
             constructTest
@@ -319,7 +318,8 @@ module Main =
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> 
                         printfn "We have inserted"
-                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
+                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])
+                        |> Orm.toResultSeq 
                         |> fun x -> printfn "We have the facts: %A" x; x
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
@@ -352,6 +352,7 @@ module Main =
                     |> Result.bind ( fun _ -> Orm.delete< Fact > testingState transaction theFact  )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
+                        |> Orm.toResultSeq
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -383,6 +384,7 @@ module Main =
                     |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])  
+                        |> Orm.toResultSeq
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -410,6 +412,7 @@ module Main =
                     let transaction = Orm.beginTransaction testingState
                     Orm.consumeReader<Fact> testingState 
                     |> fun reader -> Orm.executeWithReader testingState transaction "select * from \"Fact\"" reader 
+                    |> Orm.toResultSeq
                     |> commit transaction 
                 )
 
@@ -465,12 +468,12 @@ module Main =
         // System.Console.SetOut(writer)
         // System.Console.SetError(writer)
 
-        // states
-        // |> List.map ( 
-        //     orm  
-        //     >> runTestsWithCLIArgs [] argv 
-        // )
-        // |> printfn "%A"
+        states
+        |> List.map ( 
+            orm  
+            >> runTestsWithCLIArgs [] argv 
+        )
+        |> printfn "%A"
 
         // states 
         // |> List.map ( 
@@ -478,10 +481,10 @@ module Main =
         //     >> runTestsWithCLIArgs [] argv 
         // )
         // |> printfn "%A"
-        let testGuid1 = System.Guid.NewGuid().ToString()
-        let testGuid2 = System.Guid.NewGuid().ToString()
-        let testGuid3 = System.Guid.NewGuid().ToString()
-        Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |])
-        |> printfn "%A"
+        // let testGuid1 = System.Guid.NewGuid().ToString()
+        // let testGuid2 = System.Guid.NewGuid().ToString()
+        // let testGuid3 = System.Guid.NewGuid().ToString()
+        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |])
+        // |> printfn "%A"
 
         0

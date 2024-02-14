@@ -275,7 +275,7 @@ module Utilities =
 
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
-    let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = seq { 
+    let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
         let reifiedType = typeof< ^T >
         let constructor = 
             let mutable tmp = fun _ -> obj()
@@ -291,14 +291,19 @@ module Utilities =
                 | Some _type -> toOption _type 
                 | None -> id
             |]
-        
-        while reader.Read( ) do
-            constructor 
-                [| for i in 0..reader.FieldCount-1 do 
-                    options[i] <| reader.GetValue( i ) 
-                |] 
-            :?> ^T // dang ol' class factory man
-        }
+        seq { 
+            try 
+                while reader.Read( ) do
+                    constructor 
+                        [| for i in 0..reader.FieldCount-1 do 
+                            options[i] <| reader.GetValue( i ) 
+                        |] 
+                    :?> ^T // dang ol' class factory man
+                    |> Ok
+                    
+            with exn -> 
+                Error exn                
+        }  
 
     let inline insertBase< ^T > ( state : OrmState ) insertKeys =
         let paramChar = getParamChar state
@@ -331,18 +336,17 @@ module Utilities =
         | SQLite _ ->   new SQLiteCommand ( query, connection :?> SQLiteConnection )
         | ODBC _ ->     new OdbcCommand ( query, connection :?> OdbcConnection )
 
-    let inline withTransaction state transactionFunction noneFunction transaction =
-        try 
-            match transaction with 
-            | Some ( transaction : DbTransaction ) -> transactionFunction transaction
-            | None -> 
-                connect state
-                |> Result.map ( noneFunction )
-                |> fun x -> printfn "Result of noneFunction: %A" x; x
-        with 
-        | exn -> 
-            printfn "An Error has been encountered: %A" exn
-            Error exn
+    let inline withTransaction state transactionFunction (noneFunction : DbConnection -> Result<'a, exn> seq) transaction : Result<'a, exn> seq =
+        match transaction with 
+        | Some ( transaction : DbTransaction ) -> transactionFunction transaction
+        | None -> 
+            seq {
+                match connect state with 
+                | Ok conn -> 
+                    yield! noneFunction conn 
+                    conn.Close()
+                | Error exn -> yield Error exn
+            }
 
     let rec genericTypeName full ( _type : Type ) = 
         if not _type.IsGenericType 
@@ -447,9 +451,15 @@ module Utilities =
                     else
                         cmdParams[jindex].Value <- thing // Some 1
             )
-            cmd.ExecuteNonQuery()
+            try cmd.ExecuteNonQuery() |> Ok
+            with exn -> Error exn
         )
-        |> Seq.fold (+) 0
+        |> Seq.fold ( fun accumulator item -> 
+            match accumulator, item with 
+            | Ok a, Ok i -> Ok ( a + i )
+            | Error e, _ 
+            | _, Error e -> Error e
+        ) ( Ok 0 )
 
     let inline joins< ^T > (state : OrmState) = 
         let qoute = sqlQuote state
@@ -474,7 +484,7 @@ module Utilities =
 
     let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
         let query = queryBase< ^T > state |> f
-        
+
         transaction
         |> withTransaction  
             state 
@@ -484,14 +494,13 @@ module Utilities =
                     cmd.Transaction <- transaction 
                     use reader = cmd.ExecuteReader( ) 
                     yield! consumeReader< ^T > state reader  
-                } |> Ok
+                } 
             )
             ( fun ( connection : DbConnection ) -> 
                 seq {
                     use cmd = makeCommand state query connection  
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                    use reader = cmd.ExecuteReader( )
                     yield! consumeReader< ^T > state reader
-                    connection.Close()
                 } 
                 |> fun x -> printfn "result: %A" x; x
                 
@@ -534,15 +543,29 @@ module Utilities =
             ( fun transaction ->  
                 use command = parameterizeCommand< ^T > state query transaction false Update instance 
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( ) 
-                |> Ok
+                seq { 
+                    try 
+                        command.ExecuteNonQuery ( ) |> Ok 
+                    with exn -> 
+                        log ( sprintf "%A" exn )
+                        Error exn
+                } 
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction()
-                use command = parameterizeCommand< ^T > state query transaction false Update instance 
-                command.ExecuteNonQuery ( )
-                |> fun x -> transaction.Commit();connection.Close(); x 
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use command = parameterizeCommand< ^T > state query transaction false Update instance 
+                    try 
+                        command.ExecuteNonQuery ( )
+                        |> fun x -> 
+                            transaction.Commit()
+                            Ok x 
+                    with exn ->    
+                        transaction.Rollback()
+                        Error exn
+                }
             )
+        |> Seq.head
 
     let inline updateManyHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) = 
         let query = ( updateBase< ^T > state ) + (whereClause) 
@@ -550,14 +573,23 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances |> Ok
+                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances }
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction() 
-                parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances 
-                |> fun x -> transaction.Commit();connection.Close(); x 
+                seq {
+                    use transaction = connection.BeginTransaction() 
+                    parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances 
+                    |> function
+                    | Ok x ->
+                        transaction.Commit()
+                        Ok x
+                    | Error exn -> 
+                        log ( sprintf "%A" exn )
+                        transaction.Rollback()
+                        Error exn
+                }
             )
-        
+        |> Seq.head
 
     let inline deleteBase< ^T > state =
         table< ^T > state 
@@ -568,18 +600,32 @@ module Utilities =
         transaction
         |> withTransaction 
             state 
-            ( fun transaction -> 
+            ( fun transaction ->  
                 use command = parameterizeCommand< ^T > state query transaction false Delete instance 
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( )   
-                |> Ok     
+                seq { 
+                    try command.ExecuteNonQuery ( ) |> Ok 
+                    with exn -> 
+                        log ( sprintf "%A" exn )
+                        Error exn
+                } 
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction()
-                use cmd = parameterizeCommand< ^T > state query transaction false Delete instance 
-                cmd.ExecuteNonQuery ( )
-                |> fun x -> transaction.Commit();connection.Close(); x                
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use command = parameterizeCommand< ^T > state query transaction false Delete instance 
+                    try 
+                        command.ExecuteNonQuery ( )
+                        |> fun x -> 
+                            transaction.Commit()
+                            Ok x 
+                    with exn ->
+                        log ( sprintf "%A" exn )
+                        transaction.Rollback()
+                        Error exn
+                }
             )
+        |> Seq.head
     
     let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
         let query = deleteBase< ^T > state + (whereClause) 
@@ -587,11 +633,20 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances 
-                |> Ok 
+                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances }
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction() 
-                parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances 
-                |> fun x -> transaction.Commit();connection.Close(); x 
+                seq {
+                    use transaction = connection.BeginTransaction() 
+                    parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances 
+                    |> function
+                    | Ok x ->
+                        transaction.Commit()
+                        Ok x 
+                    | Error exn -> 
+                        log ( sprintf "%A" exn )
+                        transaction.Rollback()
+                        Error exn
+                }
             )
+        |> Seq.head
