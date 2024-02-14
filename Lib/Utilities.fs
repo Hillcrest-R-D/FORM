@@ -492,18 +492,20 @@ module Utilities =
                 seq {
                     use cmd = makeCommand state query ( transaction.Connection ) 
                     cmd.Transaction <- transaction 
-                    use reader = cmd.ExecuteReader( ) 
-                    yield! consumeReader< ^T > state reader  
+                    try 
+                        use reader = cmd.ExecuteReader( ) 
+                        yield! consumeReader< ^T > state reader  
+                    with exn -> Error exn
                 } 
             )
             ( fun ( connection : DbConnection ) -> 
                 seq {
                     use cmd = makeCommand state query connection  
-                    use reader = cmd.ExecuteReader( )
-                    yield! consumeReader< ^T > state reader
-                } 
-                |> fun x -> printfn "result: %A" x; x
-                
+                    try 
+                        use reader = cmd.ExecuteReader( )
+                        yield! consumeReader< ^T > state reader
+                    with exn -> yield Error exn
+                }
             )
 
     let inline updateBase< ^T > ( state : OrmState )  = 

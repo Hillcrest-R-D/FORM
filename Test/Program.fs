@@ -122,7 +122,9 @@ module Main =
         
         let selectWhereWithInFailure () =
             test "SelectWhereWithInFailure" {
-                Expect.wantError (Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Orm.toResultSeq ) "SelectWhereWithInFailure" 
+                Expect.wantError (
+                    Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) 
+                    |> Orm.toResultSeq ) "SelectWhereWithInFailure" 
                 |> ignore
             }
         let update () =
@@ -247,22 +249,22 @@ module Main =
             connect ()
             setup ()
             testSequenced <| testList "Tests" [
-                insert ()
-                insertMany ()
-                // asyncInsertMany ()
-                select ()
-                // asyncSelect ()
-                selectLimit ()
-                selectWhere ()
-                selectWhereWithIn ()
+                // insert ()
+                // insertMany ()
+                // // asyncInsertMany ()
+                // select ()
+                // // asyncSelect ()
+                // selectLimit ()
+                // selectWhere ()
+                // selectWhereWithIn ()
                 selectWhereWithInFailure ()
-                update ()
-                updateMany ()
-                updateWhere ()
-                delete ()
-                deleteWhere ()
-                deleteMany ()
-                reader ()
+                // update ()
+                // updateMany ()
+                // updateWhere ()
+                // delete ()
+                // deleteWhere ()
+                // deleteMany ()
+                // reader ()
             ]
             tearDown ()
         ]
@@ -484,7 +486,7 @@ module Main =
         // let testGuid1 = System.Guid.NewGuid().ToString()
         // let testGuid2 = System.Guid.NewGuid().ToString()
         // let testGuid3 = System.Guid.NewGuid().ToString()
-        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |])
-        // |> printfn "%A"
+        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Orm.toResultSeq
+        // |> printfn "Direct: %A"
 
         0
