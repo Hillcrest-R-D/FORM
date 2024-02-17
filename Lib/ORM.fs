@@ -233,16 +233,18 @@ module Orm =
         |> withTransaction 
             state 
             ( fun transaction -> 
+                let cmd = makeCommand state query transaction.Connection
                 seq {
-                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
+                    yield parameterizeSeqAndExecuteCommand state query cmd includeKeys Insert instances //makeCommand query connection state
                 } 
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction()
                 printfn "%A" transaction
                 try  
+                    let cmd = makeCommand state query connection
                     seq {
-                        yield parameterizeSeqAndExecuteCommand< ^T > state query transaction includeKeys Insert instances
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd includeKeys Insert instances
                     }
                     |> Seq.map (fun x -> x)
                     |> fun x -> transaction.Commit();  x

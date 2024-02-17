@@ -448,8 +448,8 @@ module Main =
 
         let states = 
             [ 
-            // odbcState
-            // psqlState
+            odbcState
+            psqlState
             sqliteState
             // ; mysqlState
             // ; mssqlstate

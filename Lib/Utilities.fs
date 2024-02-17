@@ -405,9 +405,9 @@ module Utilities =
         
         cmd
 
-    let inline parameterizeSeqAndExecuteCommand< ^T > state query (transaction : DbTransaction) includeKeys behavior ( instances : ^T seq ) =
-        let cmd = makeCommand state query transaction.Connection
-        cmd.Transaction <- transaction 
+    let inline parameterizeSeqAndExecuteCommand< ^T > state query (cmd : DbCommand) includeKeys behavior ( instances : ^T seq ) =
+         
+        
         let mapp = 
             let tmp = 
                 mapping< ^T > state
@@ -450,7 +450,7 @@ module Utilities =
                     else
                         cmdParams[jindex].Value <- thing // Some 1
             )
-            printfn "Parameterized Sql: %A" cmd.CommandText
+            
             log ( 
                     sprintf "Param count: %A" cmd.Parameters.Count :: 
                     [ for i in [0..cmd.Parameters.Count-1] do 
@@ -458,7 +458,7 @@ module Utilities =
                     ]
                     |> String.concat "\n"
                 )  
-            try cmd.ExecuteNonQuery() |> fun x -> printfn "UpdateMany Exec Results: %A" x; Ok x
+            try cmd.ExecuteNonQuery() |> Ok
             with exn -> Error exn
         )
         |> Seq.fold ( fun accumulator item -> 
@@ -565,7 +565,6 @@ module Utilities =
                 let command = parameterizeCommand< ^T > state query transaction false Update instance 
                 try  
                     seq {
-                        printfn "Execute Cmd: %A" command.CommandText 
                         yield! seq {command.ExecuteNonQuery( ) |> Ok}
                     }
                     |> Seq.map (fun x -> x)
@@ -582,13 +581,15 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances }
+                let cmd = makeCommand state query transaction.Connection
+                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Update instances }
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction()
+                let cmd = makeCommand state query connection
                 try  
                     seq {
-                        yield! seq {parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances }
+                        yield! seq {parameterizeSeqAndExecuteCommand< ^T > state query cmd false Update instances }
                     }
                     |> Seq.map (fun x -> x)
                     |> fun x -> transaction.Commit();  x
@@ -639,13 +640,15 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances }
+                let cmd = makeCommand state query transaction.Connection
+                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Delete instances }
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction()
-                try  
+                let cmd = makeCommand state query connection
+                try 
                     seq {
-                        yield parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd false Delete instances
                     }
                     |> Seq.map (fun x -> x)
                     |> fun x -> transaction.Commit();  x
