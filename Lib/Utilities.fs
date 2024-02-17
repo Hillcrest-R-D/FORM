@@ -344,7 +344,6 @@ module Utilities =
                 match connect state with 
                 | Ok conn -> 
                     yield! noneFunction conn 
-                    conn.Close()
                 | Error exn -> yield Error exn
             }
 
@@ -451,7 +450,15 @@ module Utilities =
                     else
                         cmdParams[jindex].Value <- thing // Some 1
             )
-            try cmd.ExecuteNonQuery() |> Ok
+            printfn "Parameterized Sql: %A" cmd.CommandText
+            log ( 
+                    sprintf "Param count: %A" cmd.Parameters.Count :: 
+                    [ for i in [0..cmd.Parameters.Count-1] do 
+                        yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value 
+                    ]
+                    |> String.concat "\n"
+                )  
+            try cmd.ExecuteNonQuery() |> fun x -> printfn "UpdateMany Exec Results: %A" x; Ok x
             with exn -> Error exn
         )
         |> Seq.fold ( fun accumulator item -> 
@@ -554,18 +561,18 @@ module Utilities =
                 } 
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use command = parameterizeCommand< ^T > state query transaction false Update instance 
-                    try 
-                        command.ExecuteNonQuery ( )
-                        |> fun x -> 
-                            transaction.Commit()
-                            Ok x 
-                    with exn ->    
-                        transaction.Rollback()
-                        Error exn
-                }
+                let transaction = connection.BeginTransaction()
+                let command = parameterizeCommand< ^T > state query transaction false Update instance 
+                try  
+                    seq {
+                        printfn "Execute Cmd: %A" command.CommandText 
+                        yield! seq {command.ExecuteNonQuery( ) |> Ok}
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
         |> Seq.head
 
@@ -578,18 +585,16 @@ module Utilities =
                 seq { parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances }
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction() 
-                    parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances 
-                    |> function
-                    | Ok x ->
-                        transaction.Commit()
-                        Ok x
-                    | Error exn -> 
-                        log ( sprintf "%A" exn )
-                        transaction.Rollback()
-                        Error exn
-                }
+                let transaction = connection.BeginTransaction()
+                try  
+                    seq {
+                        yield! seq {parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances }
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
         |> Seq.head
 
@@ -613,21 +618,20 @@ module Utilities =
                 } 
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use command = parameterizeCommand< ^T > state query transaction false Delete instance 
-                    try 
-                        command.ExecuteNonQuery ( )
-                        |> fun x -> 
-                            transaction.Commit()
-                            Ok x 
-                    with exn ->
-                        log ( sprintf "%A" exn )
-                        transaction.Rollback()
-                        Error exn
-                }
+                let transaction = connection.BeginTransaction()
+                let command = parameterizeCommand< ^T > state query transaction false Delete instance 
+                try  
+                    seq {
+                        yield! seq {command.ExecuteNonQuery( ) |> Ok}
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
         |> Seq.head
+
     
     let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
         let query = deleteBase< ^T > state + (whereClause) 
@@ -638,17 +642,15 @@ module Utilities =
                 seq { parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances }
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction() 
-                    parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances 
-                    |> function
-                    | Ok x ->
-                        transaction.Commit()
-                        Ok x 
-                    | Error exn -> 
-                        log ( sprintf "%A" exn )
-                        transaction.Rollback()
-                        Error exn
-                }
+                let transaction = connection.BeginTransaction()
+                try  
+                    seq {
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
         |> Seq.head

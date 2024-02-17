@@ -44,7 +44,7 @@ module Orm =
 
     let inline consumeReader<^T > ( state : OrmState ) ( reader : IDataReader ) = Utilities.consumeReader<^T> state reader
 
-    ///<description>WARNING! Execute takes a raw string literal to execute against the specified DB state, which is inherently unsafe and exposed to SQL injection, do not use this in a context where strings aren't being escaped properly before hand.</description>
+    ///<description>WARNING! Execute takes a raw string literal to execute against the specified DB state, which is inherently unsafe and vulnerable to SQL injection, do not use this in a context where strings aren't being escaped properly before hand.</description>
     let inline execute ( state : OrmState ) ( transaction : DbTransaction option ) sql =
         transaction 
         |> withTransaction 
@@ -58,16 +58,18 @@ module Orm =
                 }
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use cmd = makeCommand state sql connection  
-                    try 
-                        yield cmd.ExecuteNonQuery( ) |> Ok
-                        transaction.Commit()
-                    with exn -> 
-                        transaction.Rollback()
-                        yield Error exn
-                }
+                let transaction = connection.BeginTransaction() 
+                try 
+                    seq {
+                        use cmd = makeCommand state sql connection  
+                        printfn "Execute Cmd: %A" cmd.CommandText 
+                        yield! seq {cmd.ExecuteNonQuery( ) |> Ok}
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
         |> Seq.head
     
@@ -193,25 +195,24 @@ module Orm =
                 }
             )
             ( fun connection ->
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
-                    log (
-                        sprintf "Param count: %A" command.Parameters.Count ::
-                        [ for i in [0..command.Parameters.Count-1] do 
-                            yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                        ] |> String.concat "\n"
-                    )   
-                    try 
-                        command.ExecuteNonQuery ( )
-                        |> fun x -> 
-                            transaction.Commit()
-                            connection.Close() 
-                            Ok x 
+                let transaction = connection.BeginTransaction()
+                let command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
+                try 
+                    seq {
+                        log (
+                            sprintf "Param count: %A" command.Parameters.Count ::
+                            [ for i in [0..command.Parameters.Count-1] do 
+                                yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                            ] |> String.concat "\n"
+                        )   
+                        command.ExecuteNonQuery ( ) |> Ok 
+                    }
+                    |> fun x -> 
+                        transaction.Commit() 
+                        x 
                     with exn ->    
                         transaction.Rollback()
-                        Error exn
-                }
+                        seq { Error exn }
             )
         |> Seq.head
     
@@ -237,17 +238,18 @@ module Orm =
                 } 
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    try 
-                        yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
-                        transaction.Commit()
-                    with 
-                    | exn ->
-                        transaction.Rollback()
-                        yield Error exn
-                }
-            )  
+                let transaction = connection.BeginTransaction()
+                printfn "%A" transaction
+                try  
+                    seq {
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query transaction includeKeys Insert instances
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
+            )
         |> Seq.head
         
 
@@ -303,7 +305,7 @@ module Orm =
                 | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
             ) 
             |> String.concat " and "
-            |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
+            |> fun idConditional -> printfn "idConditional %A" idConditional;updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
 
     ///<summary>Update an <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the conditional <paramref name="where"/>.</summary>
@@ -401,16 +403,19 @@ module Orm =
                 seq { cmd.ExecuteNonQuery ( ) |> Ok }
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use cmd = makeCommand state query connection    
-                    try 
+                let transaction = connection.BeginTransaction()
+                let cmd = makeCommand state query connection    
+                try 
+                    seq {
                         yield cmd.ExecuteNonQuery ( ) |> Ok 
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> 
                         transaction.Commit()
-                    with exn -> 
-                        transaction.Rollback() 
-                        yield Error exn
-                }
+                        x
+                with exn -> 
+                    transaction.Rollback() 
+                    seq{ Error exn }
             )
         |> Seq.head
 

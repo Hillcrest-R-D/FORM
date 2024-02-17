@@ -64,6 +64,7 @@ module Main =
                         "
 
                     Orm.execute testingState None createTable
+                    |> fun x -> printfn "Setup: %A" x; x
                 )
         
         let connect () = 
@@ -142,36 +143,28 @@ module Main =
                 "UpdateMany"
                 "UpdateMany"
                 ( fun _ -> 
-                let initial = Fact.init() 
-                let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
-                let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
-                Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
+                    let initial = Fact.init() 
+                    // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
+                    // Orm.insertMany< Fact > testingState None true ( str8Facts )
+                    // |> printfn "insert %A"
+                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
+                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
+                    printfn "ids: %A" [testGuid2; testGuid3]
+                    Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
-                let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Orm.toResultSeq
-                let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Orm.toResultSeq
-
-                match evan, mac with 
-                | Ok e, Ok m -> 
-                    if Seq.head e = changed && Seq.head m = changed2 
-                    then Ok ()
-                    else Result.Error "Update not applied."
-                | Result.Error ex, _ 
-                | _, Result.Error ex -> Result.Error ex.Message
+                    let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Orm.toResultSeq
+                    let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Orm.toResultSeq
+                    printfn "evan: %A" evan 
+                    printfn "mac: %A" mac
+                    match evan, mac with 
+                    | Ok e, Ok m -> 
+                        if Seq.head e = changed && Seq.head m = changed2 
+                        then Ok ()
+                        else Result.Error "Update not applied."
+                    | Result.Error ex, _ 
+                    | _, Result.Error ex -> Result.Error ex.Message
                     
                 )
-            
-        
-        // 
-        // 
-        // member _.UpdateManyWithTransaction () =
-        //     printfn "Updating many with transaction..."
-        //     let initial = Fact.init() 
-        //     let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
-        //     let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        //     Orm.updateMany< Fact > testingState [changed;changed2] transaction
-        //     |> printf "%A"
-            
-        //     Assert.Pass()
         
         
         
@@ -249,22 +242,22 @@ module Main =
             connect ()
             setup ()
             testSequenced <| testList "Tests" [
-                // insert ()
-                // insertMany ()
+                insert ()
+                insertMany ()
                 // // asyncInsertMany ()
-                // select ()
-                // // asyncSelect ()
-                // selectLimit ()
-                // selectWhere ()
-                // selectWhereWithIn ()
+                select ()
+                // asyncSelect ()
+                selectLimit ()
+                selectWhere ()
+                selectWhereWithIn ()
                 selectWhereWithInFailure ()
-                // update ()
-                // updateMany ()
-                // updateWhere ()
-                // delete ()
-                // deleteWhere ()
-                // deleteMany ()
-                // reader ()
+                update ()
+                updateMany ()
+                updateWhere ()
+                delete ()
+                deleteWhere ()
+                deleteMany ()
+                reader ()
             ]
             tearDown ()
         ]
@@ -456,7 +449,7 @@ module Main =
         let states = 
             [ 
             // odbcState
-            // ; psqlState
+            // psqlState
             sqliteState
             // ; mysqlState
             // ; mssqlstate
