@@ -112,38 +112,6 @@ type OnAttribute (table : Type, key : int, part : int, on : string, kind : JoinD
     member _.part = part
     member _.kind = kind 
     member _.on = on
-        
-type SubFact =
-    {
-        [<PrimaryKey(part = 3)>]
-        id1
-        [<PrimaryKey(part = 2)>]
-        id2
-        [<PrimaryKey(part = 1)>]
-        id3
-        [<UniqueKey(part = 1)>]
-        ida 
-        [<UniqueKey(part = 2)>]
-        id4
-    }
-
-type SomeOtherType = {
-    key
-}
-
-type Fact = {
-    factId 
-    [<On(typeof<SubFact>, 1, 3, Left, ctx)>]
-    subFactId1
-    [<On(typeof<SubFact>, 1, 2, Left, ctx)>]
-    subFactId2
-    [<On(typeof<SubFact>, 1, 1, Left, ctx)>]
-    subFactId3
-    [<On(typeof<SubFact>, 2, 2, Left, ctx)>]
-    subFactId4
-    [<On(typeof<SomeOtherType>, 3, 1, Left, ctx)>]
-    someOtherType 
-}
 
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
