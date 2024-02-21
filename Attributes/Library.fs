@@ -91,6 +91,10 @@ type JoinDirection =
     | Inner = 2
     | Outer = 3
 
+type Evaluation = 
+    | Strict = 0
+    | Lazy = 1
+
 ///<Description>An attribute type which allows the specification of some FSharp Record Type fields being sourced via joinery</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
 type ByJoinAttribute ( table : Type, context : obj ) =
@@ -101,16 +105,46 @@ type ByJoinAttribute ( table : Type, context : obj ) =
 
 ///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type OnAttribute (table : Type, on : string, kind : JoinDirection, context : obj ) =
+type OnAttribute (table : Type, key : int, part : int, on : string, kind : JoinDirection, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
-    member _.key = 
-        table.GetProperties()
-        // |> Array.map ( fun field -> field :?> PropertyInfo )
-        |> Array.filter (fun field -> field.Name = on)
-        |> Array.head
+    member _.key = key
+    member _.part = part
     member _.kind = kind 
+    member _.on = on
         
+type SubFact =
+    {
+        [<PrimaryKey(part = 3)>]
+        id1
+        [<PrimaryKey(part = 2)>]
+        id2
+        [<PrimaryKey(part = 1)>]
+        id3
+        [<UniqueKey(part = 1)>]
+        ida 
+        [<UniqueKey(part = 2)>]
+        id4
+    }
+
+type SomeOtherType = {
+    key
+}
+
+type Fact = {
+    factId 
+    [<On(typeof<SubFact>, 1, 3, Left, ctx)>]
+    subFactId1
+    [<On(typeof<SubFact>, 1, 2, Left, ctx)>]
+    subFactId2
+    [<On(typeof<SubFact>, 1, 1, Left, ctx)>]
+    subFactId3
+    [<On(typeof<SubFact>, 2, 2, Left, ctx)>]
+    subFactId4
+    [<On(typeof<SomeOtherType>, 3, 1, Left, ctx)>]
+    someOtherType 
+}
+
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
     Index : int

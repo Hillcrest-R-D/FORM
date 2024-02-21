@@ -30,15 +30,15 @@ module Relation =
     //         | Leaf l -> f acc l
     //         | Node ( l, n ) -> f ( fold f acc n ) l
        
-    type Relation<^T, ^S> =
+    type Relation< ^T > =
         {
-            id : ^T //RelationshipCell 
-            // Relation<Fact> {id = Node ( {_type = typeof<int>; value = 0 }, Leaf { _type= typeof<string>; value = "42" } ); None}
-            value : ^S option    
+            private mutable value : Result<^T seq, exn> option
             private state : OrmState
+            private evaluationStrategy : EvaluationStrategy
         }
-        member Value (inst) state =
-            let id = lookupId<^S> state
+
+        private member this.evaluate () = 
+            let id = lookupId<^T> state
             let idValueSeq = 
                 RelationshipCell.fold ( 
                     fun acc item -> 
@@ -59,33 +59,66 @@ module Relation =
             )
             if Seq.isEmpty id then {inst with value = None} 
             else 
-                selectWhere<^S> state None whereClause 
-                |> function 
-                | Ok vals when Seq.length vals > 0 ->
-                    Some <| Seq.head vals    
-                | _ -> 
-                    Option.None 
-                |> fun (v : option<'S>) -> { inst with value = v}
+                selectWhere<^T> state None whereClause
+                |> Orm.toResultSeq 
+                |> Result.bind (fun vals -> 
+                    this.value <- Ok vals 
+                    Ok vals
+                ) 
+                    
+        member this.Value =
+            match this.value with 
+            | None -> this.evaluate ()
+            | Some thing -> thing
+
+        member this.Evaluate = this.evaluate 
+
+    module Relation = 
+        let evaluate relationState = 
+            let innerType = getInnerType<relationState>
+            Orm.selectWhere<innerType> relationState
 
 
-    type JoinType =
-        | Direct
-        | Relation
+    let myFact = Orm.selectAll<Fact> state None |> Seq.head
+    
+    myFact.otherFact.Value
+    |> function
+    | Ok a-> printfn "%A" a
+    
+    let myTempFacts = Relation.evaluate fact.otherFact
 
-    [<Table("auth.User", Contexts.Something)>]
-    type User = 
-        {
-            id : int
-            username : string
-            [<Join(Direct)>]
-            tenant : Tenant 
-            [<Eager>]
-            biography : Relation<Biography>
-            artPortfolioId : Relation<ArtPortfolio>
-        }
+    /// 
+    Relation.evaluate fact.otherFact
 
-    { user with biography = Relation.Value user.biography ormState }
-    user.biography.otherwiseHiddenOrmState => exception
-    match user.biography.Value with 
-    | Some bio
-    | None
+    Relation.evaluate fact.otherFact
+    => {fact with otherFact = evaluatedOtherFact}
+    {
+        id = 1
+        otherFactId1 = "blue"
+        otherFact = 
+            Relation 
+                [{
+                    
+                }]
+    }
+    // type JoinType =
+    //     | Direct
+    //     | Relation
+
+    // [<Table("auth.User", Contexts.Something)>]
+    // type User = 
+    //     {
+    //         id : int
+    //         username : string
+    //         [<Join(Direct)>]
+    //         tenant : Tenant 
+    //         [<Eager>]
+    //         biography : Relation<Biography>
+    //         artPortfolioId : Relation<ArtPortfolio>
+    //     }
+
+    // { user with biography = Relation.Value user.biography ormState }
+    // user.biography.otherwiseHiddenOrmState => exception
+    // match user.biography.Value with 
+    // | Some bio
+    // | None
