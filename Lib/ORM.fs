@@ -62,7 +62,7 @@ module Orm =
                 try 
                     seq {
                         use cmd = makeCommand state sql connection  
-                        printfn "Execute Cmd: %A" cmd.CommandText 
+                        
                         yield! seq {cmd.ExecuteNonQuery( ) |> Ok}
                     }
                     |> Seq.map (fun x -> x)
@@ -240,7 +240,7 @@ module Orm =
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction()
-                printfn "%A" transaction
+                
                 try  
                     let cmd = makeCommand state query connection
                     seq {
@@ -307,7 +307,7 @@ module Orm =
                 | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
             ) 
             |> String.concat " and "
-            |> fun idConditional -> printfn "idConditional %A" idConditional;updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
+            |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
 
     ///<summary>Update an <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the conditional <paramref name="where"/>.</summary>
