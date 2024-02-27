@@ -3,42 +3,32 @@ namespace Form
 module Relation =     
     open Utilities
     open System
-    let inline lookupId<^S> state =
-        columnMapping<^S> state
-        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^S > state  ) //! Filter out joins for non-select queries
-        |> Array.filter (fun col -> col.IsKey) 
-        |> Array.map (fun keyCol -> keyCol.QuotedSqlName)
-
-    // type SqlValueDescriptor = 
-    //     {
-    //         _type : Type
-    //         value : obj
-    //     }
-    
-    // let inline sqlWrap (item : SqlValueDescriptor) : string =
-    //     if item._type = typedefof<string> 
-    //     then $"'{item.value}'"
-    //     else $"{item.value}"
-    
-    // type RelationshipCell = 
-    //     | Leaf of SqlValueDescriptor
-    //     | Node of SqlValueDescriptor * RelationshipCell
+    // open Orm
+    open Form.Attributes
+    let inline lookupId<^C> state =
+        columnMapping<^C> state
+        |> Seq.filter (fun col -> col.IsKey)
         
-    // module RelationshipCell = 
-    //     let rec fold ( f : 'a -> SqlValueDescriptor -> 'a ) ( acc : 'a ) state =  
-    //         match state with 
-    //         | Leaf l -> f acc l
-    //         | Node ( l, n ) -> f ( fold f acc n ) l
-       
-    type Relation< ^T > =
-        {
-            private mutable value : Result<^T seq, exn> option
-            private state : OrmState
-            private evaluationStrategy : EvaluationStrategy
-        }
+    (*
+        The type argument is that of the type that needs to be looked up.
+        Do we need to be able to reference the type that Relation is declared on?
+    *)
+    type Relation< ^P, ^C > (keyId, eval, instance, state) as self =
+        let mutable value : Result<^C seq, exn> option = None
+        let state : OrmState = state
+        let evaluationStrategy : EvaluationStrategy = eval
+        let keyId : int = keyId
+        let instance : ^P = instance
 
-        private member this.evaluate () = 
-            let id = lookupId<^T> state
+        do
+            self.value <- 
+                match self.evaluationStategy with
+                | Strict -> self.evaluate ()
+                | Lazy -> None
+            
+
+        member private this.evaluate () = 
+            let id = lookupId<^C> state
             let idValueSeq = 
                 RelationshipCell.fold ( 
                     fun acc item -> 
@@ -59,7 +49,7 @@ module Relation =
             )
             if Seq.isEmpty id then {inst with value = None} 
             else 
-                selectWhere<^T> state None whereClause
+                Orm.selectWhere<^C> state None whereClause
                 |> Orm.toResultSeq 
                 |> Result.bind (fun vals -> 
                     this.value <- Ok vals 
@@ -73,52 +63,17 @@ module Relation =
 
         member this.Evaluate = this.evaluate 
 
-    module Relation = 
-        let evaluate relationState = 
-            let innerType = getInnerType<relationState>
-            Orm.selectWhere<innerType> relationState
-
-
-    let myFact = Orm.selectAll<Fact> state None |> Seq.head
-    
-    myFact.otherFact.Value
-    |> function
-    | Ok a-> printfn "%A" a
-    
-    let myTempFacts = Relation.evaluate fact.otherFact
-
-    /// 
-    Relation.evaluate fact.otherFact
-
-    Relation.evaluate fact.otherFact
-    => {fact with otherFact = evaluatedOtherFact}
-    {
-        id = 1
-        otherFactId1 = "blue"
-        otherFact = 
-            Relation 
-                [{
-                    
-                }]
-    }
-    // type JoinType =
-    //     | Direct
-    //     | Relation
-
-    // [<Table("auth.User", Contexts.Something)>]
-    // type User = 
+    // type MyOtherRecord =
     //     {
-    //         id : int
-    //         username : string
-    //         [<Join(Direct)>]
-    //         tenant : Tenant 
-    //         [<Eager>]
-    //         biography : Relation<Biography>
-    //         artPortfolioId : Relation<ArtPortfolio>
+    //         [<PrimaryKey>]
+    //         otherFactId : str 
     //     }
-
-    // { user with biography = Relation.Value user.biography ormState }
-    // user.biography.otherwiseHiddenOrmState => exception
-    // match user.biography.Value with 
-    // | Some bio
-    // | None
+        
+    // type MyRecord = 
+    //     {  
+    //         [<On(typeof<MyOtherRecord>, 2, 1, JoinDirection.Inner, propertyInfo<Other.otherFactId1>, Contexts.PSQL)>]
+    //         otherFactId1 : str
+    //         [<RelationParams(EvaluationStrategy.Strict, Context.PSQL, state)>]
+    //         otherFact : Relation<MyOtherRecord>
+    //     }
+    

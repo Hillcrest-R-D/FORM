@@ -17,7 +17,7 @@
   <ItemGroup>
     <Compile Include="Logging.fs" />
     <Compile Include="Utilities.fs" />
-    <!--<Compile Include="Relation.fs" />-->
+    <Compile Include="Relation.fs" />
     <Compile Include="ORM.fs" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="" />

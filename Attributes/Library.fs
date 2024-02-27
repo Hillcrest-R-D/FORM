@@ -91,7 +91,7 @@ type JoinDirection =
     | Inner = 2
     | Outer = 3
 
-type Evaluation = 
+type EvaluationStrategy = 
     | Strict = 0
     | Lazy = 1
 
@@ -112,6 +112,14 @@ type OnAttribute (table : Type, key : int, part : int, on : string, kind : JoinD
     member _.part = part
     member _.kind = kind 
     member _.on = on
+
+///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type ArgumentsAttribute ( evaluationStrategy : EvaluationStrategy, keyId : int, context : obj ) =
+    inherit DbAttribute( )
+    override _.Value = ( "", ( box( context ) :?> DbContext )  |> EnumToValue)
+    member _.key = keyId
+    member _.evaluationStrategy = evaluationStrategy 
 
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
