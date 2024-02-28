@@ -39,6 +39,7 @@ module Utilities =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _options = Dictionary<Type, Type option>()
+    let mutable _relations = Dictionary<Type, obj[] -> obj>()
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
@@ -107,7 +108,7 @@ module Utilities =
     let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
         Array.fold ( fun s ( x : OnAttribute ) ->  
                 if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (fst x.Value, x.key.Name)
+                then (fst x.Value, x.on)
                 else s
             ) ("", "") attrs 
     
@@ -188,7 +189,6 @@ module Utilities =
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
 
-    
     let inline toOption ( type_: Type ) ( value: obj ) : obj =
         let constructor = 
             if _toOptions.ContainsKey( type_ )
@@ -214,6 +214,18 @@ module Utilities =
                 then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
                 else None
             _options[type_] <- tmp
+            tmp
+
+    let inline relationType ( type_ : Type )  =
+        let mutable rel = None 
+        if _relations.TryGetValue( type_, &rel )
+        then rel
+        else 
+            let tmp = 
+                if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
+                then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
+                else None
+            _relations[type_] <- tmp
             tmp
         
     let inline makeParameter ( state : OrmState ) : DbParameter =
@@ -291,6 +303,9 @@ module Utilities =
                 | Some _type -> toOption _type 
                 | None -> id
             |]
+
+        //We're going to need to add logic here to instantiate relation types.
+
         seq { 
             try 
                 while reader.Read( ) do
@@ -298,7 +313,7 @@ module Utilities =
                         [| for i in 0..reader.FieldCount-1 do 
                             options[i] <| reader.GetValue( i ) 
                         |] 
-                    :?> ^T // dang ol' class factory man
+                    :?> ^T 
                     |> Ok
                     
             with exn -> 

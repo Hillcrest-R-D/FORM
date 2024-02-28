@@ -17,13 +17,13 @@
   <ItemGroup>
     <Compile Include="Logging.fs" />
     <Compile Include="Utilities.fs" />
-    <Compile Include="Relation.fs" />
     <Compile Include="ORM.fs" />
+    <Compile Include="Relation.fs" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Form.Attributes" Version="0.0.11" />
+    <PackageReference Include="Form.Attributes" Version="0.0.12" />
     <PackageReference Include="microsoft.data.sqlclient" Version="5.1.3" />
     <PackageReference Include="microsoft.extensions.logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />

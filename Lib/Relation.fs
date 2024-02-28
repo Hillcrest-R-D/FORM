@@ -1,79 +1,67 @@
-namespace Form
+namespace rec Form
 
 module Relation =     
     open Utilities
     open System
-    // open Orm
     open Form.Attributes
-    let inline lookupId<^C> state =
-        columnMapping<^C> state
-        |> Seq.filter (fun col -> col.IsKey)
+    open System.Reflection
+    open Microsoft.FSharp.Reflection
+    open System.Data.Common
         
     (*
         The type argument is that of the type that needs to be looked up.
         Do we need to be able to reference the type that Relation is declared on?
     *)
-    type Relation< ^P, ^C > (keyId, eval, instance, state) as self =
-        let mutable value : Result<^C seq, exn> option = None
-        let state : OrmState = state
-        let evaluationStrategy : EvaluationStrategy = eval
-        let keyId : int = keyId
-        let instance : ^P = instance
-
-        do
-            self.value <- 
-                match self.evaluationStategy with
-                | Strict -> self.evaluate ()
-                | Lazy -> None
+    type Relation< ^P, ^C > (keyId : int, evaluationStrategy : EvaluationStrategy, instance : ^P, context : int, state : OrmState) as self =
+        let mutable value : Result<^C, exn> seq option = None
+        let parent = typeof< ^P >
+        let child = typeof< ^C >
+        member private this.evaluate (transaction : DbTransaction option) : Result< ^C, exn> seq option = 
+            let columns = 
+                parent.GetProperties() 
+                |> Seq.filter( fun prop -> 
+                    if prop.IsDefined( typeof< OnAttribute > ) 
+                    then 
+                        let attr = prop.GetCustomAttribute(typeof< OnAttribute >) :?> OnAttribute
+                        snd attr.Value = context && attr.key = keyId //if the key lines up AND the context.
+                    else false
+                )
+                |> Seq.map ( fun prop -> {| property = prop;  attribute = prop.GetCustomAttribute(typeof< OnAttribute >) :?> OnAttribute |} )
+                |> Seq.sortBy ( fun column -> column.attribute.part )
+                |> Seq.map ( fun column -> {| child = child.GetProperty(column.attribute.on); parent = column |} )
             
+            let where = 
+                String.Join( 
+                    " and "
+                    , columns |> Seq.mapi ( fun index column -> $"{column.child.Name} = :{index+1}" ) 
+                )
 
-        member private this.evaluate () = 
-            let id = lookupId<^C> state
-            let idValueSeq = 
-                RelationshipCell.fold ( 
-                    fun acc item -> 
-                        Seq.append acc <| seq { sqlWrap item } 
-                    ) 
-                    Seq.empty 
-                    inst.id
-                |> Seq.rev
+            let parameters = 
+                columns 
+                |> Seq.map ( fun column -> column.parent.property.GetValue(instance) )
+            
+            value <- Some <| (Orm.selectWhere< ^C > state transaction ( where, parameters ))
+            value
 
-            let whereClause = 
-                Seq.zip id idValueSeq
-                |> Seq.map (fun (keyCol, value) -> $"{keyCol} = {value}") 
-                |> String.concat " and " 
+        member _.Value = value 
+        member this.Evaluate = this.evaluate
 
-            log ( fun _ -> 
-                sprintfn "lookupId Id Column Name: %A" id 
-                + sprintf "Where Clause: %A" whereClause 
-            )
-            if Seq.isEmpty id then {inst with value = None} 
-            else 
-                Orm.selectWhere<^C> state None whereClause
-                |> Orm.toResultSeq 
-                |> Result.bind (fun vals -> 
-                    this.value <- Ok vals 
-                    Ok vals
-                ) 
-                    
-        member this.Value =
-            match this.value with 
-            | None -> this.evaluate ()
-            | Some thing -> thing
-
-        member this.Evaluate = this.evaluate 
-
-    // type MyOtherRecord =
-    //     {
-    //         [<PrimaryKey>]
-    //         otherFactId : str 
-    //     }
-        
-    // type MyRecord = 
-    //     {  
-    //         [<On(typeof<MyOtherRecord>, 2, 1, JoinDirection.Inner, propertyInfo<Other.otherFactId1>, Contexts.PSQL)>]
-    //         otherFactId1 : str
-    //         [<RelationParams(EvaluationStrategy.Strict, Context.PSQL, state)>]
-    //         otherFact : Relation<MyOtherRecord>
-    //     }
-    
+    (* For ^T Seq *)
+[<Table("Fact", Contexts.PSQL)>]
+[<Join(typeof<SubFact>, Left)>]
+[<Join(typeof<OtherFact>, Inner)>]
+type Fact =
+    {
+        id: int64
+        [<On(typeof<SubFact>, 1, 1, JoinDirection.Left, propertyInfo<SubFact.subFactId1>, Contexts.PSQL)>]
+        subFactId1 : int64
+        [<On(typeof<SubFact>, 1, 2, JoinDirection.Left, propertyInfo<SubFact.subFactId2>, Contexts.PSQL)>]
+        subFactId2 : string
+        [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
+        subFact : string option
+        [<On(typeof<OtherFact>, 2, 1, JoinDirection.Inner, propertyInfo<Other.otherFactId1>, Contexts.PSQL)>]
+        otherFactId1 : DateTime
+        (* This could SIGNIFICANTLY complicate the attributes and the join logic *)
+        [<ByJoin(typeof<SubFact>, EvaluationStrategy.Lazy, Contexts.PSQL)>]
+        otherFact : OtherFact seq option
+    }
