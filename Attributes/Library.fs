@@ -105,13 +105,13 @@ type ByJoinAttribute ( table : Type, context : obj ) =
 
 ///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type OnAttribute (table : Type, key : int, part : int, on : string, kind : JoinDirection, context : obj ) =
+type OnAttribute (table : Type, key : int, part : int, fieldName : string, kind : JoinDirection, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
     member _.key = key
     member _.part = part
     member _.kind = kind 
-    member _.on = on
+    member _.fieldName = fieldName
 
 ///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]

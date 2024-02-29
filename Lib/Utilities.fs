@@ -1,5 +1,50 @@
 namespace Form
 
+module Result = 
+    // {Ok a; Ok b; Ok c} -> Ok {a; b; c}
+    // {Ok a; Ok b; Ok c; Error e} -> Error e
+    
+    ///<summary>A utility function which takes a query result and returns a result of <c>Ok seq&lt;'a&gt;</c> or <c>Error e</c>, where <c>'a</c> would be the static type parameter <c>^T</c> fed to a previously called query function (e.g. selectAll, selectWhere, etc)</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toResultSeq (results : seq<Result<'a,'b>>) = 
+        Seq.fold 
+            ( fun accumulator item -> 
+                match accumulator, item with 
+                | Ok state, Ok i -> Ok ( seq { yield! state; yield i } )
+                | Error e, _  
+                | _, Error e -> Error e 
+            ) 
+            ( Ok Seq.empty )
+            results
+
+    
+    ///<summary>A utility function which takes a query result and returns a sequence of the unwrapped Ok results.</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeq (results : seq<Result<'a,'b>>) = 
+        results
+        |> Seq.takeWhile ( Result.isOk ) 
+        |> Seq.map ( Result.defaultValue Unchecked.defaultof<'a> ) 
+
+    
+    ///<summary>A utility function which takes a query result and returns a tuple whose first element is the unwrapped Ok results and second element is the unwrapped Error results</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeqs (results : seq<Result<'a,'b>>) : (seq<'a> * seq<'b>) = 
+        Seq.fold 
+            ( fun (okAcc, errAcc) item -> 
+                match item with 
+                | Ok i -> ( seq { yield! okAcc; yield i } , errAcc)
+                | Error e -> ( okAcc , seq { yield! errAcc; yield e}) 
+            ) 
+            ( Seq.empty, Seq.empty )
+            results
+    let bindError f state = 
+        match state with 
+        | Error e -> f e
+        | _ -> state
+
 module Utilities = 
     open Form.Attributes
     open System.Collections.Generic

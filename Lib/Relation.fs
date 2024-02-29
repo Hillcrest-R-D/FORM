@@ -12,11 +12,14 @@ module Relation =
         The type argument is that of the type that needs to be looked up.
         Do we need to be able to reference the type that Relation is declared on?
     *)
+    
+
     type Relation< ^P, ^C > (keyId : int, evaluationStrategy : EvaluationStrategy, instance : ^P, context : int, state : OrmState) as self =
         let mutable value : Result<^C, exn> seq option = None
+        let mutable instance = instance
         let parent = typeof< ^P >
         let child = typeof< ^C >
-        member private this.evaluate (transaction : DbTransaction option) : Result< ^C, exn> seq option = 
+        member this.Evaluate (transaction : DbTransaction option) : Result<^C, exn> seq = 
             let columns = 
                 parent.GetProperties() 
                 |> Seq.filter( fun prop -> 
@@ -38,30 +41,27 @@ module Relation =
 
             let parameters = 
                 columns 
-                |> Seq.map ( fun column -> column.parent.property.GetValue(instance) )
+                |> Seq.map ( fun column -> 
+                    column.parent.property.GetValue(instance) 
+                )
             
-            value <- Some <| (Orm.selectWhere< ^C > state transaction ( where, parameters ))
+            let tmp = (Orm.selectWhere< ^C > state transaction ( where, parameters ))
+            value <- Some tmp
+            tmp
+
+        ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
+        member _.State : Result<^C, exn > seq option = value
+        
+        ///<summary>Returns the current State as a Result&lt;^C seq, exn&gt;, calling an Evaluation if the state is currently none.</summary>
+        ///<param name="transaction"></param>
+        member this.Result transaction : Result< ^C seq, exn > = 
             value
+            |> function 
+            | None -> this.Evaluate transaction
+            | Some v -> v 
+            |> Form.Result.toResultSeq 
+        
+        member _.SetParentInstance i = 
+            instance <- i
 
-        member _.Value = value 
-        member this.Evaluate = this.evaluate
-
-    (* For ^T Seq *)
-[<Table("Fact", Contexts.PSQL)>]
-[<Join(typeof<SubFact>, Left)>]
-[<Join(typeof<OtherFact>, Inner)>]
-type Fact =
-    {
-        id: int64
-        [<On(typeof<SubFact>, 1, 1, JoinDirection.Left, propertyInfo<SubFact.subFactId1>, Contexts.PSQL)>]
-        subFactId1 : int64
-        [<On(typeof<SubFact>, 1, 2, JoinDirection.Left, propertyInfo<SubFact.subFactId2>, Contexts.PSQL)>]
-        subFactId2 : string
-        [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
-        subFact : string option
-        [<On(typeof<OtherFact>, 2, 1, JoinDirection.Inner, propertyInfo<Other.otherFactId1>, Contexts.PSQL)>]
-        otherFactId1 : DateTime
-        (* This could SIGNIFICANTLY complicate the attributes and the join logic *)
-        [<ByJoin(typeof<SubFact>, EvaluationStrategy.Lazy, Contexts.PSQL)>]
-        otherFact : OtherFact seq option
-    }
+    
