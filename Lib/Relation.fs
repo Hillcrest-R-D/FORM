@@ -61,7 +61,7 @@ module Relation =
             | Some v -> v 
             |> Form.Result.toResultSeq 
         
-        member _.SetParentInstance i = 
+        member _.SetParentInstance i =
             instance <- i
 
     

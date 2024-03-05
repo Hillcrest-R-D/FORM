@@ -84,7 +84,7 @@ module Utilities =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _options = Dictionary<Type, Type option>()
-    let mutable _relations = Dictionary<Type, obj[] -> obj>()
+    let mutable _relations = Dictionary<Type, Dictionary<Type, obj[] -> obj>>()
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
@@ -261,18 +261,33 @@ module Utilities =
             _options[type_] <- tmp
             tmp
 
-    let inline relationType ( type_ : Type )  =
-        let mutable rel = None 
-        if _relations.TryGetValue( type_, &rel )
-        then rel
-        else 
-            let tmp = 
-                if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
-                then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
-                else None
-            _relations[type_] <- tmp
-            tmp
+    ///<summary>Gets the constructor for the child type in a Parent-Child relationship, computes it if it hasn't been memoized yet.</summary>
+    ///<param name="parent"></param>
+    ///<param name="child"></param>
+    ///<returns>The record constructor for the given child type in the context of the Parent-Child relation.</returns>
+    let inline relationType ( parent : Type ) ( child : Type ) : obj[] -> obj =
+        let mutable childDictionary = Dictionary<Type, obj[]->obj>()
+        //check to see if the parent exists
+        //if it does assign the reference to childDictionary
+        if not <| _relations.TryGetValue( parent, &childDictionary )
+        then 
+            //if it doesn't, assign a new dictionary with the current 
+            //child and its constructor as the first key-value pair
+            let tmp = FSharpValue.PreComputeRecordConstructor(child)
+            childDictionary[child] <- tmp
+            _relations[parent] <- childDictionary
         
+        let mutable constructor = fun _ -> Object()
+        //check to see if the child exists in the parent entry of the relation dict
+        //if it does assign the reference to constructor and return the constructor
+        if childDictionary.TryGetValue( child, &constructor )
+        then constructor
+        else 
+            //if it doesn't, add the child (its record constructor)
+            let tmp = FSharpValue.PreComputeRecordConstructor(child)
+            childDictionary[child] <- tmp
+            tmp
+
     let inline makeParameter ( state : OrmState ) : DbParameter =
         match state with
         | MSSQL     _ -> SqlParameter( )
