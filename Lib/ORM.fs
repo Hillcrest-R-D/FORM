@@ -13,6 +13,8 @@ module Orm =
     open Utilities
     open Logging
     
+    let inline fields< ^T > = Unchecked.defaultof< ^T >
+    
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( state : OrmState ) = Utilities.connect state
 
@@ -421,6 +423,5 @@ module Orm =
             )
         |> Seq.head
 
-    
     
     

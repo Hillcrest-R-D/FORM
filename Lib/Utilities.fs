@@ -44,7 +44,7 @@ module Result =
         match state with 
         | Error e -> f e
         | _ -> state
-
+        
 module Utilities = 
     open Form.Attributes
     open System.Collections.Generic
@@ -356,12 +356,25 @@ module Utilities =
             else 
                 tmp <- FSharpValue.PreComputeRecordConstructor(reifiedType)
                 _constructors[reifiedType] <- tmp
-            tmp        
+            tmp       
+             
         let mutable options = 
             [| for fld in ( columnMapping< ^T > state  ) do  
                 match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
                 | Some _type -> toOption _type 
                 | None -> id
+            |]
+
+        let mutable relations = 
+            let context = snd state 
+            [| for fld in ( columnMapping< ^T > state  ) do  
+                match fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
+                | :? Relation -> 
+                    let typeParameters = t.GetGenericParameterConstraints()
+                    let constructor = typedefof<Relation<_,_>>.MakeGenericType( [|typeParameters|] ) 
+                    // FSharpValue.PreComputeUnionConstructor(info[1])
+                    constructor [| 1, context, state |]
+                | _ -> id
             |]
 
         //We're going to need to add logic here to instantiate relation types.
@@ -732,3 +745,63 @@ module Utilities =
                     seq { Error exn }
             )
         |> Seq.head
+
+    
+module rec Relation =     
+    open System
+    open Form.Attributes
+    open System.Reflection
+    open System.Data.Common
+    open Microsoft.FSharp.Core.LanguagePrimitives
+        
+    (*
+        The type argument is that of the type that needs to be looked up.
+        Do we need to be able to reference the type that Relation is declared on?
+    *)
+    
+
+    type Relation< ^P, ^C > (keyId : int, context : obj, state : OrmState) =
+        let mutable value : Result<^C, exn> seq option = None
+        let parent = typeof< ^P >
+        let child = typeof< ^C >
+        member this.Evaluate (transaction : DbTransaction option) ( instance : ^P ): Result<^C, exn> seq = 
+            let columns = 
+                parent.GetProperties() 
+                |> Seq.filter( fun prop -> 
+                    if prop.IsDefined( typeof< OnAttribute > ) 
+                    then 
+                        let attr = prop.GetCustomAttribute(typeof< OnAttribute >) :?> OnAttribute
+                        snd attr.Value = ( context :?> DbContext |> EnumToValue ) && attr.key = keyId //if the key lines up AND the context.
+                    else false
+                )
+                |> Seq.map ( fun prop -> {| property = prop;  attribute = prop.GetCustomAttribute(typeof< OnAttribute >) :?> OnAttribute |} )
+                |> Seq.sortBy ( fun column -> column.attribute.part )
+                |> Seq.map ( fun column -> {| child = child.GetProperty(column.attribute.on); parent = column |} )
+            
+            let where = 
+                String.Join( 
+                    " and "
+                    , columns |> Seq.mapi ( fun index column -> $"{column.child.Name} = :{index+1}" ) 
+                )
+
+            let parameters = 
+                columns 
+                |> Seq.map ( fun column -> column.parent.property.GetValue(instance) )
+            
+            let tmp = (Orm.selectWhere< ^C > state transaction ( where, parameters ))
+            value <- Some tmp
+            tmp
+
+        ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
+        member _.State : Result<^C, exn > seq option = value
+        
+        ///<summary>Returns the current State as a Result&lt;^C seq, exn&gt;, calling an Evaluation if the state is currently none.</summary>
+        ///<param name="transaction"></param>
+        member this.Result transaction instance  : Result< ^C seq, exn > = 
+            value
+            |> function 
+            | None -> this.Evaluate transaction instance
+            | Some v -> v 
+            |> Result.toResultSeq 
+
+    
