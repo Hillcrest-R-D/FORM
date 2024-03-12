@@ -44,7 +44,7 @@ module Result =
         match state with 
         | Error e -> f e
         | _ -> state
-        
+
 module Utilities = 
     open Form.Attributes
     open System.Collections.Generic
@@ -60,14 +60,16 @@ module Utilities =
     open System.Reflection
     open System.Data.Common
     open Logging
-    open System.Data.Odbc
-    
+    open System.Data.Odbc    
     open System.Text.RegularExpressions
-
+    
     type Behavior = 
         | Update
         | Insert 
         | Delete
+
+    type BaseRelation<^P, ^C>(key, state) = 
+        class end
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
@@ -228,7 +230,11 @@ module Utilities =
 
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
-        |> Array.map ( fun x -> $"{x.QuotedSource}.{x.QuotedSqlName}" )
+        |> Array.map ( fun x -> 
+            match x.Type.Name with 
+            | BaseRelation<_,_> -> $"null as {x.QuotedSqlName}" 
+            | _ -> $"{x.QuotedSource}.{x.QuotedSqlName}" 
+        )
        
     let inline fields< ^T >  ( state : OrmState ) = 
         mapping< ^T > state
@@ -345,6 +351,7 @@ module Utilities =
         | ODBC _ -> "?"
         | _ -> "@"
 
+    
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
@@ -364,16 +371,21 @@ module Utilities =
                 | Some _type -> toOption _type 
                 | None -> id
             |]
+            
+        let unpackContext =
+            function 
+            | MSSQL ( _ , ctx) | PSQL ( _ , ctx) | MySQL ( _ , ctx) | ODBC ( _, ctx) | SQLite ( _, ctx) -> ctx
 
         let mutable relations = 
-            let context = snd state 
+            let context = unpackContext state
             [| for fld in ( columnMapping< ^T > state  ) do  
-                match fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
-                | :? Relation -> 
-                    let typeParameters = t.GetGenericParameterConstraints()
-                    let constructor = typedefof<Relation<_,_>>.MakeGenericType( [|typeParameters|] ) 
-                    // FSharpValue.PreComputeUnionConstructor(info[1])
-                    constructor [| 1, context, state |]
+                match box fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
+                | :? BaseRelation<_, _> as t -> 
+                    printfn "HERES A RELATION!!!! %A %A\n\n\n" fld t
+                    let typeParameters = t.GetType().GetGenericParameterConstraints()
+                    let constructor = typedefof<BaseRelation<_,_>>.MakeGenericType( typeParameters ) 
+                    let relation = Activator.CreateInstance( constructor, [| 1, context, state |] )
+                    fun _ -> relation 
                 | _ -> id
             |]
 
@@ -384,7 +396,10 @@ module Utilities =
                 while reader.Read( ) do
                     constructor 
                         [| for i in 0..reader.FieldCount-1 do 
-                            options[i] <| reader.GetValue( i ) 
+                            reader.GetValue( i ) 
+                            |> fun x -> printfn "Here's the value of %A : %A" i x; x
+                            |> options[i] 
+                            |> relations[i]
                         |] 
                     :?> ^T 
                     |> Ok
@@ -745,63 +760,3 @@ module Utilities =
                     seq { Error exn }
             )
         |> Seq.head
-
-    
-module rec Relation =     
-    open System
-    open Form.Attributes
-    open System.Reflection
-    open System.Data.Common
-    open Microsoft.FSharp.Core.LanguagePrimitives
-        
-    (*
-        The type argument is that of the type that needs to be looked up.
-        Do we need to be able to reference the type that Relation is declared on?
-    *)
-    
-
-    type Relation< ^P, ^C > (keyId : int, context : obj, state : OrmState) =
-        let mutable value : Result<^C, exn> seq option = None
-        let parent = typeof< ^P >
-        let child = typeof< ^C >
-        member this.Evaluate (transaction : DbTransaction option) ( instance : ^P ): Result<^C, exn> seq = 
-            let columns = 
-                parent.GetProperties() 
-                |> Seq.filter( fun prop -> 
-                    if prop.IsDefined( typeof< OnAttribute > ) 
-                    then 
-                        let attr = prop.GetCustomAttribute(typeof< OnAttribute >) :?> OnAttribute
-                        snd attr.Value = ( context :?> DbContext |> EnumToValue ) && attr.key = keyId //if the key lines up AND the context.
-                    else false
-                )
-                |> Seq.map ( fun prop -> {| property = prop;  attribute = prop.GetCustomAttribute(typeof< OnAttribute >) :?> OnAttribute |} )
-                |> Seq.sortBy ( fun column -> column.attribute.part )
-                |> Seq.map ( fun column -> {| child = child.GetProperty(column.attribute.on); parent = column |} )
-            
-            let where = 
-                String.Join( 
-                    " and "
-                    , columns |> Seq.mapi ( fun index column -> $"{column.child.Name} = :{index+1}" ) 
-                )
-
-            let parameters = 
-                columns 
-                |> Seq.map ( fun column -> column.parent.property.GetValue(instance) )
-            
-            let tmp = (Orm.selectWhere< ^C > state transaction ( where, parameters ))
-            value <- Some tmp
-            tmp
-
-        ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
-        member _.State : Result<^C, exn > seq option = value
-        
-        ///<summary>Returns the current State as a Result&lt;^C seq, exn&gt;, calling an Evaluation if the state is currently none.</summary>
-        ///<param name="transaction"></param>
-        member this.Result transaction instance  : Result< ^C seq, exn > = 
-            value
-            |> function 
-            | None -> this.Evaluate transaction instance
-            | Some v -> v 
-            |> Result.toResultSeq 
-
-    

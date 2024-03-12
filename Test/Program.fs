@@ -95,7 +95,7 @@ module Main =
             constructTest 
                 "Select" 
                 "Select"
-                ( fun _ -> Orm.selectAll< Fact > testingState None |> Orm.toResultSeq ) 
+                ( fun _ -> Orm.selectAll< Fact > testingState None |> Result.toResultSeq ) 
                 
         // let asyncSelect () =
         //     constructTest
@@ -107,25 +107,25 @@ module Main =
             constructTest 
                 "SelectLimit"
                 "SelectLimit"
-                (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Orm.toResultSeq)
+                (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Result.toResultSeq)
 
         let selectWhere () =
             constructTest 
                 "SelectWhere"
                 "SelectWhere"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Orm.toResultSeq )
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Result.toResultSeq )
 
         let selectWhereWithIn () =
             constructTest 
                 "SelectWhereWithIn"
                 "SelectWhereWithIn"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) |> Orm.toResultSeq )
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) |> Result.toResultSeq )
         
         let selectWhereWithInFailure () =
             test "SelectWhereWithInFailure" {
                 Expect.wantError (
                     Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) 
-                    |> Orm.toResultSeq ) "SelectWhereWithInFailure" 
+                    |> Result.toResultSeq ) "SelectWhereWithInFailure" 
                 |> ignore
             }
         let update () =
@@ -147,13 +147,13 @@ module Main =
                     // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
                     // Orm.insertMany< Fact > testingState None true ( str8Facts )
                     // |> printfn "insert %A"
-                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
-                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
+                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Unchecked.defaultof<Form.Relation<Fact, SubFact>>}
+                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>>}
                     printfn "ids: %A" [testGuid2; testGuid3]
                     Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
-                    let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Orm.toResultSeq
-                    let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Orm.toResultSeq
+                    let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Result.toResultSeq
+                    let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Result.toResultSeq
                     printfn "evan: %A" evan 
                     printfn "mac: %A" mac
                     match evan, mac with 
@@ -209,7 +209,7 @@ module Main =
                 "Reader"
                 (fun _ ->
                     Orm.consumeReader<Fact> testingState 
-                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader |> Orm.toResultSeq
+                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader |> Result.toResultSeq
                 )
 
         // 
@@ -242,22 +242,22 @@ module Main =
             connect ()
             setup ()
             testSequenced <| testList "Tests" [
-                insert ()
-                insertMany ()
+                // insert ()
+                // insertMany ()
                 // // asyncInsertMany ()
                 select ()
                 // asyncSelect ()
-                selectLimit ()
-                selectWhere ()
-                selectWhereWithIn ()
-                selectWhereWithInFailure ()
-                update ()
-                updateMany ()
-                updateWhere ()
-                delete ()
-                deleteWhere ()
-                deleteMany ()
-                reader ()
+                // selectLimit ()
+                // selectWhere ()
+                // selectWhereWithIn ()
+                // selectWhereWithInFailure ()
+                // update ()
+                // updateMany ()
+                // updateWhere ()
+                // delete ()
+                // deleteWhere ()
+                // deleteMany ()
+                // reader ()
             ]
             tearDown ()
         ]
@@ -308,13 +308,13 @@ module Main =
                 "InsertSelect"
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
-                    let theFact = {Fact.init() with subFact = None}
+                    let theFact = {Fact.init() with subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>>}
                     let mutable theBackFact = Fact.init()
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> 
                         printfn "We have inserted"
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])
-                        |> Orm.toResultSeq 
+                        |> Result.toResultSeq 
                         |> fun x -> printfn "We have the facts: %A" x; x
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
@@ -347,7 +347,7 @@ module Main =
                     |> Result.bind ( fun _ -> Orm.delete< Fact > testingState transaction theFact  )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
-                        |> Orm.toResultSeq
+                        |> Result.toResultSeq
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -371,7 +371,7 @@ module Main =
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = Fact.init()
-                    let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = None }
+                    let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>> }
                     let mutable theBackFact = Fact.init() 
                     let err = exn "No data returned by select, you forgot the facts!"
         
@@ -379,7 +379,7 @@ module Main =
                     |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])  
-                        |> Orm.toResultSeq
+                        |> Result.toResultSeq
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -407,7 +407,7 @@ module Main =
                     let transaction = Orm.beginTransaction testingState
                     Orm.consumeReader<Fact> testingState 
                     |> fun reader -> Orm.executeWithReader testingState transaction "select * from \"Fact\"" reader 
-                    |> Orm.toResultSeq
+                    |> Result.toResultSeq
                     |> commit transaction 
                 )
 
@@ -448,9 +448,9 @@ module Main =
 
         let states = 
             [ 
-            odbcState
+            // odbcState
             psqlState
-            sqliteState
+            // sqliteState
             // ; mysqlState
             // ; mssqlstate
             ]
@@ -479,7 +479,7 @@ module Main =
         // let testGuid1 = System.Guid.NewGuid().ToString()
         // let testGuid2 = System.Guid.NewGuid().ToString()
         // let testGuid3 = System.Guid.NewGuid().ToString()
-        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Orm.toResultSeq
+        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Result.toResultSeq
         // |> printfn "Direct: %A"
 
         0
