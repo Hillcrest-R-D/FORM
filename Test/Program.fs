@@ -46,7 +46,7 @@ module Main =
                 ( fun _ ->
                     let createTable = 
                         $"DROP TABLE IF EXISTS {tableName};
-                        DROP TABLE IF EXISTS \"SubFact\";
+                        
                         CREATE TABLE {tableName} (
                             \"indexId\" {intType testingState} not null,
                             \"id\" text primary key,
@@ -57,12 +57,13 @@ module Main =
                             \"sometimesNothing\" {intType testingState} null,
                             \"biteSize\" text
                         );
-                        CREATE TABLE \"SubFact\" (
-                            \"factId\" {intType testingState} not null,
-                            \"subFact\" text not null
-                        );
+                        
                         "
-
+                    //DROP TABLE IF EXISTS \"SubFact\";
+                    // CREATE TABLE \"SubFact\" (
+                    //         \"factId\" {intType testingState} not null,
+                    //         \"subFact\" text not null
+                    //     );
                     Orm.execute testingState None createTable
                     |> fun x -> printfn "Setup: %A" x; x
                 )
@@ -147,8 +148,8 @@ module Main =
                     // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
                     // Orm.insertMany< Fact > testingState None true ( str8Facts )
                     // |> printfn "insert %A"
-                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Unchecked.defaultof<Form.Relation<Fact, SubFact>>}
-                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>>}
+                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>}
+                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>}
                     printfn "ids: %A" [testGuid2; testGuid3]
                     Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
@@ -242,8 +243,8 @@ module Main =
             connect ()
             setup ()
             testSequenced <| testList "Tests" [
-                // insert ()
-                // insertMany ()
+                insert ()
+                insertMany ()
                 // // asyncInsertMany ()
                 select ()
                 // asyncSelect ()
@@ -308,7 +309,7 @@ module Main =
                 "InsertSelect"
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
-                    let theFact = {Fact.init() with subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>>}
+                    let theFact = {Fact.init() with subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>}
                     let mutable theBackFact = Fact.init()
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> 
@@ -371,7 +372,7 @@ module Main =
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = Fact.init()
-                    let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>> }
+                    let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>> }
                     let mutable theBackFact = Fact.init() 
                     let err = exn "No data returned by select, you forgot the facts!"
         
@@ -481,5 +482,13 @@ module Main =
         // let testGuid3 = System.Guid.NewGuid().ToString()
         // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Result.toResultSeq
         // |> printfn "Direct: %A"
+        Orm.selectAll<Fact> psqlState None 
+        |> Result.toResultSeq
+        |> function 
+        | Ok v ->
+            v
+            |> Seq.map ( fun x -> Relation.evaluate x.subFact None x )
+            |> printfn "%A"
+        | _ -> printfn "Get fucked."
 
         0

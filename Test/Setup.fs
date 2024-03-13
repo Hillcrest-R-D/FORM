@@ -2,6 +2,7 @@ module HCRD.FORM.Tests.Setup
 
 open Form
 open Form.Orm 
+open Form.Utilities
 open Form.Attributes
 open dotenv.net
 
@@ -75,13 +76,13 @@ type Fact =
         [<Unique("group2", Contexts.PSQL)>]
         [<Unique("group2", Contexts.ODBC)>]
         biteSize : string
-        // [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
-        // [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
-        // [<ByJoin(typeof<SubFact>, Contexts.ODBC)>]
+        [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
+        [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
+        [<ByJoin(typeof<SubFact>, Contexts.ODBC)>]
         [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.SQLite)>]
         [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.PSQL)>]
         [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.ODBC)>]
-        subFact : Form.Relation<Fact, SubFact>
+        subFact : Form.Utilities.Relation<Fact, SubFact>
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -102,7 +103,7 @@ module Fact =
             maybeSomething = "true"
             sometimesNothing = Some 1L
             biteSize =  "!aBite"
-            subFact = Unchecked.defaultof<Form.Relation<Fact, SubFact>>
+            subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>
         }
 
     

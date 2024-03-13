@@ -68,8 +68,29 @@ module Utilities =
         | Insert 
         | Delete
 
-    type BaseRelation<^P, ^C>(key, state) = 
-        class end
+    type IRelation =
+        interface end
+
+    type Relation< ^P, ^C > (keyId : int, state : OrmState) =
+        let mutable value : Result<^C, exn> seq option = None
+        member _.parent = typeof< ^P >
+        member _.child = typeof< ^C >
+
+        member _.keyId = keyId 
+        member _.state = state
+        member _.context = 
+            match state with 
+            | MSSQL ( _ , ctx) 
+            | PSQL ( _ , ctx) 
+            | MySQL ( _ , ctx) 
+            | ODBC ( _, ctx) 
+            | SQLite ( _, ctx) -> ctx :?> DbContext |> EnumToValue
+
+        interface IRelation
+        member _.SetValue v = value <- v
+        ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
+        member _.State : Result<^C, exn > seq option = value
+
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
@@ -86,7 +107,7 @@ module Utilities =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _options = Dictionary<Type, Type option>()
-    let mutable _relations = Dictionary<Type, Dictionary<Type, obj[] -> obj>>()
+    let mutable _relations = Dictionary<Type, ConstructorInfo>()
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
@@ -231,9 +252,10 @@ module Utilities =
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> 
-            match x.Type.Name with 
-            | BaseRelation<_,_> -> $"null as {x.QuotedSqlName}" 
-            | _ -> $"{x.QuotedSource}.{x.QuotedSqlName}" 
+            // printfn "%A = %A | %A" x.Type typeof<IRelation> typeof<Relation<_,_>>
+            if Seq.contains typeof<IRelation> ( x.Type.GetInterfaces() )
+            then $"null as {x.QuotedSqlName}" 
+            else $"{x.QuotedSource}.{x.QuotedSqlName}" 
         )
        
     let inline fields< ^T >  ( state : OrmState ) = 
@@ -271,28 +293,28 @@ module Utilities =
     ///<param name="parent"></param>
     ///<param name="child"></param>
     ///<returns>The record constructor for the given child type in the context of the Parent-Child relation.</returns>
-    let inline relationType ( parent : Type ) ( child : Type ) : obj[] -> obj =
-        let mutable childDictionary = Dictionary<Type, obj[]->obj>()
-        //check to see if the parent exists
-        //if it does assign the reference to childDictionary
-        if not <| _relations.TryGetValue( parent, &childDictionary )
-        then 
-            //if it doesn't, assign a new dictionary with the current 
-            //child and its constructor as the first key-value pair
-            let tmp = FSharpValue.PreComputeRecordConstructor(child)
-            childDictionary[child] <- tmp
-            _relations[parent] <- childDictionary
+    // let inline relationType ( parent : Type ) ( child : Type ) : obj[] -> obj =
+    //     let mutable childDictionary = Dictionary<Type, obj[]->obj>()
+    //     //check to see if the parent exists
+    //     //if it does assign the reference to childDictionary
+    //     if not <| _relations.TryGetValue( parent, &childDictionary )
+    //     then 
+    //         //if it doesn't, assign a new dictionary with the current 
+    //         //child and its constructor as the first key-value pair
+    //         let tmp = FSharpValue.PreComputeRecordConstructor(child)
+    //         childDictionary[child] <- tmp
+    //         _relations[parent] <- childDictionary
         
-        let mutable constructor = fun _ -> Object()
-        //check to see if the child exists in the parent entry of the relation dict
-        //if it does assign the reference to constructor and return the constructor
-        if childDictionary.TryGetValue( child, &constructor )
-        then constructor
-        else 
-            //if it doesn't, add the child (its record constructor)
-            let tmp = FSharpValue.PreComputeRecordConstructor(child)
-            childDictionary[child] <- tmp
-            tmp
+    //     let mutable constructor = fun _ -> Object()
+    //     //check to see if the child exists in the parent entry of the relation dict
+    //     //if it does assign the reference to constructor and return the constructor
+    //     if childDictionary.TryGetValue( child, &constructor )
+    //     then constructor
+    //     else 
+    //         //if it doesn't, add the child (its record constructor)
+    //         let tmp = FSharpValue.PreComputeRecordConstructor(child)
+    //         childDictionary[child] <- tmp
+    //         tmp
 
     let inline makeParameter ( state : OrmState ) : DbParameter =
         match state with
@@ -379,14 +401,19 @@ module Utilities =
         let mutable relations = 
             let context = unpackContext state
             [| for fld in ( columnMapping< ^T > state  ) do  
-                match box fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
-                | :? BaseRelation<_, _> as t -> 
-                    printfn "HERES A RELATION!!!! %A %A\n\n\n" fld t
-                    let typeParameters = t.GetType().GetGenericParameterConstraints()
-                    let constructor = typedefof<BaseRelation<_,_>>.MakeGenericType( typeParameters ) 
-                    let relation = Activator.CreateInstance( constructor, [| 1, context, state |] )
+                if Seq.contains typeof<IRelation> ( fld.Type.GetInterfaces() )
+                then
+                    let typeParameters = fld.Type.GenericTypeArguments
+                    let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
+                    let mutable constructor : ConstructorInfo = null
+                    if _relations.TryGetValue(reifiedType, &constructor) 
+                    then ()
+                    else
+                        constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
+                        _relations[reifiedType] <- constructor
+                    let relation = constructor.Invoke( [| box 1; box state |])
                     fun _ -> relation 
-                | _ -> id
+                else id
             |]
 
         //We're going to need to add logic here to instantiate relation types.
@@ -401,7 +428,10 @@ module Utilities =
                             |> options[i] 
                             |> relations[i]
                         |] 
-                    :?> ^T 
+                    // |> function 
+                    // | :? IRelation as r -> r.Evaluate
+                    // | _ -> 
+                    :?> ^T
                     |> Ok
                     
             with exn -> 
@@ -591,6 +621,7 @@ module Utilities =
         let joins = joins<^T> state 
         ( String.concat ", " cols ) + " from " + table< ^T > state
         + " " + joins
+        |> fun x -> printfn "Query: %A" x; x
 
     let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
         let query = queryBase< ^T > state |> f
