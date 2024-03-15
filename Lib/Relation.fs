@@ -32,7 +32,7 @@ module Relation =
                         |> Seq.filter ( fun x -> snd x.Value = (relation.context) ) 
                         |> Seq.head |} )
             |> Seq.sortBy ( fun column -> column.attribute.part )
-            |> Seq.map ( fun column -> {| child = relation.child.GetProperty(column.attribute.on); parent = column |} )
+            |> Seq.map ( fun column -> {| child = relation.child.GetProperty(column.attribute.fieldName); parent = column |} )
         
         let where = 
             String.Join( 

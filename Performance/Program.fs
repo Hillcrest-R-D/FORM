@@ -35,7 +35,7 @@ type InsertBenchmark() =
     member _.Setup() = 
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
-        Orm.execute _sqliteState None Utilities.drop |> ignore
+        Form.Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
     
     [<Benchmark>]
@@ -63,7 +63,7 @@ type InsertBenchmark() =
     
     
     [<Benchmark(Baseline = true)>]
-    member _.System () = 
+    member _.Baseline () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -141,7 +141,7 @@ type UpdateBenchmark() =
         connection.Close()
     
     [<Benchmark(Baseline = true)>]
-    member _.System () = 
+    member _.Baseline () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -206,6 +206,7 @@ type SelectBenchmark() =
     [<Benchmark>]
     member _.Form () = 
         Orm.selectLimit<Data.Sanic> _sqliteState None _data  
+        |> Result.toResultSeq
         |> Result.map ( Seq.iter ignore )
 
     [<Benchmark>]
@@ -214,7 +215,7 @@ type SelectBenchmark() =
         for _ in connection.Query<Data.Sanic>($"select * from Sanic limit {_data};") do () 
     
     [<Benchmark(Baseline = true)>]
-    member _.System () = 
+    member _.Baseline () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )

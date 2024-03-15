@@ -176,7 +176,7 @@ module Utilities =
     let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
         Array.fold ( fun s ( x : OnAttribute ) ->  
                 if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (fst x.Value, x.on)
+                then (fst x.Value, x.fieldName)
                 else s
             ) ("", "") attrs 
     
