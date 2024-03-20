@@ -33,7 +33,6 @@ type InsertBenchmark() =
     
     [<IterationSetup>]
     member _.Setup() = 
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
         Form.Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
@@ -114,7 +113,6 @@ type UpdateBenchmark() =
     
     [<GlobalSetup>]
     member _.Setup () = 
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
@@ -194,7 +192,6 @@ type SelectBenchmark() =
     [<GlobalSetup>]
     member _.Setup () = 
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
@@ -205,9 +202,10 @@ type SelectBenchmark() =
 
     [<Benchmark>]
     member _.Form () = 
-        Orm.selectLimit<Data.Sanic> _sqliteState None _data  
+        Orm.selectLimit<Data.Sanic> _sqliteState None _data
         |> Result.toResultSeq
-        |> Result.map ( Seq.iter ignore )
+        |> Result.mapError( printfn "Error: %A" )
+        |> Result.map ( fun x -> for _ in x do () )
 
     [<Benchmark>]
     member _.Dapper () = 
@@ -220,25 +218,27 @@ type SelectBenchmark() =
         connection.Open()
         use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )
         let reader = cmd.ExecuteReader()
-        seq {
-            while (reader.Read()) do
-                { 
-                    id = reader.GetValue(0) :?> int64 //104abc3e
-                    name = reader.GetValue(1) :?> string
-                    optional = 
-                        reader.GetValue(2) |> function 
-                        | :? int64 as i -> Some i
-                        | _ -> None
-                    modified = reader.GetValue(3) :?> string
-                } : Data.Sanic
-        } |> Seq.iter ignore
+        let data =
+            seq {
+                while (reader.Read()) do
+                    { 
+                        id = reader.GetInt32(0) //104abc3e
+                        name = reader.GetString(1)
+                        optional = 
+                            if reader.IsDBNull(2) 
+                            then None 
+                            else Some <| reader.GetInt32(2)
+                        modified = reader.GetString(3)
+                    } : Data.Sanic
+            }
+        for _ in data do ()
 
 module Main = 
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
-        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
-        BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
+        // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
         BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0

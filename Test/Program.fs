@@ -82,6 +82,15 @@ module Main =
                     let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
                     Orm.insertMany< Fact > testingState None true ( str8Facts )
                 )
+
+        let insertAlot () =
+            constructTest 
+                "InsertManyMany" 
+                "Inserted many facts."
+                ( fun _ ->
+                    let str8Facts = [ for _ in 1..10000 do Fact.init() ]
+                    Orm.insertMany< Fact > testingState None true ( str8Facts )
+                )
                   
         // let asyncInsertMany () =
         //     constructTest
@@ -109,6 +118,12 @@ module Main =
                 "SelectLimit"
                 "SelectLimit"
                 (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Result.toResultSeq)
+        
+        let selectBigLimit () =
+            constructTest 
+                "SelectBigLimit"
+                "SelectBigLimit"
+                (fun _ -> Orm.selectLimit< Fact > testingState None 10000 |> Result.toResultSeq)
 
         let selectWhere () =
             constructTest 
@@ -148,8 +163,8 @@ module Main =
                     // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
                     // Orm.insertMany< Fact > testingState None true ( str8Facts )
                     // |> printfn "insert %A"
-                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>}
-                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>}
+                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Form.Utilities.Relation<Fact, SubFact>(1,testingState)}
+                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Form.Utilities.Relation<Fact, SubFact>(1,testingState)}
                     printfn "ids: %A" [testGuid2; testGuid3]
                     Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
@@ -159,7 +174,10 @@ module Main =
                     printfn "mac: %A" mac
                     match evan, mac with 
                     | Ok e, Ok m -> 
-                        if Seq.head e = changed && Seq.head m = changed2 
+                        let headE = Seq.head e 
+                        let headM = Seq.head m 
+                        printfn "\n%A = %A\n\n\n%A = %A" headE changed headM changed2
+                        if headE = changed && headM = changed2 
                         then Ok ()
                         else Result.Error "Update not applied."
                     | Result.Error ex, _ 
@@ -245,20 +263,22 @@ module Main =
             testSequenced <| testList "Tests" [
                 insert ()
                 insertMany ()
+                insertAlot ()
                 // // asyncInsertMany ()
                 select ()
-                // asyncSelect ()
-                // selectLimit ()
-                // selectWhere ()
-                // selectWhereWithIn ()
-                // selectWhereWithInFailure ()
-                // update ()
-                // updateMany ()
-                // updateWhere ()
-                // delete ()
-                // deleteWhere ()
-                // deleteMany ()
-                // reader ()
+                // // asyncSelect ()
+                selectLimit ()
+                selectBigLimit ()
+                selectWhere ()
+                selectWhereWithIn ()
+                selectWhereWithInFailure ()
+                update ()
+                updateMany ()
+                updateWhere ()
+                delete ()
+                deleteWhere ()
+                deleteMany ()
+                reader ()
             ]
             tearDown ()
         ]
@@ -450,8 +470,8 @@ module Main =
         let states = 
             [ 
             // odbcState
-            psqlState
-            // sqliteState
+            // psqlState
+            sqliteState
             // ; mysqlState
             // ; mssqlstate
             ]
@@ -482,13 +502,13 @@ module Main =
         // let testGuid3 = System.Guid.NewGuid().ToString()
         // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Result.toResultSeq
         // |> printfn "Direct: %A"
-        Orm.selectAll<Fact> psqlState None 
-        |> Result.toResultSeq
-        |> function 
-        | Ok v ->
-            v
-            |> Seq.map ( fun x -> Relation.evaluate x.subFact None x )
-            |> printfn "%A"
-        | _ -> printfn "Get fucked."
+        // Orm.selectAll<Fact> psqlState None 
+        // |> Result.toResultSeq
+        // |> function 
+        // | Ok v ->
+        //     v
+        //     |> Seq.map ( fun x -> Relation.evaluate x.subFact None x )
+        //     |> printfn "%A"
+        // | _ -> printfn "Get fucked."
 
         0

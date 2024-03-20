@@ -90,6 +90,11 @@ module Utilities =
         member _.SetValue v = value <- v
         ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
         member _.State : Result<^C, exn > seq option = value
+        member _.Value = value
+        static member op_Equality ( L : Relation< ^P, ^C >, R : Relation< ^P, ^C > ) =
+            printfn "Using custom-defined equality"
+            L.Value = R.Value
+            
 
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
@@ -252,7 +257,6 @@ module Utilities =
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> 
-            // printfn "%A = %A | %A" x.Type typeof<IRelation> typeof<Relation<_,_>>
             if Seq.contains typeof<IRelation> ( x.Type.GetInterfaces() )
             then $"null as {x.QuotedSqlName}" 
             else $"{x.QuotedSource}.{x.QuotedSqlName}" 
@@ -423,8 +427,7 @@ module Utilities =
                 while reader.Read( ) do
                     constructor 
                         [| for i in 0..reader.FieldCount-1 do 
-                            reader.GetValue( i ) 
-                            |> fun x -> printfn "Here's the value of %A : %A" i x; x
+                            reader.GetValue( i )
                             |> options[i] 
                             |> relations[i]
                         |] 
@@ -621,7 +624,6 @@ module Utilities =
         let joins = joins<^T> state 
         ( String.concat ", " cols ) + " from " + table< ^T > state
         + " " + joins
-        |> fun x -> printfn "Query: %A" x; x
 
     let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
         let query = queryBase< ^T > state |> f

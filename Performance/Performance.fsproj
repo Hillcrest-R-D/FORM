@@ -12,16 +12,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<ProjectReference Include="..\Lib\FORM.fsproj" />-->
-    <!--<ProjectReference Include="..\Attributes\Attributes.fsproj" />-->
+    <ProjectReference Include="..\Lib\FORM.fsproj" />
+    <!-- <ProjectReference Include="..\Attributes\Attributes.fsproj" /> -->
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Form" Version="4.0.0-alpha-2" />
+    <!-- <PackageReference Include="Form" Version="4.0.0-alpha-2" /> -->
     <PackageReference Include="benchmarkdotnet" Version="0.13.12" />
     <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.13.12" />
     <PackageReference Include="dotnetenv" Version="2.5.0" />
-    <PackageReference Include="dapper" Version="2.1.28" />
+    <PackageReference Include="dapper" Version="2.1.35" />
     <PackageReference Include="system.data.sqlite" Version="1.0.118" />
   </ItemGroup>
 
