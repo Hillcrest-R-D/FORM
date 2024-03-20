@@ -454,26 +454,20 @@ module Main =
             System.Environment.SetEnvironmentVariable(variable, value)
         )
         
-        
         let psqlConnectionString  = System.Environment.GetEnvironmentVariable("postgres_connection_string")
         let odbcConnectionString  = System.Environment.GetEnvironmentVariable("odbc_connection_string")
         let mysqlConnectionString  = ""
         let mssqlConnectionString  = ""
         let sqliteConnectionString  = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
         
-        let psqlState = PSQL( psqlConnectionString , Contexts.PSQL )
-        let mysqlState = MySQL( mysqlConnectionString , Contexts.MySQL )
-        let mssqlState = MSSQL( mssqlConnectionString , Contexts.MSSQL )
-        let sqliteState = SQLite( sqliteConnectionString , Contexts.SQLite )
-        let odbcState = ODBC( odbcConnectionString , Contexts.ODBC )
 
         let states = 
             [ 
-            // odbcState
-            // psqlState
-            sqliteState
-            // ; mysqlState
-            // ; mssqlstate
+            // PSQL( psqlConnectionString , Contexts.PSQL ) 
+            // MySQL( mysqlConnectionString , Contexts.MySQL )
+            // MSSQL( mssqlConnectionString , Contexts.MSSQL )
+            SQLite( sqliteConnectionString , Contexts.SQLite )
+            // ODBC( odbcConnectionString , Contexts.ODBC )
             ]
 
         // use fs = new FileStream(outputPath, FileMode.Create)

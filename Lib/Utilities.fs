@@ -91,9 +91,18 @@ module Utilities =
         ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
         member _.State : Result<^C, exn > seq option = value
         member _.Value = value
-        static member op_Equality ( L : Relation< ^P, ^C >, R : Relation< ^P, ^C > ) =
-            printfn "Using custom-defined equality"
-            L.Value = R.Value
+
+        override _.GetHashCode() =
+            hash (value, keyId, state)
+        
+        override this.Equals(b) =
+            match b with 
+            | :? Relation< ^P, ^C > as r -> this.GetHashCode() = r.GetHashCode()
+            | _ -> false
+            
+        // static member op_Equality ( L : Relation< ^P, ^C >, R : Relation< ^P, ^C > ) =
+        //     printfn "Using custom-defined equality"
+        //     L.Value = R.Value
             
 
 
@@ -112,7 +121,19 @@ module Utilities =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _options = Dictionary<Type, Type option>()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let mutable _keyArray = Dictionary<Type, obj -> obj[]>()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
     let mutable _relations = Dictionary<Type, ConstructorInfo>()
+
+    let unpackContext =
+            function 
+            | MSSQL ( _ , ctx) | PSQL ( _ , ctx) | MySQL ( _ , ctx) | ODBC ( _, ctx) | SQLite ( _, ctx) -> ctx
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
@@ -231,6 +252,11 @@ module Utilities =
                         Index = i
                         IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
                         IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
+                        IsRelation = 
+                            x.GetType().GetInterfaces()
+                            |> Seq.contains typeof<IRelation>
+                        IsLazilyEvaluated =
+                            x.GetCustomAttributes( typeof< LazyEvaluationAttribute >, false ).Length > 0
                         JoinOn = 
                             x.GetCustomAttributes( typeof< OnAttribute >, false ) 
                             |> Array.map ( fun y -> y :?> OnAttribute )
@@ -377,7 +403,61 @@ module Utilities =
         | ODBC _ -> "?"
         | _ -> "@"
 
-    
+    let inline keyArray<^T> state keyId = 
+        let ctx = box (unpackContext state) :?> DbContext |> EnumToValue
+        let _type = typeof<^T>
+        if _keyArray.ContainsKey( _type )
+        then _keyArray[ _type ]
+        else
+            let props = 
+                _type.GetType().GetProperties() 
+                |> Seq.filter( fun prop -> 
+                    if prop.IsDefined( typeof< OnAttribute > ) 
+                    then 
+                        let attr = 
+                            prop.GetCustomAttributes(typeof< OnAttribute >) 
+                            |> Seq.map ( fun x -> x :?> OnAttribute) 
+                            |> Seq.filter ( fun x -> snd x.Value = ctx )
+                            |> Seq.head
+                        snd attr.Value = ctx && attr.key = keyId //if the key lines up AND the context.
+                    else false
+                )
+                |> Seq.map ( fun prop -> {| 
+                property = prop
+                attribute = 
+                    prop.GetCustomAttributes(typeof< OnAttribute >) 
+                    |> Seq.map ( fun x -> x :?> OnAttribute) 
+                    |> Seq.filter ( fun x -> snd x.Value = ctx ) 
+                    |> Seq.head 
+                |} )
+                |> Seq.sortBy ( fun column -> column.attribute.part )
+                |> Seq.toArray
+                |> Array.map (fun prop -> prop.property)
+                
+            let getValuesFromProps = 
+                fun ( instance : obj ) -> 
+                    Array.map ( fun (prop : PropertyInfo) -> prop.GetValue(instance)) props 
+            _keyArray[_type] <- getValuesFromProps 
+            getValuesFromProps
+            
+
+        (*
+            select *
+            from subfact 
+            where 
+                concat(key1,key2,...) in ('12..', '4269..', ) and 
+
+            select *
+            from subfact
+            where
+                key1 = someVal and key2 = someotherval
+            union
+            select *
+            from subfact
+            where
+                key1 = someVal2 and key2 = someotherval2
+            ...
+        *)
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
@@ -398,14 +478,12 @@ module Utilities =
                 | None -> id
             |]
             
-        let unpackContext =
-            function 
-            | MSSQL ( _ , ctx) | PSQL ( _ , ctx) | MySQL ( _ , ctx) | ODBC ( _, ctx) | SQLite ( _, ctx) -> ctx
-
+        
+        
         let mutable relations = 
             let context = unpackContext state
             [| for fld in ( columnMapping< ^T > state  ) do  
-                if Seq.contains typeof<IRelation> ( fld.Type.GetInterfaces() )
+                if fld.IsRelation
                 then
                     let typeParameters = fld.Type.GenericTypeArguments
                     let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
@@ -420,6 +498,7 @@ module Utilities =
                 else id
             |]
 
+        
         //We're going to need to add logic here to instantiate relation types.
 
         seq { 
@@ -431,15 +510,13 @@ module Utilities =
                             |> options[i] 
                             |> relations[i]
                         |] 
-                    // |> function 
-                    // | :? IRelation as r -> r.Evaluate
-                    // | _ -> 
                     :?> ^T
                     |> Ok
                     
             with exn -> 
                 Error exn                
         }  
+        |> eagerHandler
 
     let inline insertBase< ^T > ( state : OrmState ) insertKeys =
         let paramChar = getParamChar state

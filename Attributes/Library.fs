@@ -115,17 +115,24 @@ type OnAttribute (table : Type, key : int, part : int, fieldName : string, kind 
 
 ///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type ArgumentsAttribute ( evaluationStrategy : EvaluationStrategy, keyId : int, context : obj ) =
+type ArgumentsAttribute ( keyId : int, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( "", ( box( context ) :?> DbContext )  |> EnumToValue)
     member _.key = keyId
-    member _.evaluationStrategy = evaluationStrategy 
+
+
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type LazyEvaluationAttribute () =
+    inherit DbAttribute( )
+    override _.Value = ( "", -1)
 
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
     Index : int
     IsKey : bool
     IsIndex : bool
+    IsRelation : bool
+    IsLazilyEvaluated : bool
     JoinOn : ( string * string ) option 
     Source : string
     QuotedSource : string 

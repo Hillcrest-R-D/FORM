@@ -82,6 +82,7 @@ type Fact =
         [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.SQLite)>]
         [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.PSQL)>]
         [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.ODBC)>]
+        [<LazyEvaluation>]
         subFact : Form.Utilities.Relation<Fact, SubFact>
     }
 
