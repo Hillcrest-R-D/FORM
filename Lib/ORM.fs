@@ -1,4 +1,4 @@
-﻿namespace Form 
+﻿namespace rec Form 
 
 
 module Orm = 
@@ -12,6 +12,8 @@ module Orm =
     open Form.Attributes
     open Utilities
     open Logging
+    
+    let inline fields< ^T > = Unchecked.defaultof< ^T >
     
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect ( state : OrmState ) = Utilities.connect state
@@ -44,7 +46,7 @@ module Orm =
 
     let inline consumeReader<^T > ( state : OrmState ) ( reader : IDataReader ) = Utilities.consumeReader<^T> state reader
 
-    ///<description>WARNING! Execute takes a raw string literal to execute against the specified DB state, which is inherently unsafe and exposed to SQL injection, do not use this in a context where strings aren't being escaped properly before hand.</description>
+    ///<description>WARNING! Execute takes a raw string literal to execute against the specified DB state, which is inherently unsafe and vulnerable to SQL injection, do not use this in a context where strings aren't being escaped properly before hand.</description>
     let inline execute ( state : OrmState ) ( transaction : DbTransaction option ) sql =
         transaction 
         |> withTransaction 
@@ -52,26 +54,38 @@ module Orm =
             ( fun transaction -> 
                 use cmd = makeCommand state sql ( transaction.Connection )
                 cmd.Transaction <- transaction  
-                cmd.ExecuteNonQuery( )
+                seq { 
+                    try cmd.ExecuteNonQuery( ) |> Ok 
+                    with exn -> Error exn
+                }
             )
             ( fun connection -> 
-                use cmd = makeCommand state sql connection  
-                let result = cmd.ExecuteNonQuery( )
-                connection.Close() 
-                result
+                let transaction = connection.BeginTransaction() 
+                try 
+                    seq {
+                        use cmd = makeCommand state sql connection  
+                        
+                        yield! seq {cmd.ExecuteNonQuery( ) |> Ok}
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
+        |> Seq.head
     
-    ///<Description>
-    /// Takes a function of IDataReader -> Result< 't seq, exn> (see FORMs consumeReader function as example) to 
+    ///<summary>
+    /// Takes a function of IDataReader -> Result&lt; 't seq, exn&gt; (see FORMs consumeReader function as example) to 
     /// transfer the results of executing the specified sql against the specified database given by state into an 
     /// arbitrary type 't, defined by you in the readerFunction.
-    /// </Description>
+    /// </summary>
     let inline generateReader state sql =
         match connect state with
         | Ok conn -> 
             try 
                 use cmd = makeCommand state (sql) conn 
-                cmd.ExecuteReader( CommandBehavior.CloseConnection )
+                cmd.ExecuteReader( )
                 |> Ok
             with 
             | exn -> Error exn
@@ -85,16 +99,20 @@ module Orm =
                 seq {
                     use cmd = makeCommand state (sql) <| transaction.Connection
                     cmd.Transaction <- transaction
-                    use reader = cmd.ExecuteReader( )
-                    yield! readerFunction reader
+                    try 
+                        use reader = cmd.ExecuteReader( )
+                        yield! readerFunction reader
+                    with exn -> Error exn 
                 } 
             )
             ( fun connection -> 
                 seq {
+                    
                     use cmd = makeCommand state (sql) connection 
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-                    yield! readerFunction reader
-                    connection.Close()
+                    try 
+                        use reader = cmd.ExecuteReader( )
+                        yield! readerFunction reader
+                    with exn -> Error exn
                 }
             )
     
@@ -104,10 +122,10 @@ module Orm =
     ///<param name="limit"></param>
     ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
     ///<remarks>
-    /// </remarks>
     ///<example>
     ///     <code>selectlimit&lt;^T&gt; someState None 5</code>
     ///</example>
+    /// </remarks>
     let inline selectLimit< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( limit : int ) = 
         selectHelper< ^T > state transaction ( fun x -> 
             match state with 
@@ -173,21 +191,32 @@ module Orm =
                     |> String.concat "\n"
                 )  
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( ) 
+                seq {
+                    try command.ExecuteNonQuery ( ) |> Ok 
+                    with exn -> Error exn 
+                }
             )
             ( fun connection ->
-                let query = insertBase< ^T > state includeKeys 
-                use transaction = connection.BeginTransaction()
-                use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
-                log (
-                    sprintf "Param count: %A" command.Parameters.Count ::
-                    [ for i in [0..command.Parameters.Count-1] do 
-                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                    ] |> String.concat "\n"
-                )   
-                command.ExecuteNonQuery ( )
-                |> fun x -> transaction.Commit(); connection.Close(); x
+                let transaction = connection.BeginTransaction()
+                let command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
+                try 
+                    seq {
+                        log (
+                            sprintf "Param count: %A" command.Parameters.Count ::
+                            [ for i in [0..command.Parameters.Count-1] do 
+                                yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                            ] |> String.concat "\n"
+                        )   
+                        command.ExecuteNonQuery ( ) |> Ok 
+                    }
+                    |> fun x -> 
+                        transaction.Commit() 
+                        x 
+                    with exn ->    
+                        transaction.Rollback()
+                        seq { Error exn }
             )
+        |> Seq.head
     
     ///<summary>Insert a seq&lt;<typeparamref name="^T"/>&gt; <paramref name="instances"/> into the table <typeparamref name="^T"/> @ <paramref name="state"/>.</summary>
     ///<param name="state"></param>
@@ -206,18 +235,27 @@ module Orm =
         |> withTransaction 
             state 
             ( fun transaction -> 
+                let cmd = makeCommand state query transaction.Connection
                 seq {
-                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
-                }
+                    yield parameterizeSeqAndExecuteCommand state query cmd includeKeys Insert instances //makeCommand query connection state
+                } 
             )
             ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    yield parameterizeSeqAndExecuteCommand state query transaction includeKeys Insert instances //makeCommand query connection state
-                    transaction.Commit()
-                    connection.Close()
-                }
+                let transaction = connection.BeginTransaction()
+                
+                try  
+                    let cmd = makeCommand state query connection
+                    seq {
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd includeKeys Insert instances
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
+        |> Seq.head
+        
 
     ///<summary>Update a record <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
     ///<param name="state"></param>
@@ -245,7 +283,7 @@ module Orm =
             |> String.concat " and "
             |> fun idConditional -> updateHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instance 
         )
-    
+
     ///<summary>Update a seq&lt;<typeparamref name="^T"/>&gt; of <paramref name="instances"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the keys/identity attribute(s) of <typeparamref name="^T"/>.</summary>
     ///<param name="state"></param>
     ///<param name="transaction"></param>
@@ -358,7 +396,7 @@ module Orm =
     ///<example>
     ///     <code>deleteWhere&lt;^T&gt; someState None where</code>
     ///</example>
-    let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * string[]) ) = 
+    let inline deleteWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( where : (string * obj seq) ) = 
         let query = $"{deleteBase< ^T > state} {escape where}"
         transaction 
         |> withTransaction
@@ -366,10 +404,24 @@ module Orm =
             ( fun transaction -> 
                 use cmd = makeCommand state query ( transaction.Connection ) 
                 cmd.Transaction <- transaction
-                cmd.ExecuteNonQuery ( )
+                seq { cmd.ExecuteNonQuery ( ) |> Ok }
             )
             ( fun connection -> 
-                use cmd = makeCommand state query connection 
-                cmd.ExecuteNonQuery ( )
-                |> fun res -> connection.Close(); res
+                let transaction = connection.BeginTransaction()
+                let cmd = makeCommand state query connection    
+                try 
+                    seq {
+                        yield cmd.ExecuteNonQuery ( ) |> Ok 
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> 
+                        transaction.Commit()
+                        x
+                with exn -> 
+                    transaction.Rollback() 
+                    seq{ Error exn }
             )
+        |> Seq.head
+
+    
+    

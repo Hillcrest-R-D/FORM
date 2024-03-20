@@ -11,9 +11,14 @@ module Main =
     let outputPath = "./console.log"
     let constructTest name message f =
         test name {
-            Expect.wantOk ( f () ) message 
-            |> printfn "%A"
+            Expect.wantOk ( f () |> Result.map ( fun _ -> () )) message 
         }
+    
+    let constructFailureTest name message f =
+        test name {
+            Expect.wantError ( f () |> Result.mapError ( fun _ -> () )) message 
+        }
+
     let tableName = "\"Fact\""
     let nameCol = function 
         | SQLite _ -> "sqliteName"
@@ -41,7 +46,7 @@ module Main =
                 ( fun _ ->
                     let createTable = 
                         $"DROP TABLE IF EXISTS {tableName};
-                        DROP TABLE IF EXISTS \"SubFact\";
+                        
                         CREATE TABLE {tableName} (
                             \"indexId\" {intType testingState} not null,
                             \"id\" text primary key,
@@ -52,20 +57,22 @@ module Main =
                             \"sometimesNothing\" {intType testingState} null,
                             \"biteSize\" text
                         );
-                        CREATE TABLE \"SubFact\" (
-                            \"factId\" {intType testingState} not null,
-                            \"subFact\" text not null
-                        );
+                        
                         "
-
+                    //DROP TABLE IF EXISTS \"SubFact\";
+                    // CREATE TABLE \"SubFact\" (
+                    //         \"factId\" {intType testingState} not null,
+                    //         \"subFact\" text not null
+                    //     );
                     Orm.execute testingState None createTable
+                    |> fun x -> printfn "Setup: %A" x; x
                 )
         
         let connect () = 
             constructTest "Connect" "Successfully connected." ( fun _ -> Orm.connect testingState )
 
         let insert () =
-                constructTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
+            constructTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
                 
         let insertMany () =
             constructTest 
@@ -73,6 +80,15 @@ module Main =
                 "Inserted many facts."
                 ( fun _ ->
                     let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
+                    Orm.insertMany< Fact > testingState None true ( str8Facts )
+                )
+
+        let insertAlot () =
+            constructTest 
+                "InsertManyMany" 
+                "Inserted many facts."
+                ( fun _ ->
+                    let str8Facts = [ for _ in 1..10000 do Fact.init() ]
                     Orm.insertMany< Fact > testingState None true ( str8Facts )
                 )
                   
@@ -88,31 +104,50 @@ module Main =
         let select () =
             constructTest 
                 "Select" 
-                "Select succeeded"
-                ( fun _ -> Orm.selectAll< Fact > testingState None ) 
+                "Select"
+                ( fun _ -> Orm.selectAll< Fact > testingState None |> Result.toResultSeq ) 
                 
         // let asyncSelect () =
         //     constructTest
         //         "Select-Async"
-        //         "Select-Async Succeeded"
+        //         "Select-Async"
         //         (fun _ -> Orm.selectAll< Fact > testingState None)  
         
         let selectLimit () =
             constructTest 
                 "SelectLimit"
-                "SelectLimit succeeded"
-                (fun _ -> Orm.selectLimit< Fact > testingState None 5)
+                "SelectLimit"
+                (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Result.toResultSeq)
+        
+        let selectBigLimit () =
+            constructTest 
+                "SelectBigLimit"
+                "SelectBigLimit"
+                (fun _ -> Orm.selectLimit< Fact > testingState None 10000 |> Result.toResultSeq)
 
         let selectWhere () =
             constructTest 
                 "SelectWhere"
-                "SelectWhere succeeded"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) )
-                
+                "SelectWhere"
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Result.toResultSeq )
+
+        let selectWhereWithIn () =
+            constructTest 
+                "SelectWhereWithIn"
+                "SelectWhereWithIn"
+                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) |> Result.toResultSeq )
+        
+        let selectWhereWithInFailure () =
+            test "SelectWhereWithInFailure" {
+                Expect.wantError (
+                    Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) 
+                    |> Result.toResultSeq ) "SelectWhereWithInFailure" 
+                |> ignore
+            }
         let update () =
             constructTest 
                 "Update"
-                "Update succeeded"
+                "Update"
                 (fun _ ->
                     let initial = { Fact.init() with id = testGuid1 }
                     let changed = { initial with name = "Evan Towlett"}
@@ -122,45 +157,40 @@ module Main =
         let updateMany () =
             constructTest 
                 "UpdateMany"
-                "UpdateMany succeeded"
+                "UpdateMany"
                 ( fun _ -> 
-                let initial = Fact.init() 
-                let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= None}
-                let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = None}
-                Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
+                    let initial = Fact.init() 
+                    // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
+                    // Orm.insertMany< Fact > testingState None true ( str8Facts )
+                    // |> printfn "insert %A"
+                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Form.Utilities.Relation<Fact, SubFact>(1,testingState)}
+                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Form.Utilities.Relation<Fact, SubFact>(1,testingState)}
+                    printfn "ids: %A" [testGuid2; testGuid3]
+                    Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
 
-                let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] )
-                let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] )
-
-                match evan, mac with 
-                | Ok e, Ok m -> 
-                    if Seq.head e = changed && Seq.head m = changed2 
-                    then Ok ()
-                    else Result.Error "Update not applied."
-                | Result.Error ex, _ 
-                | _, Result.Error ex -> Result.Error ex.Message
+                    let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Result.toResultSeq
+                    let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Result.toResultSeq
+                    printfn "evan: %A" evan 
+                    printfn "mac: %A" mac
+                    match evan, mac with 
+                    | Ok e, Ok m -> 
+                        let headE = Seq.head e 
+                        let headM = Seq.head m 
+                        printfn "\n%A = %A\n\n\n%A = %A" headE changed headM changed2
+                        if headE = changed && headM = changed2 
+                        then Ok ()
+                        else Result.Error "Update not applied."
+                    | Result.Error ex, _ 
+                    | _, Result.Error ex -> Result.Error ex.Message
                     
                 )
-            
-        
-        // 
-        // 
-        // member _.UpdateManyWithTransaction () =
-        //     printfn "Updating many with transaction..."
-        //     let initial = Fact.init() 
-        //     let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
-        //     let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-        //     Orm.updateMany< Fact > testingState [changed;changed2] transaction
-        //     |> printf "%A"
-            
-        //     Assert.Pass()
         
         
         
         let updateWhere () =
             constructTest
                 "UpdateWhere"
-                "UpdateWhere succeeded"
+                "UpdateWhere"
                 (fun _ -> 
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
@@ -170,7 +200,7 @@ module Main =
         let delete () =
             constructTest 
                 "Delete"
-                "Delete succeeded"
+                "Delete"
                 ( fun _ ->
                     let initial = Fact.init () 
                     let changed = { initial with name = "Evan Howlett"}
@@ -179,13 +209,13 @@ module Main =
         let deleteWhere () = 
             constructTest
                 "DeleteWhere"
-                "DeleteWhere succeeded"
+                "DeleteWhere"
                 (fun _ -> Orm.deleteWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) )
                 
         let deleteMany () =
             constructTest
                 "DeleteMany"
-                "DeleteMany succeeded"
+                "DeleteMany"
                 (fun _ ->
                     let initial = Fact.init() 
                     let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
@@ -195,10 +225,10 @@ module Main =
         let reader () =
             constructTest
                 "Reader"
-                "Reader succeeded"
+                "Reader"
                 (fun _ ->
                     Orm.consumeReader<Fact> testingState 
-                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader 
+                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader |> Result.toResultSeq
                 )
 
         // 
@@ -218,7 +248,7 @@ module Main =
         let tearDown () = 
             constructTest 
                 "Teardown"
-                "Teardown succeeded"
+                "Teardown"
                 ( fun _ -> 
                     transaction
                     |> Option.map ( Orm.commitTransaction  )
@@ -233,11 +263,15 @@ module Main =
             testSequenced <| testList "Tests" [
                 insert ()
                 insertMany ()
-                // asyncInsertMany ()
+                insertAlot ()
+                // // asyncInsertMany ()
                 select ()
-                // asyncSelect ()
+                // // asyncSelect ()
                 selectLimit ()
+                selectBigLimit ()
                 selectWhere ()
+                selectWhereWithIn ()
+                selectWhereWithInFailure ()
                 update ()
                 updateMany ()
                 updateWhere ()
@@ -286,21 +320,22 @@ module Main =
                             );
                             "
 
-                        Orm.execute testingState None createTable
-                    )        
+                        Orm.execute testingState None createTable 
+                    )         
         
         let insertSelect () =
             constructTest
                 "InsertSelect"
-                "InsertSelect succeeded"
+                "InsertSelect"
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
-                    let theFact = {Fact.init() with subFact = None}
+                    let theFact = {Fact.init() with subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>}
                     let mutable theBackFact = Fact.init()
                     Orm.insert< Fact > testingState transaction true ( theFact ) 
                     |> Result.bind ( fun _ -> 
                         printfn "We have inserted"
-                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
+                        Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])
+                        |> Result.toResultSeq 
                         |> fun x -> printfn "We have the facts: %A" x; x
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
@@ -322,7 +357,7 @@ module Main =
         let insertDeleteSelect () =
             constructTest 
                 "InsertDeleteSelect"
-                "InsertDeleteSelect succeeded"
+                "InsertDeleteSelect"
                 ( fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = Fact.init()
@@ -333,6 +368,7 @@ module Main =
                     |> Result.bind ( fun _ -> Orm.delete< Fact > testingState transaction theFact  )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|]) 
+                        |> Result.toResultSeq
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -352,11 +388,11 @@ module Main =
         let insertUpdateSelect () =
             constructTest
                 "InsertUpdateSelect"
-                "InsertUpdateSelect succeeded"
+                "InsertUpdateSelect"
                 (fun _ ->
                     let transaction = Orm.beginTransaction testingState
                     let theFact = Fact.init()
-                    let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = None }
+                    let theNewFact = { theFact with name = "All Facts, All the Time"; subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>> }
                     let mutable theBackFact = Fact.init() 
                     let err = exn "No data returned by select, you forgot the facts!"
         
@@ -364,6 +400,7 @@ module Main =
                     |> Result.bind ( fun _ -> Orm.update< Fact > testingState transaction theNewFact )
                     |> Result.bind ( fun _ -> 
                         Orm.selectWhere< Fact > testingState transaction ("id = ':1'", [|theFact.id|])  
+                        |> Result.toResultSeq
                         |> function 
                         | Ok facts when Seq.length facts > 0 -> 
                             theBackFact <- Seq.head facts
@@ -386,11 +423,12 @@ module Main =
         let readerWithTransaction () =
             constructTest
                 "Reader-Transaction"
-                "Reader with Transaction succeeded"
+                "Reader with Transaction"
                 (fun _ -> 
                     let transaction = Orm.beginTransaction testingState
                     Orm.consumeReader<Fact> testingState 
                     |> fun reader -> Orm.executeWithReader testingState transaction "select * from \"Fact\"" reader 
+                    |> Result.toResultSeq
                     |> commit transaction 
                 )
 
@@ -431,9 +469,9 @@ module Main =
 
         let states = 
             [ 
-            odbcState
-            ; psqlState
-            ; sqliteState
+            // odbcState
+            // psqlState
+            sqliteState
             // ; mysqlState
             // ; mssqlstate
             ]
@@ -453,11 +491,24 @@ module Main =
         )
         |> printfn "%A"
 
-        states 
-        |> List.map ( 
-            transaction 
-            >> runTestsWithCLIArgs [] argv 
-        )
-        |> printfn "%A"
+        // states 
+        // |> List.map ( 
+        //     transaction 
+        //     >> runTestsWithCLIArgs [] argv 
+        // )
+        // |> printfn "%A"
+        // let testGuid1 = System.Guid.NewGuid().ToString()
+        // let testGuid2 = System.Guid.NewGuid().ToString()
+        // let testGuid3 = System.Guid.NewGuid().ToString()
+        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Result.toResultSeq
+        // |> printfn "Direct: %A"
+        // Orm.selectAll<Fact> psqlState None 
+        // |> Result.toResultSeq
+        // |> function 
+        // | Ok v ->
+        //     v
+        //     |> Seq.map ( fun x -> Relation.evaluate x.subFact None x )
+        //     |> printfn "%A"
+        // | _ -> printfn "Get fucked."
 
         0

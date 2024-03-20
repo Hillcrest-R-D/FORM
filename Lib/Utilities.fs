@@ -1,5 +1,50 @@
 namespace Form
 
+module Result = 
+    // {Ok a; Ok b; Ok c} -> Ok {a; b; c}
+    // {Ok a; Ok b; Ok c; Error e} -> Error e
+    
+    ///<summary>A utility function which takes a query result and returns a result of <c>Ok seq&lt;'a&gt;</c> or <c>Error e</c>, where <c>'a</c> would be the static type parameter <c>^T</c> fed to a previously called query function (e.g. selectAll, selectWhere, etc)</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toResultSeq (results : seq<Result<'a,'b>>) = 
+        Seq.fold 
+            ( fun accumulator item -> 
+                match accumulator, item with 
+                | Ok state, Ok i -> Ok ( seq { yield! state; yield i } )
+                | Error e, _  
+                | _, Error e -> Error e 
+            ) 
+            ( Ok Seq.empty )
+            results
+
+    
+    ///<summary>A utility function which takes a query result and returns a sequence of the unwrapped Ok results.</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeq (results : seq<Result<'a,'b>>) = 
+        results
+        |> Seq.takeWhile ( Result.isOk ) 
+        |> Seq.map ( Result.defaultValue Unchecked.defaultof<'a> ) 
+
+    
+    ///<summary>A utility function which takes a query result and returns a tuple whose first element is the unwrapped Ok results and second element is the unwrapped Error results</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeqs (results : seq<Result<'a,'b>>) : (seq<'a> * seq<'b>) = 
+        Seq.fold 
+            ( fun (okAcc, errAcc) item -> 
+                match item with 
+                | Ok i -> ( seq { yield! okAcc; yield i } , errAcc)
+                | Error e -> ( okAcc , seq { yield! errAcc; yield e}) 
+            ) 
+            ( Seq.empty, Seq.empty )
+            results
+    let bindError f state = 
+        match state with 
+        | Error e -> f e
+        | _ -> state
+
 module Utilities = 
     open Form.Attributes
     open System.Collections.Generic
@@ -15,14 +60,42 @@ module Utilities =
     open System.Reflection
     open System.Data.Common
     open Logging
-    open System.Data.Odbc
-    
+    open System.Data.Odbc    
     open System.Text.RegularExpressions
-
+    
     type Behavior = 
         | Update
         | Insert 
         | Delete
+
+    type IRelation =
+        interface end
+
+    type Relation< ^P, ^C > (keyId : int, state : OrmState) =
+        let mutable value : Result<^C, exn> seq option = None
+        member _.parent = typeof< ^P >
+        member _.child = typeof< ^C >
+
+        member _.keyId = keyId 
+        member _.state = state
+        member _.context = 
+            match state with 
+            | MSSQL ( _ , ctx) 
+            | PSQL ( _ , ctx) 
+            | MySQL ( _ , ctx) 
+            | ODBC ( _, ctx) 
+            | SQLite ( _, ctx) -> ctx :?> DbContext |> EnumToValue
+
+        interface IRelation
+        member _.SetValue v = value <- v
+        ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
+        member _.State : Result<^C, exn > seq option = value
+        member _.Value = value
+        static member op_Equality ( L : Relation< ^P, ^C >, R : Relation< ^P, ^C > ) =
+            printfn "Using custom-defined equality"
+            L.Value = R.Value
+            
+
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
@@ -39,6 +112,7 @@ module Utilities =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _options = Dictionary<Type, Type option>()
+    let mutable _relations = Dictionary<Type, ConstructorInfo>()
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
@@ -63,22 +137,30 @@ module Utilities =
         | ODBC _ -> $"\"{str}\""
 
     let pattern = fun t -> Regex.Replace(t, @"'", @"''" )
-    //         function 
-    //         | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
-    //         | t -> t
+        // function 
+        // | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
+        // | t when t :?> seq -> t
     // [| ("customerType = %s", "retail"); ( "and (hasSaleWithinPastYear = %s", "true" ); ( "or boughtTiresAYearAgo = %s)", "true" ) |]
 
     // "customerType = :1 and (hasSaleWithinPastYear = :2 or boughtTiresAYearAgo = :2)" [| "retail"; "true" |]
-    let escape ( where : string * string[] )= 
+    let inline escape( where : string * obj seq )= 
         let format, values = where  
         let mutable i = 0
         values  
-        |> Array.fold 
+        |> Seq.fold 
             (fun accumulator item -> 
                 i <- i+1
-                let ret = Regex.Replace(accumulator, $":{i}", pattern item)
-                printfn "This is the regex replace result: %A" ret 
-                ret
+
+                let sanitizedInput = 
+                    match item with 
+                    | :? seq<string> as t -> 
+                        System.String.Join( ", ", Seq.map ( fun innerItem -> $"'{pattern innerItem}'" ) t )
+                    | :? string as t -> pattern <| t.ToString()
+                    | :? System.Collections.IEnumerable as t -> //seq of non string type (for numeric sequences, and any others that will behave in an interpolated string. May need to adjust to get desirable behavior generically)
+                        System.String.Join( ", ", Seq.map (fun innerItem -> $"{innerItem}") [for i in t do yield i] ) 
+                    | _ -> pattern <| item.ToString()
+                
+                Regex.Replace(accumulator, $":{i}", sanitizedInput)
             )
             format 
     let inline context< ^T > ( state : OrmState ) = 
@@ -99,7 +181,7 @@ module Utilities =
     let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
         Array.fold ( fun s ( x : OnAttribute ) ->  
                 if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (fst x.Value, x.key.Name)
+                then (fst x.Value, x.fieldName)
                 else s
             ) ("", "") attrs 
     
@@ -174,13 +256,16 @@ module Utilities =
 
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
-        |> Array.map ( fun x -> $"{x.QuotedSource}.{x.QuotedSqlName}" )
+        |> Array.map ( fun x -> 
+            if Seq.contains typeof<IRelation> ( x.Type.GetInterfaces() )
+            then $"null as {x.QuotedSqlName}" 
+            else $"{x.QuotedSource}.{x.QuotedSqlName}" 
+        )
        
     let inline fields< ^T >  ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> x.FSharpName )
 
-    
     let inline toOption ( type_: Type ) ( value: obj ) : obj =
         let constructor = 
             if _toOptions.ContainsKey( type_ )
@@ -207,7 +292,34 @@ module Utilities =
                 else None
             _options[type_] <- tmp
             tmp
+
+    ///<summary>Gets the constructor for the child type in a Parent-Child relationship, computes it if it hasn't been memoized yet.</summary>
+    ///<param name="parent"></param>
+    ///<param name="child"></param>
+    ///<returns>The record constructor for the given child type in the context of the Parent-Child relation.</returns>
+    // let inline relationType ( parent : Type ) ( child : Type ) : obj[] -> obj =
+    //     let mutable childDictionary = Dictionary<Type, obj[]->obj>()
+    //     //check to see if the parent exists
+    //     //if it does assign the reference to childDictionary
+    //     if not <| _relations.TryGetValue( parent, &childDictionary )
+    //     then 
+    //         //if it doesn't, assign a new dictionary with the current 
+    //         //child and its constructor as the first key-value pair
+    //         let tmp = FSharpValue.PreComputeRecordConstructor(child)
+    //         childDictionary[child] <- tmp
+    //         _relations[parent] <- childDictionary
         
+    //     let mutable constructor = fun _ -> Object()
+    //     //check to see if the child exists in the parent entry of the relation dict
+    //     //if it does assign the reference to constructor and return the constructor
+    //     if childDictionary.TryGetValue( child, &constructor )
+    //     then constructor
+    //     else 
+    //         //if it doesn't, add the child (its record constructor)
+    //         let tmp = FSharpValue.PreComputeRecordConstructor(child)
+    //         childDictionary[child] <- tmp
+    //         tmp
+
     let inline makeParameter ( state : OrmState ) : DbParameter =
         match state with
         | MSSQL     _ -> SqlParameter( )
@@ -259,18 +371,13 @@ module Utilities =
         | :? Option<Decimal>    as t -> tmp.Value <- t |> Option.get
         | :? Option<DateTime>   as t -> tmp.Value <- t |> Option.get
         | _ -> ()
-
-    let inline exceptionHandler f =
-        try 
-            Ok <| f( )
-        with 
-        | exn -> Error exn
     
     let inline getParamChar state = 
         match state with
         | ODBC _ -> "?"
         | _ -> "@"
 
+    
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
@@ -282,20 +389,56 @@ module Utilities =
             else 
                 tmp <- FSharpValue.PreComputeRecordConstructor(reifiedType)
                 _constructors[reifiedType] <- tmp
-            tmp        
+            tmp       
+             
         let mutable options = 
             [| for fld in ( columnMapping< ^T > state  ) do  
                 match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
                 | Some _type -> toOption _type 
                 | None -> id
             |]
+            
+        let unpackContext =
+            function 
+            | MSSQL ( _ , ctx) | PSQL ( _ , ctx) | MySQL ( _ , ctx) | ODBC ( _, ctx) | SQLite ( _, ctx) -> ctx
+
+        let mutable relations = 
+            let context = unpackContext state
+            [| for fld in ( columnMapping< ^T > state  ) do  
+                if Seq.contains typeof<IRelation> ( fld.Type.GetInterfaces() )
+                then
+                    let typeParameters = fld.Type.GenericTypeArguments
+                    let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
+                    let mutable constructor : ConstructorInfo = null
+                    if _relations.TryGetValue(reifiedType, &constructor) 
+                    then ()
+                    else
+                        constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
+                        _relations[reifiedType] <- constructor
+                    let relation = constructor.Invoke( [| box 1; box state |])
+                    fun _ -> relation 
+                else id
+            |]
+
+        //We're going to need to add logic here to instantiate relation types.
+
         seq { 
-            while reader.Read( ) do
-                constructor 
-                    [| for i in 0..reader.FieldCount-1 do 
-                        options[i] <| reader.GetValue( i ) 
-                    |] 
-                :?> ^T // dang ol' class factory man
+            try 
+                while reader.Read( ) do
+                    constructor 
+                        [| for i in 0..reader.FieldCount-1 do 
+                            reader.GetValue( i )
+                            |> options[i] 
+                            |> relations[i]
+                        |] 
+                    // |> function 
+                    // | :? IRelation as r -> r.Evaluate
+                    // | _ -> 
+                    :?> ^T
+                    |> Ok
+                    
+            with exn -> 
+                Error exn                
         }  
 
     let inline insertBase< ^T > ( state : OrmState ) insertKeys =
@@ -321,7 +464,7 @@ module Utilities =
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
     
     let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
-        log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
+        // log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
         match state with 
         | MSSQL _ ->    new SqlCommand ( query, connection :?> SqlConnection )
         | MySQL _ ->    new MySqlCommand ( query, connection :?> MySqlConnection )
@@ -329,13 +472,16 @@ module Utilities =
         | SQLite _ ->   new SQLiteCommand ( query, connection :?> SQLiteConnection )
         | ODBC _ ->     new OdbcCommand ( query, connection :?> OdbcConnection )
 
-    let inline withTransaction state transactionFunction noneFunction transaction =
-        try 
-            match transaction with 
-            | Some ( transaction : DbTransaction ) -> transactionFunction transaction |> Ok 
-            | None -> connect state |> Result.map ( noneFunction )
-        with 
-        | exn -> Error exn
+    let inline withTransaction state transactionFunction (noneFunction : DbConnection -> Result<'a, exn> seq) transaction : Result<'a, exn> seq =
+        match transaction with 
+        | Some ( transaction : DbTransaction ) -> transactionFunction transaction
+        | None -> 
+            seq {
+                match connect state with 
+                | Ok conn -> 
+                    yield! noneFunction conn 
+                | Error exn -> yield Error exn
+            }
 
     let rec genericTypeName full ( _type : Type ) = 
         if not _type.IsGenericType 
@@ -395,9 +541,9 @@ module Utilities =
         
         cmd
 
-    let inline parameterizeSeqAndExecuteCommand< ^T > state query (transaction : DbTransaction) includeKeys behavior ( instances : ^T seq ) =
-        let cmd = makeCommand state query transaction.Connection
-        cmd.Transaction <- transaction 
+    let inline parameterizeSeqAndExecuteCommand< ^T > state query (cmd : DbCommand) includeKeys behavior ( instances : ^T seq ) =
+         
+        
         let mapp = 
             let tmp = 
                 mapping< ^T > state
@@ -440,9 +586,23 @@ module Utilities =
                     else
                         cmdParams[jindex].Value <- thing // Some 1
             )
-            cmd.ExecuteNonQuery()
+            
+            log ( 
+                    sprintf "Param count: %A" cmd.Parameters.Count :: 
+                    [ for i in [0..cmd.Parameters.Count-1] do 
+                        yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value 
+                    ]
+                    |> String.concat "\n"
+                )  
+            try cmd.ExecuteNonQuery() |> Ok
+            with exn -> Error exn
         )
-        |> Seq.fold (+) 0
+        |> Seq.fold ( fun accumulator item -> 
+            match accumulator, item with 
+            | Ok a, Ok i -> Ok ( a + i )
+            | Error e, _ 
+            | _, Error e -> Error e
+        ) ( Ok 0 )
 
     let inline joins< ^T > (state : OrmState) = 
         let qoute = sqlQuote state
@@ -467,7 +627,7 @@ module Utilities =
 
     let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
         let query = queryBase< ^T > state |> f
-        
+
         transaction
         |> withTransaction  
             state 
@@ -475,20 +635,21 @@ module Utilities =
                 seq {
                     use cmd = makeCommand state query ( transaction.Connection ) 
                     cmd.Transaction <- transaction 
-                    use reader = cmd.ExecuteReader( ) 
-                    yield! consumeReader< ^T > state reader  
-                }
+                    try 
+                        use reader = cmd.ExecuteReader( ) 
+                        yield! consumeReader< ^T > state reader  
+                    with exn -> Error exn
+                } 
             )
             ( fun ( connection : DbConnection ) -> 
                 seq {
-                    use cmd = makeCommand state query connection 
-                    use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection ) 
-                    yield! consumeReader< ^T > state reader  
-                    connection.Close()
+                    use cmd = makeCommand state query connection  
+                    try 
+                        use reader = cmd.ExecuteReader( )
+                        yield! consumeReader< ^T > state reader
+                    with exn -> yield Error exn
                 }
-                
             )
-
 
     let inline updateBase< ^T > ( state : OrmState )  = 
         let paramChar = getParamChar state
@@ -527,14 +688,28 @@ module Utilities =
             ( fun transaction ->  
                 use command = parameterizeCommand< ^T > state query transaction false Update instance 
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( )
+                seq { 
+                    try 
+                        command.ExecuteNonQuery ( ) |> Ok 
+                    with exn -> 
+                        log ( sprintf "%A" exn )
+                        Error exn
+                } 
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction()
-                use command = parameterizeCommand< ^T > state query transaction false Update instance 
-                command.ExecuteNonQuery ( )
-                |> fun x -> transaction.Commit();connection.Close(); x 
+                let transaction = connection.BeginTransaction()
+                let command = parameterizeCommand< ^T > state query transaction false Update instance 
+                try  
+                    seq {
+                        yield! seq {command.ExecuteNonQuery( ) |> Ok}
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
+        |> Seq.head
 
     let inline updateManyHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) = 
         let query = ( updateBase< ^T > state ) + (whereClause) 
@@ -542,14 +717,23 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Update instances  
+                let cmd = makeCommand state query transaction.Connection
+                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Update instances }
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction() 
-                parameterizeSeqAndExecuteCommand< ^T > state query transaction false Update instances 
-                |> fun x -> transaction.Commit();connection.Close(); x 
+                let transaction = connection.BeginTransaction()
+                let cmd = makeCommand state query connection
+                try  
+                    seq {
+                        yield! seq {parameterizeSeqAndExecuteCommand< ^T > state query cmd false Update instances }
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
-        
+        |> Seq.head
 
     let inline deleteBase< ^T > state =
         table< ^T > state 
@@ -560,17 +744,31 @@ module Utilities =
         transaction
         |> withTransaction 
             state 
-            ( fun transaction -> 
+            ( fun transaction ->  
                 use command = parameterizeCommand< ^T > state query transaction false Delete instance 
                 command.Transaction <- transaction
-                command.ExecuteNonQuery ( )        
+                seq { 
+                    try command.ExecuteNonQuery ( ) |> Ok 
+                    with exn -> 
+                        log ( sprintf "%A" exn )
+                        Error exn
+                } 
             )
             ( fun connection -> 
-                use transaction = connection.BeginTransaction()
-                use cmd = parameterizeCommand< ^T > state query transaction false Delete instance 
-                cmd.ExecuteNonQuery ( )
-                |> fun x -> transaction.Commit();connection.Close(); x                
+                let transaction = connection.BeginTransaction()
+                let command = parameterizeCommand< ^T > state query transaction false Delete instance 
+                try  
+                    seq {
+                        yield! seq {command.ExecuteNonQuery( ) |> Ok}
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
+        |> Seq.head
+
     
     let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
         let query = deleteBase< ^T > state + (whereClause) 
@@ -578,10 +776,20 @@ module Utilities =
         |> withTransaction 
             state 
             ( fun transaction -> 
-                parameterizeSeqAndExecuteCommand< ^T > state query ( transaction ) false Delete instances  
+                let cmd = makeCommand state query transaction.Connection
+                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Delete instances }
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction() 
-                parameterizeSeqAndExecuteCommand< ^T > state query transaction false Delete instances 
-                |> fun x -> transaction.Commit();connection.Close(); x 
+                let transaction = connection.BeginTransaction()
+                let cmd = makeCommand state query connection
+                try 
+                    seq {
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd false Delete instances
+                    }
+                    |> Seq.map (fun x -> x)
+                    |> fun x -> transaction.Commit();  x
+                with exn -> 
+                    transaction.Rollback()
+                    seq { Error exn }
             )
+        |> Seq.head

@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib\FORM.fsproj" />
-    <ProjectReference Include="..\Attributes\Attributes.fsproj" />
+    <!--<ProjectReference Include="..\Attributes\Attributes.fsproj" />-->
   </ItemGroup>
 
 </Project>
