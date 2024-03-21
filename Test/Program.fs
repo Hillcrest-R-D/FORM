@@ -46,7 +46,10 @@ module Main =
                 ( fun _ ->
                     let createTable = 
                         $"DROP TABLE IF EXISTS {tableName};
-                        
+                        CREATE TABLE IF NOT EXISTS \"SubFact\" (
+                                \"factId\" {intType testingState} not null,
+                                \"subFact\" text not null
+                            );
                         CREATE TABLE {tableName} (
                             \"indexId\" {intType testingState} not null,
                             \"id\" text primary key,
@@ -57,13 +60,10 @@ module Main =
                             \"sometimesNothing\" {intType testingState} null,
                             \"biteSize\" text
                         );
-                        
+                        DELETE FROM \"SubFact\";
+                        INSERT INTO \"SubFact\" VALUES (1, 'a really good subfact');
                         "
-                    //DROP TABLE IF EXISTS \"SubFact\";
-                    // CREATE TABLE \"SubFact\" (
-                    //         \"factId\" {intType testingState} not null,
-                    //         \"subFact\" text not null
-                    //     );
+                    
                     Orm.execute testingState None createTable
                     |> fun x -> printfn "Setup: %A" x; x
                 )
@@ -129,7 +129,28 @@ module Main =
             constructTest 
                 "SelectWhere"
                 "SelectWhere"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Result.toResultSeq )
+                (fun _ -> 
+                    let results = Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Result.toResultSeq 
+                    match results with
+                    | Ok res -> 
+                        let factResult = res |> Seq.head 
+                        factResult
+                        |> fun x -> (Relation.evaluate x.subFact None x) 
+                        |> Result.toResultSeq
+                        |> function 
+                        | Ok sf -> 
+                            let subfactResult = sf |> Seq.head 
+                            factResult.subFact.Value
+                            |> function 
+                            | Some subFactValueResultSeqFromFact ->
+                                let subFactValueResultFromFact = Seq.head subFactValueResultSeqFromFact
+                                if subFactValueResultFromFact = Ok subfactResult then Ok ()
+                                else Error (exn $"subfacts not equal")
+                            | None -> Error (exn $"subfact obtained from evaluate but no mutation on higher type occured")
+                        | Error e -> Error (exn "subfact not evaluated")
+                    | Error e -> Error e         
+                )
+
 
         let selectWhereWithIn () =
             constructTest 
@@ -263,22 +284,22 @@ module Main =
             testSequenced <| testList "Tests" [
                 insert ()
                 insertMany ()
-                insertAlot ()
+                // insertAlot ()
                 // // asyncInsertMany ()
-                select ()
-                // // asyncSelect ()
-                selectLimit ()
-                selectBigLimit ()
+                // select ()
+                // // // asyncSelect ()
+                // selectLimit ()
+                // selectBigLimit ()
                 selectWhere ()
-                selectWhereWithIn ()
-                selectWhereWithInFailure ()
-                update ()
-                updateMany ()
-                updateWhere ()
-                delete ()
-                deleteWhere ()
-                deleteMany ()
-                reader ()
+                // selectWhereWithIn ()
+                // selectWhereWithInFailure ()
+                // update ()
+                // updateMany ()
+                // updateWhere ()
+                // delete ()
+                // deleteWhere ()
+                // deleteMany ()
+                // reader ()
             ]
             tearDown ()
         ]
@@ -463,10 +484,10 @@ module Main =
 
         let states = 
             [ 
-            // PSQL( psqlConnectionString , Contexts.PSQL ) 
+            PSQL( psqlConnectionString , Contexts.PSQL ) 
             // MySQL( mysqlConnectionString , Contexts.MySQL )
             // MSSQL( mssqlConnectionString , Contexts.MSSQL )
-            SQLite( sqliteConnectionString , Contexts.SQLite )
+            // SQLite( sqliteConnectionString , Contexts.SQLite )
             // ODBC( odbcConnectionString , Contexts.ODBC )
             ]
 

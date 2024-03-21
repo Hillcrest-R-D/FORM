@@ -256,7 +256,8 @@ module Utilities =
                         IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
                         IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
                         IsRelation = 
-                            x.GetType().GetInterfaces()
+                            // x.PropertyType.GetInterface(nameof(IRelation)) This might be faster?
+                            x.PropertyType.GetInterfaces()
                             |> Seq.contains typeof<IRelation>
                         IsLazilyEvaluated =
                             x.GetCustomAttributes( typeof< LazyEvaluationAttribute >, false ).Length > 0
@@ -476,9 +477,9 @@ module Utilities =
                 tmp <- FSharpValue.PreComputeRecordConstructor(reifiedType)
                 _constructors[reifiedType] <- tmp
             tmp       
-             
+        let columns = columnMapping<^T> state 
         let mutable options = 
-            [| for fld in ( columnMapping< ^T > state  ) do  
+            [| for fld in columns do  
                 match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
                 | Some _type -> toOption _type 
                 | None -> id
@@ -488,7 +489,7 @@ module Utilities =
         
         let mutable relations = 
             let context = unpackContext state
-            [| for fld in ( columnMapping< ^T > state  ) do  
+            [| for fld in columns do  
                 if fld.IsRelation
                 then
                     let typeParameters = fld.Type.GenericTypeArguments
