@@ -27,10 +27,14 @@ module Relation =
                     snd attr.Value = ( relation.context) && attr.key = relation.keyId //if the key lines up AND the context.
                 else false
             )
-            |> Seq.map ( fun prop -> {| property = prop;  attribute = prop.GetCustomAttributes(typeof< OnAttribute >) 
-                        |> Seq.map ( fun x -> x :?> OnAttribute) 
-                        |> Seq.filter ( fun x -> snd x.Value = (relation.context) ) 
-                        |> Seq.head |} )
+            |> Seq.map ( fun prop -> {| 
+                property = prop
+                attribute = 
+                    prop.GetCustomAttributes(typeof< OnAttribute >) 
+                    |> Seq.map ( fun x -> x :?> OnAttribute) 
+                    |> Seq.filter ( fun x -> snd x.Value = (relation.context) ) 
+                    |> Seq.head 
+            |} )
             |> Seq.sortBy ( fun column -> column.attribute.part )
             |> Seq.map ( fun column -> {| child = relation.child.GetProperty(column.attribute.fieldName); parent = column |} )
         

@@ -33,6 +33,7 @@ type InsertBenchmark() =
     
     [<IterationSetup>]
     member _.Setup() = 
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
         Form.Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
@@ -113,7 +114,7 @@ type UpdateBenchmark() =
     
     [<GlobalSetup>]
     member _.Setup () = 
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
+        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
@@ -237,9 +238,9 @@ module Main =
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
-        // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
         // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
-        BenchmarkRunner.Run<SelectBenchmark>() |> ignore
+        // BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0
         

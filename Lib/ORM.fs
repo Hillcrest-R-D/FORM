@@ -25,10 +25,10 @@ module Orm =
                 Some ( connection.BeginTransaction() )
             with 
             | exn -> 
-                log ( sprintf "Exception when beginning transaction: %A" exn )
+                // log ( sprintf "Exception when beginning transaction: %A" exn )
                 None
         | Error e -> 
-            log ( sprintf "Error when beginning transaction: %A" e )
+            // log ( sprintf "Error when beginning transaction: %A" e )
             None
 
     let commitTransaction = 
@@ -147,8 +147,42 @@ module Orm =
     ///<example>
     ///     <code>selectWhere&lt;^T&gt; someState None where</code>
     ///</example>
-    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) (where) = 
+    let inline selectWhere< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) (where) =     
+        let eagerRelations = 
+            columnMapping< ^T > state
+            |> Seq.filter ( fun fld -> fld.IsRelation && not fld.IsLazilyEvaluated )
+            |> Seq.toArray
+        
+        // let eagerHandler =
+        //     if typeHasEagerlyEvaluatedRelations then
+        //     Seq.map ( 
+        //         function 
+        //         | Ok s -> 
+        //             let ids = 
+        //             Some s
+        //         | Error e -> None
+        //     )
+        //     else 
+        //         id
+        // let results = 
         selectHelper< ^T > state transaction ( fun x -> $"select {x} where {escape where}" ) 
+
+        // if eagerRelations.Length = 0
+        // then results
+        // else   
+        //     eagerRelations 
+        //     |> Array.map (  fun relation ->  
+        //         let valueGetter = 
+        //             keyArray< ^T > state _someKeyDict[(^T, relation.GetType())] relation.PropertyInfo.GetCustomAttributes( typeof<ArgumentsAttribute> )
+        //         results
+        //         |> Seq.filter ( 
+        //         function 
+        //         | Ok _ -> true 
+        //         | _ -> false
+        //         )
+        //         |> Seq.map (  )
+        //     )
+            
         
     ///<summary>Select all records from the table <typeparamref name="^T"/> @ <paramref name="state"/></summary>
     ///<param name="state"></param>
@@ -177,19 +211,19 @@ module Orm =
     ///</example>
     let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instance : ^T ) =
         let query = insertBase< ^T > state includeKeys 
-        log $"Insert Query Generated: {query}"
+        // log $"Insert Query Generated: {query}"
         transaction 
         |> withTransaction 
             state 
             ( fun transaction ->
                 use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query conn state
-                log ( 
-                    sprintf "Param count: %A" command.Parameters.Count :: 
-                    [ for i in [0..command.Parameters.Count-1] do 
-                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value 
-                    ]
-                    |> String.concat "\n"
-                )  
+                // log ( 
+                //     sprintf "Param count: %A" command.Parameters.Count :: 
+                //     [ for i in [0..command.Parameters.Count-1] do 
+                //         yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value 
+                //     ]
+                //     |> String.concat "\n"
+                // )  
                 command.Transaction <- transaction
                 seq {
                     try command.ExecuteNonQuery ( ) |> Ok 
@@ -201,12 +235,12 @@ module Orm =
                 let command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
                 try 
                     seq {
-                        log (
-                            sprintf "Param count: %A" command.Parameters.Count ::
-                            [ for i in [0..command.Parameters.Count-1] do 
-                                yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                            ] |> String.concat "\n"
-                        )   
+                        // log (
+                        //     sprintf "Param count: %A" command.Parameters.Count ::
+                        //     [ for i in [0..command.Parameters.Count-1] do 
+                        //         yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                        //     ] |> String.concat "\n"
+                        // )   
                         command.ExecuteNonQuery ( ) |> Ok 
                     }
                     |> fun x -> 

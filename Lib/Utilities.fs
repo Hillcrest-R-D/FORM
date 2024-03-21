@@ -126,11 +126,14 @@ module Utilities =
     let mutable _keyArray = Dictionary<Type, obj -> obj[]>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
+    // let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _relations = Dictionary<Type, ConstructorInfo>()
-
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let mutable _relationArguments = Dictionary<(Type * Type), int>()
+    
     let unpackContext =
             function 
             | MSSQL ( _ , ctx) | PSQL ( _ , ctx) | MySQL ( _ , ctx) | ODBC ( _, ctx) | SQLite ( _, ctx) -> ctx
@@ -403,6 +406,9 @@ module Utilities =
         | ODBC _ -> "?"
         | _ -> "@"
 
+    // let inline relationshipArguments< ^T, ^S > state = 
+
+
     let inline keyArray<^T> state keyId = 
         let ctx = box (unpackContext state) :?> DbContext |> EnumToValue
         let _type = typeof<^T>
@@ -488,7 +494,7 @@ module Utilities =
                     let typeParameters = fld.Type.GenericTypeArguments
                     let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
                     let mutable constructor : ConstructorInfo = null
-                    if _relations.TryGetValue(reifiedType, &constructor) 
+                    if _relations.TryGetValue(reifiedType, &constructor)
                     then ()
                     else
                         constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
@@ -516,7 +522,6 @@ module Utilities =
             with exn -> 
                 Error exn                
         }  
-        |> eagerHandler
 
     let inline insertBase< ^T > ( state : OrmState ) insertKeys =
         let paramChar = getParamChar state
@@ -591,7 +596,7 @@ module Utilities =
         | Update -> allColumns |> Array.filter (fun col ->  not col.IsKey || includeKeys ) |> fun x -> Array.append x ( Array.filter (fun col -> col.IsKey ) allColumns )
         | Delete -> allColumns |> Array.filter (fun col ->  col.IsKey )
         |> Array.iteri ( fun i mappedInstance -> 
-            log (sprintf "binding value %s(%A) to position %i - " mappedInstance.FSharpName (mappedInstance.PropertyInfo.GetValue( instance )) i )
+            // log (sprintf "binding value %s(%A) to position %i - " mappedInstance.FSharpName (mappedInstance.PropertyInfo.GetValue( instance )) i )
             let param =
                 let mutable tmp = cmd.CreateParameter( )    
                 let mappedValue = mappedInstance.PropertyInfo.GetValue( instance )
@@ -664,13 +669,13 @@ module Utilities =
                         cmdParams[jindex].Value <- thing // Some 1
             )
             
-            log ( 
-                    sprintf "Param count: %A" cmd.Parameters.Count :: 
-                    [ for i in [0..cmd.Parameters.Count-1] do 
-                        yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value 
-                    ]
-                    |> String.concat "\n"
-                )  
+            // log ( 
+            //         sprintf "Param count: %A" cmd.Parameters.Count :: 
+            //         [ for i in [0..cmd.Parameters.Count-1] do 
+            //             yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value 
+            //         ]
+            //         |> String.concat "\n"
+            //     )  
             try cmd.ExecuteNonQuery() |> Ok
             with exn -> Error exn
         )
@@ -734,7 +739,7 @@ module Utilities =
             mapping< ^T > state
             |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
             |> Array.filter (fun col -> not col.IsKey) //Can't update keys
-        log ( sprintf "columns to update: %A" cols )
+        // log ( sprintf "columns to update: %A" cols )
         let queryParams = 
             cols 
             |> Array.map (fun col -> 
@@ -769,7 +774,7 @@ module Utilities =
                     try 
                         command.ExecuteNonQuery ( ) |> Ok 
                     with exn -> 
-                        log ( sprintf "%A" exn )
+                        // log ( sprintf "%A" exn )
                         Error exn
                 } 
             )
@@ -827,7 +832,7 @@ module Utilities =
                 seq { 
                     try command.ExecuteNonQuery ( ) |> Ok 
                     with exn -> 
-                        log ( sprintf "%A" exn )
+                        // log ( sprintf "%A" exn )
                         Error exn
                 } 
             )

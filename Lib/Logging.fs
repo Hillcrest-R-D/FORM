@@ -11,7 +11,7 @@ module Logging =
         LoggerFactory.Create( fun builder -> builder.AddConsole() |> ignore ).CreateLogger<Form>()
     
     let inline log msg = 
-        #if DEBUG 
-            printfn "%s" msg
-        #endif  
-            ()
+#if DEBUG 
+        printfn "%s" msg
+#endif  
+        ()
