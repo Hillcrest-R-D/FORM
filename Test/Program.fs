@@ -7,27 +7,10 @@ module Main =
     open Form.Attributes
     open Expecto
     open System.IO
-
-    let outputPath = "./console.log"
-    let constructTest name message f =
-        test name {
-            Expect.wantOk ( f () |> Result.map ( fun _ -> () )) message 
-        }
+    open HCRD.FORM.Tests.Utilities
+    open HCRD.FORM.Tests.BaseOrmTests
+    open HCRD.FORM.Tests.RelationTests
     
-    let constructFailureTest name message f =
-        test name {
-            Expect.wantError ( f () |> Result.mapError ( fun _ -> () )) message 
-        }
-
-    let tableName = "\"Fact\""
-    let nameCol = function 
-        | SQLite _ -> "sqliteName"
-        | PSQL _ -> "psqlName"
-        | ODBC _ -> "psqlName"
-        | _ -> "idk"
-    let intType = function 
-        | SQLite _ -> "integer"
-        | _ -> "bigint"
 
     let orm testingState = 
         let testGuid1 = System.Guid.NewGuid().ToString()
@@ -65,192 +48,9 @@ module Main =
                         "
                     
                     Orm.execute testingState None createTable
-                    |> fun x -> printfn "Setup: %A" x; x
-                )
-        
-        let connect () = 
-            constructTest "Connect" "Successfully connected." ( fun _ -> Orm.connect testingState )
-
-        let insert () =
-            constructTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
-                
-        let insertMany () =
-            constructTest 
-                "InsertMany" 
-                "Inserted many facts."
-                ( fun _ ->
-                    let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-                    Orm.insertMany< Fact > testingState None true ( str8Facts )
-                )
-
-        let insertAlot () =
-            constructTest 
-                "InsertManyMany" 
-                "Inserted many facts."
-                ( fun _ ->
-                    let str8Facts = [ for _ in 1..10000 do Fact.init() ]
-                    Orm.insertMany< Fact > testingState None true ( str8Facts )
-                )
-                  
-        // let asyncInsertMany () =
-        //     constructTest
-        //         "InsertMany-Async"
-        //         "Inserted many facts asynchronously."
-        //         (fun _ -> 
-        //             let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-        //             Orm.insertMany< Fact > testingState None true ( str8Facts )
-        //         )
-
-        let select () =
-            constructTest 
-                "Select" 
-                "Select"
-                ( fun _ -> Orm.selectAll< Fact > testingState None |> Result.toResultSeq ) 
-                
-        // let asyncSelect () =
-        //     constructTest
-        //         "Select-Async"
-        //         "Select-Async"
-        //         (fun _ -> Orm.selectAll< Fact > testingState None)  
-        
-        let selectLimit () =
-            constructTest 
-                "SelectLimit"
-                "SelectLimit"
-                (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Result.toResultSeq)
-        
-        let selectBigLimit () =
-            constructTest 
-                "SelectBigLimit"
-                "SelectBigLimit"
-                (fun _ -> Orm.selectLimit< Fact > testingState None 10000 |> Result.toResultSeq)
-
-        let selectWhere () =
-            constructTest 
-                "SelectWhere"
-                "SelectWhere"
-                (fun _ -> 
-                    let results = Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Result.toResultSeq 
-                    match results with
-                    | Ok res -> 
-                        let factResult = res |> Seq.head 
-                        factResult
-                        |> fun x -> (Relation.evaluate x.subFact None x) 
-                        |> Result.toResultSeq
-                        |> function 
-                        | Ok sf -> 
-                            let subfactResult = sf |> Seq.head 
-                            factResult.subFact.Value
-                            |> function 
-                            | Some subFactValueResultSeqFromFact ->
-                                let subFactValueResultFromFact = Seq.head subFactValueResultSeqFromFact
-                                if subFactValueResultFromFact = Ok subfactResult then Ok ()
-                                else Error (exn $"subfacts not equal")
-                            | None -> Error (exn $"subfact obtained from evaluate but no mutation on higher type occured")
-                        | Error e -> Error (exn "subfact not evaluated")
-                    | Error e -> Error e         
-                )
-
-
-        let selectWhereWithIn () =
-            constructTest 
-                "SelectWhereWithIn"
-                "SelectWhereWithIn"
-                (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) |> Result.toResultSeq )
-        
-        let selectWhereWithInFailure () =
-            test "SelectWhereWithInFailure" {
-                Expect.wantError (
-                    Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) 
-                    |> Result.toResultSeq ) "SelectWhereWithInFailure" 
-                |> ignore
-            }
-        let update () =
-            constructTest 
-                "Update"
-                "Update"
-                (fun _ ->
-                    let initial = { Fact.init() with id = testGuid1 }
-                    let changed = { initial with name = "Evan Towlett"}
-                    Orm.update< Fact > testingState None changed
-                )
-
-        let updateMany () =
-            constructTest 
-                "UpdateMany"
-                "UpdateMany"
-                ( fun _ -> 
-                    let initial = Fact.init() 
-                    // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-                    // Orm.insertMany< Fact > testingState None true ( str8Facts )
-                    // |> printfn "insert %A"
-                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3 ; subFact= Form.Utilities.Relation<Fact, SubFact>(1,testingState)}
-                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2; subFact = Form.Utilities.Relation<Fact, SubFact>(1,testingState)}
-                    printfn "ids: %A" [testGuid2; testGuid3]
-                    Orm.updateMany< Fact > testingState None [changed;changed2]  |> printf "%A"
-
-                    let evan = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid3 |] ) |> Result.toResultSeq
-                    let mac = Orm.selectWhere<Fact> testingState None ( "id = ':1'", [| testGuid2 |] ) |> Result.toResultSeq
-                    printfn "evan: %A" evan 
-                    printfn "mac: %A" mac
-                    match evan, mac with 
-                    | Ok e, Ok m -> 
-                        let headE = Seq.head e 
-                        let headM = Seq.head m 
-                        printfn "\n%A = %A\n\n\n%A = %A" headE changed headM changed2
-                        if headE = changed && headM = changed2 
-                        then Ok ()
-                        else Result.Error "Update not applied."
-                    | Result.Error ex, _ 
-                    | _, Result.Error ex -> Result.Error ex.Message
-                    
                 )
         
         
-        
-        let updateWhere () =
-            constructTest
-                "UpdateWhere"
-                "UpdateWhere"
-                (fun _ -> 
-                    let initial = Fact.init () 
-                    let changed = { initial with name = "Evan Howlett"}
-                    Orm.updateWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) changed 
-                )
-
-        let delete () =
-            constructTest 
-                "Delete"
-                "Delete"
-                ( fun _ ->
-                    let initial = Fact.init () 
-                    let changed = { initial with name = "Evan Howlett"}
-                    Orm.delete< Fact > testingState None changed
-                )
-        let deleteWhere () = 
-            constructTest
-                "DeleteWhere"
-                "DeleteWhere"
-                (fun _ -> Orm.deleteWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) )
-                
-        let deleteMany () =
-            constructTest
-                "DeleteMany"
-                "DeleteMany"
-                (fun _ ->
-                    let initial = Fact.init() 
-                    let changed = { initial with name = "Evan Mowlett"; id = testGuid3}
-                    let changed2 = { initial with name = "Mac Flibby"; id = testGuid2}
-                    Orm.deleteMany< Fact > testingState None [changed;changed2] 
-                )
-        let reader () =
-            constructTest
-                "Reader"
-                "Reader"
-                (fun _ ->
-                    Orm.consumeReader<Fact> testingState 
-                    |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader |> Result.toResultSeq
-                )
 
         // 
         // 
@@ -278,29 +78,34 @@ module Main =
                     | None -> Ok ()
                 )
 
-        testSequenced <| testList "Base ORM tests" [
-            connect ()
+        testSequenced <| testList "FORM tests" [
+            connect testingState
             setup ()
-            testSequenced <| testList "Tests" [
-                insert ()
-                insertMany ()
-                // insertAlot ()
-                // // asyncInsertMany ()
-                // select ()
-                // // // asyncSelect ()
-                // selectLimit ()
-                // selectBigLimit ()
-                selectWhere ()
-                // selectWhereWithIn ()
-                // selectWhereWithInFailure ()
-                // update ()
-                // updateMany ()
-                // updateWhere ()
-                // delete ()
-                // deleteWhere ()
-                // deleteMany ()
-                // reader ()
+            //base orm tests
+            testSequenced <| testList "Base Orm Tests" [
+                insert testingState
+                insertMany testingState
+                insertAlot testingState
+                // // asyncInsertMany testingState
+                select testingState
+                // // // asyncSelect testingState
+                selectLimit testingState
+                selectBigLimit testingState
+                selectWhere testingState
+                selectWhereWithIn testingState
+                selectWhereWithInFailure testingState
+                update testingState
+                updateMany testingState
+                updateWhere testingState
+                delete testingState
+                deleteWhere testingState
+                deleteMany testingState
+                reader testingState
             ]
+            //relation tests
+            testSequenced <| testList "Relation Tests" [
+                relationEvaluteAndNestedAreEqual testingState
+            ] 
             tearDown ()
         ]
         
