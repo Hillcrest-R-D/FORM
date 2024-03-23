@@ -186,6 +186,7 @@ module BaseOrmTests =
             "Reader"
             "Reader"
             (fun _ ->
+                let query = $"select {Utilities.queryBase<Fact> testingState}"
                 Orm.consumeReader<Fact> testingState 
-                |> fun reader -> Orm.executeWithReader testingState None "select * from \"Fact\"" reader |> Result.toResultSeq
+                |> fun reader -> Orm.executeWithReader testingState None query reader |> Result.toResultSeq
             )

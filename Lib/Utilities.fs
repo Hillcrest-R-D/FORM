@@ -507,10 +507,14 @@ module Utilities =
 
         
         //We're going to need to add logic here to instantiate relation types.
-
+        reader.GetSchemaTable().Columns
+        |> fun x -> [for i in x do yield i]
+        |> List.map (fun i -> i.ColumnName)
+        |> printfn "%A"
         seq { 
             try 
                 while reader.Read( ) do
+                    
                     constructor 
                         [| for i in 0..reader.FieldCount-1 do 
                             reader.GetValue( i )
