@@ -23,20 +23,15 @@ type ContextInfo = ( string * DbContext ) array
 type DbAttribute( ) = 
     inherit Attribute( )
     abstract Value : ( string * int )
-    
-///<Description>An attribute type which specifies a schema name</Description>
-///<Warning>Not Implemented, don't bother using yet...</Warning>
-[<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type SchemaAttribute( alias : string, context : obj ) = 
-    inherit DbAttribute( )
-    override _.Value = ( alias, ( box( context ) :?> DbContext )  |> EnumToValue )
 
 ///<Description>An attribute type which specifies a table name</Description>
 [<AttributeUsage( AttributeTargets.Class, AllowMultiple = true )>]
-type TableAttribute( alias : string , context : obj ) = 
+type TableAttribute( alias : string , context : obj) = 
     inherit DbAttribute( )
     override _.Value = ( alias, ( context :?> DbContext )  |> EnumToValue )
     member _.Context = ( context :?> DbContext )  |> EnumToValue
+    member val Schema = null 
+        with get, set
 
 
 ///<Description>An attribute type which specifies a Column name</Description>
@@ -70,11 +65,6 @@ type SQLTypeAttribute( definition : string, context : obj ) =
 type UniqueAttribute( group : string,context : obj ) = 
     inherit DbAttribute( )
     override _.Value = (group,  ( context :?> DbContext )  |> EnumToValue)
-
-[<AttributeUsage( AttributeTargets.Property, AllowMultiple = false )>]
-type LazyAttribute() = 
-    inherit DbAttribute( )
-    override _.Value = ("lazy",  -1)
     
 ///<Description>An attribute type which specifies a Column name</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
@@ -143,7 +133,7 @@ type SqlMapping = {
     PropertyInfo: PropertyInfo
 }
 
-///<Description>Stores the flavor And context used for a particular connection.
+///<Description>Stores the flavor and context used for a particular connection.
 /// Takes the connection string and context.
 ///</Description>
 type OrmState = 
@@ -152,4 +142,4 @@ type OrmState =
     | PSQL      of ( string * Enum )
     | SQLite    of ( string * Enum )
     | ODBC      of ( string * Enum ) // SQL Driver = SQL Server Native 11.0
-  
+
