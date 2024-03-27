@@ -1,91 +1,63 @@
 namespace Form
 
-module Relation =     
-    open Utilities
-    open System
-    let inline lookupId<^S> state =
-        columnMapping<^S> state
-        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^S > state  ) //! Filter out joins for non-select queries
-        |> Array.filter (fun col -> col.IsKey) 
-        |> Array.map (fun keyCol -> keyCol.QuotedSqlName)
+open System
+open Form.Attributes
+open System.Reflection
+open System.Data.Common
+open Microsoft.FSharp.Core.LanguagePrimitives
+open Form.Orm
+open Form.Utilities
+(*
+    The type argument is that of the type that needs to be looked up.
+    Do we need to be able to reference the type that Relation is declared on?
+*)
+module Relation =
 
-    // type SqlValueDescriptor = 
-    //     {
-    //         _type : Type
-    //         value : obj
-    //     }
-    
-    // let inline sqlWrap (item : SqlValueDescriptor) : string =
-    //     if item._type = typedefof<string> 
-    //     then $"'{item.value}'"
-    //     else $"{item.value}"
-    
-    // type RelationshipCell = 
-    //     | Leaf of SqlValueDescriptor
-    //     | Node of SqlValueDescriptor * RelationshipCell
-        
-    // module RelationshipCell = 
-    //     let rec fold ( f : 'a -> SqlValueDescriptor -> 'a ) ( acc : 'a ) state =  
-    //         match state with 
-    //         | Leaf l -> f acc l
-    //         | Node ( l, n ) -> f ( fold f acc n ) l
-       
-    type Relation<^T, ^S> =
-        {
-            id : ^T //RelationshipCell 
-            // Relation<Fact> {id = Node ( {_type = typeof<int>; value = 0 }, Leaf { _type= typeof<string>; value = "42" } ); None}
-            value : ^S option    
-            private state : OrmState
-        }
-        member Value (inst) state =
-            let id = lookupId<^S> state
-            let idValueSeq = 
-                RelationshipCell.fold ( 
-                    fun acc item -> 
-                        Seq.append acc <| seq { sqlWrap item } 
-                    ) 
-                    Seq.empty 
-                    inst.id
-                |> Seq.rev
-
-            let whereClause = 
-                Seq.zip id idValueSeq
-                |> Seq.map (fun (keyCol, value) -> $"{keyCol} = {value}") 
-                |> String.concat " and " 
-
-            log ( fun _ -> 
-                sprintfn "lookupId Id Column Name: %A" id 
-                + sprintf "Where Clause: %A" whereClause 
+    let inline evaluate<^P, ^C> (relation : Relation<^P, ^C>) (transaction : DbTransaction option) ( instance : ^P ): Result<^C, exn> seq = 
+        let columns = 
+            relation.parent.GetProperties() 
+            |> Seq.filter( fun prop -> 
+                if prop.IsDefined( typeof< OnAttribute > ) 
+                then 
+                    let attr = 
+                        prop.GetCustomAttributes(typeof< OnAttribute >) 
+                        |> Seq.map ( fun x -> x :?> OnAttribute) 
+                        |> Seq.filter ( fun x -> snd x.Value = (relation.context) ) 
+                        |> Seq.head
+                    snd attr.Value = ( relation.context) && attr.key = relation.keyId //if the key lines up AND the context.
+                else false
             )
-            if Seq.isEmpty id then {inst with value = None} 
-            else 
-                selectWhere<^S> state None whereClause 
-                |> function 
-                | Ok vals when Seq.length vals > 0 ->
-                    Some <| Seq.head vals    
-                | _ -> 
-                    Option.None 
-                |> fun (v : option<'S>) -> { inst with value = v}
+            |> Seq.map ( fun prop -> {| 
+                property = prop
+                attribute = 
+                    prop.GetCustomAttributes(typeof< OnAttribute >) 
+                    |> Seq.map ( fun x -> x :?> OnAttribute) 
+                    |> Seq.filter ( fun x -> snd x.Value = (relation.context) ) 
+                    |> Seq.head 
+            |} )
+            |> Seq.sortBy ( fun column -> column.attribute.part )
+            |> Seq.map ( fun column -> {| child = relation.child.GetProperty(column.attribute.fieldName); parent = column |} )
+        
+        let where = 
+            String.Join( 
+                " and "
+                , columns |> Seq.mapi ( fun index column -> $"\"{column.child.Name}\" = :{index+1}" ) 
+            )
 
+        let parameters = 
+            columns 
+            |> Seq.map ( fun column -> column.parent.property.GetValue(instance) )
+        
+        let tmp = (Orm.selectWhere< ^C > relation.state transaction ( where, parameters )) //selectHelper< ^T > state transaction ( fun x -> $"select {x} where {escape (where, parameters)}" ) //
+        relation.SetValue <| Some tmp
+        tmp
 
-    type JoinType =
-        | Direct
-        | Relation
-
-    [<Table("auth.User", Contexts.Something)>]
-    type User = 
-        {
-            id : int
-            username : string
-            [<Join(Direct)>]
-            tenant : Tenant 
-            [<Eager>]
-            biography : Relation<Biography>
-            artPortfolioId : Relation<ArtPortfolio>
-        }
-
-    { user with biography = Relation.Value user.biography ormState }
-    user.biography.otherwiseHiddenOrmState => exception
-    match user.biography.Value with 
-    | Some bio
-    | None
+    
+    // ///<summary>Returns the current State as a Result&lt;^C seq, exn&gt;, calling an Evaluation if the state is currently none.</summary>
+    // ///<param name="transaction"></param>
+    // let result transaction instance  : Result< ^C seq, exn > = 
+    //     value
+    //     |> function 
+    //     | None -> this.Evaluate transaction instance
+    //     | Some v -> v 
+    //     |> Result.toResultSeq 

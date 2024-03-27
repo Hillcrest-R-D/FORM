@@ -8,9 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Utilities.fs"/>
     <Compile Include="Setup.fs" />
     <!--<Compile Include="Orm.fs" />-->
     <!--Compile Include="SQLGen.fs" />-->
+    <Compile Include="BaseOrmTests.fs"/>
+    <Compile Include="RelationTests.fs"/>
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -34,7 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib\FORM.fsproj" />
-    <ProjectReference Include="..\Attributes\Attributes.fsproj" />
+    <!--<ProjectReference Include="..\Attributes\Attributes.fsproj" />-->
   </ItemGroup>
 
 </Project>

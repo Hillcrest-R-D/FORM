@@ -91,6 +91,10 @@ type JoinDirection =
     | Inner = 2
     | Outer = 3
 
+type EvaluationStrategy = 
+    | Strict = 0
+    | Lazy = 1
+
 ///<Description>An attribute type which allows the specification of some FSharp Record Type fields being sourced via joinery</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
 type ByJoinAttribute ( table : Type, context : obj ) =
@@ -101,21 +105,34 @@ type ByJoinAttribute ( table : Type, context : obj ) =
 
 ///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
 [<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
-type OnAttribute (table : Type, on : string, kind : JoinDirection, context : obj ) =
+type OnAttribute (table : Type, key : int, part : int, fieldName : string, kind : JoinDirection, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
-    member _.key = 
-        table.GetProperties()
-        // |> Array.map ( fun field -> field :?> PropertyInfo )
-        |> Array.filter (fun field -> field.Name = on)
-        |> Array.head
+    member _.key = key
+    member _.part = part
     member _.kind = kind 
-        
+    member _.fieldName = fieldName
+
+///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type ArgumentsAttribute ( keyId : int, context : obj ) =
+    inherit DbAttribute( )
+    override _.Value = ( "", ( box( context ) :?> DbContext )  |> EnumToValue)
+    member _.key = keyId
+
+
+[<AttributeUsage( AttributeTargets.Property, AllowMultiple = true )>]
+type LazyEvaluationAttribute () =
+    inherit DbAttribute( )
+    override _.Value = ( "", -1)
+
 ///<Description>A record type which holds the information required to map across BE And DB. </Description>
 type SqlMapping = { 
     Index : int
     IsKey : bool
     IsIndex : bool
+    IsRelation : bool
+    IsLazilyEvaluated : bool
     JoinOn : ( string * string ) option 
     Source : string
     QuotedSource : string 

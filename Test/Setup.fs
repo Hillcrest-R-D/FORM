@@ -2,6 +2,7 @@ module HCRD.FORM.Tests.Setup
 
 open Form
 open Form.Orm 
+open Form.Utilities
 open Form.Attributes
 open dotenv.net
 
@@ -36,9 +37,9 @@ type Fact =
         [<Id(Contexts.MySQL)>]
         [<Id(Contexts.MSSQL)>]
         [<Id(Contexts.ODBC)>]
-        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.PSQL)>]
-        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.SQLite)>]
-        [<On(typeof<SubFact>, "factId", JoinDirection.Left, Contexts.ODBC)>]
+        [<On(typeof<SubFact>, 1, 1, "factId", JoinDirection.Left, Contexts.PSQL)>]
+        [<On(typeof<SubFact>, 1, 1, "factId", JoinDirection.Left, Contexts.SQLite)>]
+        [<On(typeof<SubFact>, 1, 1, "factId", JoinDirection.Left, Contexts.ODBC)>]
         indexId: int64
         [<PrimaryKey("pk",Contexts.PSQL)>]
         [<PrimaryKey("pk",Contexts.MySQL)>]
@@ -78,7 +79,11 @@ type Fact =
         [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
         [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
         [<ByJoin(typeof<SubFact>, Contexts.ODBC)>]
-        subFact : string option
+        [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.SQLite)>]
+        [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.PSQL)>]
+        [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.ODBC)>]
+        [<LazyEvaluation>]
+        subFact : Form.Utilities.Relation<Fact, SubFact>
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -99,7 +104,7 @@ module Fact =
             maybeSomething = "true"
             sometimesNothing = Some 1L
             biteSize =  "!aBite"
-            subFact = Some "sooper dooper secret fact"
+            subFact = Unchecked.defaultof<Form.Utilities.Relation<Fact, SubFact>>
         }
 
     
