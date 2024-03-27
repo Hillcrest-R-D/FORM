@@ -127,10 +127,11 @@ module Utilities =
     // let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _relations = Dictionary<Type, ConstructorInfo>()
+    let mutable _relation = Dictionary<Type, ConstructorInfo>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _relationArguments = Dictionary<(Type * Type), int>()
+    let _relations = Dictionary<Type * OrmState, obj -> obj array>()
     
     let unpackContext =
             function 
@@ -327,13 +328,13 @@ module Utilities =
     //     let mutable childDictionary = Dictionary<Type, obj[]->obj>()
     //     //check to see if the parent exists
     //     //if it does assign the reference to childDictionary
-    //     if not <| _relations.TryGetValue( parent, &childDictionary )
+    //     if not <| _relation.TryGetValue( parent, &childDictionary )
     //     then 
     //         //if it doesn't, assign a new dictionary with the current 
     //         //child and its constructor as the first key-value pair
     //         let tmp = FSharpValue.PreComputeRecordConstructor(child)
     //         childDictionary[child] <- tmp
-    //         _relations[parent] <- childDictionary
+    //         _relation[parent] <- childDictionary
         
     //     let mutable constructor = fun _ -> Object()
     //     //check to see if the child exists in the parent entry of the relation dict
@@ -474,15 +475,16 @@ module Utilities =
                 _constructors[reifiedType] <- tmp
             tmp       
         let columns = columnMapping<^T> state 
+        
+        //Memoize this
         let mutable options = 
             [| for fld in columns do  
                 match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
                 | Some _type -> toOption _type 
                 | None -> id
             |]
-            
         
-        
+        //Memoize this
         let mutable relations = 
             let context = unpackContext state
             [| for fld in columns do  
@@ -491,11 +493,11 @@ module Utilities =
                     let typeParameters = fld.Type.GenericTypeArguments
                     let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
                     let mutable constructor : ConstructorInfo = null
-                    if _relations.TryGetValue(reifiedType, &constructor)
+                    if _relation.TryGetValue(reifiedType, &constructor)
                     then ()
                     else
                         constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
-                        _relations[reifiedType] <- constructor
+                        _relation[reifiedType] <- constructor
                     let relation = constructor.Invoke( [| box 1; box state |])
                     fun _ -> relation 
                 else id
