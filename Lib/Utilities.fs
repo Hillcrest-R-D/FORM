@@ -1,5 +1,4 @@
-namespace Form
-
+namespace rec Form
 module Result = 
     // {Ok a; Ok b; Ok c} -> Ok {a; b; c}
     // {Ok a; Ok b; Ok c; Error e} -> Error e
@@ -62,14 +61,14 @@ module Utilities =
     open Logging
     open System.Data.Odbc    
     open System.Text.RegularExpressions
+    open Form.Attributes.Reflection
     
     type Behavior = 
         | Update
         | Insert 
         | Delete
 
-    type IRelation =
-        interface end
+    
 
     type Relation< ^P, ^C > (keyId : int, state : OrmState) =
         let mutable value : Result<^C, exn> seq option = None
@@ -101,43 +100,27 @@ module Utilities =
         // static member op_Equality ( L : Relation< ^P, ^C >, R : Relation< ^P, ^C > ) =
         //     printfn "Using custom-defined equality"
         //     L.Value = R.Value
-            
+    
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let _keyArray = Dictionary<Type, obj -> obj[]>()
+    
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let _constructors = Dictionary< Type, obj[] -> obj>()
+    
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let _toOptions = Dictionary<Type, obj[] -> obj>()
+    
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// We make no promises your code won't break in the future if you use this.
+    let _options = Dictionary<Type, array<obj -> obj>>()
 
-
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _tableNames = Dictionary<Type * OrmState, string>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _constructors = Dictionary< Type, obj[] -> obj>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _toOptions = Dictionary<Type, obj[] -> obj>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _option = Dictionary<Type, Type option>()
-
-    let mutable _options = Dictionary<Type, array<obj -> obj>>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _keyArray = Dictionary<Type, obj -> obj[]>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    // let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _relation = Dictionary<Type, ConstructorInfo>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
-    /// We make no promises your code won't break in the future if you use this.
-    let mutable _relationArguments = Dictionary<(Type * Type), int>()
     let _relations = Dictionary<Type * Enum, array<obj -> obj>>()
     
-    let unpackContext =
-            function 
-            | MSSQL ( _ , ctx) | PSQL ( _ , ctx) | MySQL ( _ , ctx) | ODBC ( _, ctx) | SQLite ( _, ctx) -> ctx
 
     let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
         try 
@@ -153,13 +136,7 @@ module Utilities =
         with 
         | exn -> Error exn
 
-    let inline sqlQuote ( state : OrmState ) str  =
-        match state with 
-        | MSSQL _ -> $"[{str}]"
-        | MySQL _ -> $"`{str}`"
-        | PSQL _ 
-        | SQLite _ 
-        | ODBC _ -> $"\"{str}\""
+
 
     let pattern = fun t -> Regex.Replace(t, @"'", @"''" )
         // function 
@@ -188,100 +165,7 @@ module Utilities =
                 Regex.Replace(accumulator, $":{i}", sanitizedInput)
             )
             format 
-    let inline context< ^T > ( state : OrmState ) = 
-        match state with 
-        | MSSQL     ( _, c ) -> c 
-        | MySQL     ( _, c ) -> c 
-        | PSQL      ( _, c ) -> c 
-        | SQLite    ( _, c ) -> c 
-        | ODBC      ( _, c ) -> c 
-
-    let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
-        Array.fold ( fun s ( x : DbAttribute ) ->  
-                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then fst x.Value
-                else s
-            ) "" attrs
-
-    let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
-        Array.fold ( fun s ( x : OnAttribute ) ->  
-                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (fst x.Value, x.fieldName)
-                else s
-            ) ("", "") attrs 
     
-    let inline tableName< ^T > ( state : OrmState ) = 
-        let reifiedType = typeof< ^T >
-        let mutable name = ""
-        if _tableNames.TryGetValue( (reifiedType, state), &name ) 
-        then name
-        else 
-            let attrs =
-                typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
-                |> Array.map ( fun x -> x :?> DbAttribute )
-            
-            let tName = 
-                if attrs = Array.empty 
-                then typedefof< ^T >.Name
-                else attrFold attrs ( context< ^T > state )
-                |> fun x -> x.Split( "." )
-                |> Array.map ( fun x -> sqlQuote state x )
-                |> String.concat "."
-            
-            _tableNames[(reifiedType, state)] <- tName 
-            tName
-
-    
-    let inline mappingHelper< ^T, ^A > state (propertyInfo : PropertyInfo) = 
-        propertyInfo.GetCustomAttributes( typeof< ^A >, false ) 
-        |> Array.map ( fun y -> y :?> DbAttribute )
-        |> fun y -> attrFold y ( context< ^T > state )   
- 
-    let inline columnMapping< ^T > ( state : OrmState ) = 
-        let reifiedType = typeof< ^T >
-        let mutable outMapping = Array.empty
-        if _mappings.TryGetValue((reifiedType, state), &outMapping) 
-        then outMapping 
-        else 
-            let mapping = 
-                FSharpType.GetRecordFields typedefof< ^T > 
-                |> Array.mapi ( fun i x -> 
-                    let source =
-                        let tmp = mappingHelper< ^T, ByJoinAttribute > state x
-                        if tmp = "" then tableName< ^T > state else sqlQuote state tmp
-                    let sqlName = 
-                        let tmp = mappingHelper< ^T, ColumnAttribute > state x
-                        if tmp = "" then x.Name else tmp
-                    { 
-                        Index = i
-                        IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
-                        IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
-                        IsRelation = 
-                            x.PropertyType.GetInterface(nameof(IRelation)) <> null
-                        IsLazilyEvaluated =
-                            x.GetCustomAttributes( typeof< LazyEvaluationAttribute >, false ).Length > 0
-                        JoinOn = 
-                            x.GetCustomAttributes( typeof< OnAttribute >, false ) 
-                            |> Array.map ( fun y -> y :?> OnAttribute )
-                            |> fun y -> attrJoinFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                            |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
-                        Source = source
-                        QuotedSource = source
-                        SqlName = sqlName
-                        QuotedSqlName = sqlQuote state sqlName
-                        FSharpName = x.Name
-                        Type = x.PropertyType 
-                        PropertyInfo = x
-                    } 
-                )
-            _mappings[(reifiedType, state)] <- mapping 
-            mapping
-
-    let inline table< ^T > ( state : OrmState ) = 
-        tableName< ^T > state
-    
-    let inline mapping< ^T > ( state : OrmState ) = 
-        columnMapping< ^T > state
 
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state

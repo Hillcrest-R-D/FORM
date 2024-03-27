@@ -12,6 +12,7 @@ module Orm =
     open Form.Attributes
     open Utilities
     open Logging
+    open Form.Attributes.Reflection
     
     let inline fields< ^T > = Unchecked.defaultof< ^T >
     

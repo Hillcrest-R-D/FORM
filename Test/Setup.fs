@@ -14,22 +14,12 @@ type Contexts =
     | SQLite = 8
     | ODBC = 16
 
-[<Table("SubFact", Contexts.PSQL)>]
-[<Table("SubFact", Contexts.MySQL)>]
-[<Table("SubFact", Contexts.MSSQL)>]
-[<Table("SubFact", Contexts.SQLite)>]
-[<Table("SubFact", Contexts.ODBC)>]
 type SubFact = 
     {
         factId : int64 
         subFact : string
     }
 
-[<Table("Fact", Contexts.PSQL)>]
-[<Table("Fact", Contexts.MySQL)>]
-[<Table("Fact", Contexts.MSSQL)>]
-[<Table("Fact", Contexts.SQLite)>]
-[<Table("Fact", Contexts.ODBC)>]
 type Fact =
     {
         [<Id(Contexts.PSQL)>]
@@ -79,9 +69,9 @@ type Fact =
         [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
         [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
         [<ByJoin(typeof<SubFact>, Contexts.ODBC)>]
-        [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.SQLite)>]
-        [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.PSQL)>]
-        [<Arguments(EvaluationStrategy.Lazy, 1, Contexts.ODBC)>]
+        [<Arguments(1, Contexts.SQLite)>]
+        [<Arguments(1, Contexts.PSQL)>]
+        [<Arguments(1, Contexts.ODBC)>]
         [<LazyEvaluation>]
         subFact : Form.Utilities.Relation<Fact, SubFact>
     }

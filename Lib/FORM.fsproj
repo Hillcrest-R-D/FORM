@@ -32,5 +32,7 @@
     <PackageReference Include="system.data.odbc" Version="8.0.0" />
     <PackageReference Include="system.data.sqlite" Version="1.0.118" />
   </ItemGroup>
-  
+  <ItemGroup>
+    <ProjectReference Include="..\Attributes\Lib\Attributes.fsproj" />
+  </ItemGroup>
 </Project>
