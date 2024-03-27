@@ -118,7 +118,9 @@ module Utilities =
     let mutable _toOptions = Dictionary<Type, obj[] -> obj>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _options = Dictionary<Type, Type option>()
+    let mutable _option = Dictionary<Type, Type option>()
+
+    let mutable _options = Dictionary<Type, array<obj -> obj>>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _keyArray = Dictionary<Type, obj -> obj[]>()
@@ -131,7 +133,7 @@ module Utilities =
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let mutable _relationArguments = Dictionary<(Type * Type), int>()
-    let _relations = Dictionary<Type * OrmState, obj -> obj array>()
+    let _relations = Dictionary<Type * Enum, array<obj -> obj>>()
     
     let unpackContext =
             function 
@@ -310,14 +312,14 @@ module Utilities =
     
     let inline optionType ( type_ : Type )  =
         let mutable opt = None 
-        if _options.TryGetValue( type_, &opt )
+        if _option.TryGetValue( type_, &opt )
         then opt
         else 
             let tmp = 
                 if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
                 then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
                 else None
-            _options[type_] <- tmp
+            _option[type_] <- tmp
             tmp
 
     ///<summary>Gets the constructor for the child type in a Parent-Child relationship, computes it if it hasn't been memoized yet.</summary>
@@ -478,30 +480,44 @@ module Utilities =
         
         //Memoize this
         let mutable options = 
-            [| for fld in columns do  
-                match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
-                | Some _type -> toOption _type 
-                | None -> id
-            |]
+            let mutable tmp : array<obj -> obj> = [||]
+            if _options.TryGetValue(reifiedType, &tmp)
+            then ()
+            else 
+                tmp <-
+                    [| for fld in columns do  
+                        match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
+                        | Some _type -> toOption _type 
+                        | None -> id
+                    |]
+                _options[reifiedType] <- tmp 
+            tmp 
+
         
         //Memoize this
         let mutable relations = 
             let context = unpackContext state
-            [| for fld in columns do  
-                if fld.IsRelation
-                then
-                    let typeParameters = fld.Type.GenericTypeArguments
-                    let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
-                    let mutable constructor : ConstructorInfo = null
-                    if _relation.TryGetValue(reifiedType, &constructor)
-                    then ()
-                    else
-                        constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
-                        _relation[reifiedType] <- constructor
-                    let relation = constructor.Invoke( [| box 1; box state |])
-                    fun _ -> relation 
-                else id
-            |]
+            let mutable tmp = [||]
+            if _relations.TryGetValue((reifiedType, context), &tmp)
+            then ()
+            else 
+                tmp <-
+                    [| for fld in columns do  
+                        if fld.IsRelation
+                        then
+                            let typeParameters = fld.Type.GenericTypeArguments
+                            let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
+                            let mutable constructor : ConstructorInfo = null
+                            if _relation.TryGetValue(reifiedType, &constructor)
+                            then ()
+                            else
+                                constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
+                                _relation[reifiedType] <- constructor
+                            fun _ -> constructor.Invoke( [| box 1; box state |]) 
+                        else id
+                    |]
+                _relations[(reifiedType, context)] <- tmp 
+            tmp
 
         
         //We're going to need to add logic here to instantiate relation types.

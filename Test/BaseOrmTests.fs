@@ -136,6 +136,8 @@ module BaseOrmTests =
                     let headE = Seq.head e 
                     let headM = Seq.head m 
                     printfn "\n%A = %A\n\n\n%A = %A" headE changed headM changed2
+                    printfn "\n%A = %A\n%A = %A" (headE.GetHashCode()) (changed.GetHashCode()) (headM.GetHashCode()) (changed2.GetHashCode())
+                    printfn "\n(%A) = (%A)\n(%A) = (%A)" ($"{headE.subFact.keyId}, {headE.subFact.Value}, {headE.subFact.state}") ($"{changed.subFact.keyId}, {changed.subFact.Value}, {changed.subFact.state}") ($"{headM.subFact.keyId}, {headM.subFact.Value}, {headM.subFact.state}") ($"{changed2.subFact.keyId}, {changed2.subFact.Value}, {changed2.subFact.state}")
                     if headE = changed && headM = changed2 
                     then Ok ()
                     else Result.Error "Update not applied."

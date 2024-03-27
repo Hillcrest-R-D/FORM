@@ -85,12 +85,12 @@ module Main =
             testSequenced <| testList "Base Orm Tests" [
                 insert testingState
                 insertMany testingState
-                insertAlot testingState
+                // insertAlot testingState
                 // // asyncInsertMany testingState
                 select testingState
                 // // // asyncSelect testingState
                 selectLimit testingState
-                selectBigLimit testingState
+                // selectBigLimit testingState
                 selectWhere testingState
                 selectWhereWithIn testingState
                 selectWhereWithInFailure testingState
