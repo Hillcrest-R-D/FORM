@@ -88,8 +88,6 @@ module Utilities =
 
         interface IRelation
         member _.SetValue v = value <- v
-        ///<summary>Returns the current state of the relation. None if the relation has not been evaluated yet, Some if the evaluation has been called.</summary>
-        member _.State : Result<^C, exn > seq option = value
         member _.Value = value
 
         override _.GetHashCode() =
@@ -256,9 +254,7 @@ module Utilities =
                         IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
                         IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
                         IsRelation = 
-                            // x.PropertyType.GetInterface(nameof(IRelation)) This might be faster?
-                            x.PropertyType.GetInterfaces()
-                            |> Seq.contains typeof<IRelation>
+                            x.PropertyType.GetInterface(nameof(IRelation)) <> null
                         IsLazilyEvaluated =
                             x.GetCustomAttributes( typeof< LazyEvaluationAttribute >, false ).Length > 0
                         JoinOn = 
@@ -507,17 +503,13 @@ module Utilities =
 
         
         //We're going to need to add logic here to instantiate relation types.
-        reader.GetSchemaTable().Columns
-        |> fun x -> [for i in x do yield i]
-        |> List.map (fun i -> i.ColumnName)
-        |> printfn "%A"
         seq { 
             try 
                 while reader.Read( ) do
                     
                     constructor 
                         [| for i in 0..reader.FieldCount-1 do 
-                            reader.GetValue( i )
+                            reader.GetValue( reader.GetOrdinal( columns[i].SqlName ) )
                             |> options[i] 
                             |> relations[i]
                         |] 

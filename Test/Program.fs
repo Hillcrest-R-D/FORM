@@ -85,7 +85,7 @@ module Main =
             testSequenced <| testList "Base Orm Tests" [
                 insert testingState
                 insertMany testingState
-                // insertAlot testingState
+                insertAlot testingState
                 // // asyncInsertMany testingState
                 select testingState
                 // // // asyncSelect testingState

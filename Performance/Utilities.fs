@@ -15,12 +15,18 @@ module Utilities =
             id int not null,
             name varchar(32) not null,
             optional int null,
-            modified varchar(16) not null
-        )"
+            modified varchar(16) not null,
+            knockId int not null
+        );
+        create table if not exists \"Knockles\"(
+            id int not null,
+            name varchar(32) not null
+        );
+        "
 
-    let drop = "drop table if exists \"Sanic\";"
+    let drop = "drop table if exists \"Sanic\"; drop table if exists \"Knockles\";"
 
-    let truncate = "delete from \"Sanic\";"
+    let truncate = "delete from \"Sanic\"; delete from \"Knockles\";"
 
     
     type OptionHandler<'T> () =
@@ -43,9 +49,17 @@ module Utilities =
 module Data =
     open System
     open Form.Attributes
+    open Form.Utilities
 
     type Context = 
     | SQLite = 1
+
+    [<CLIMutable>]
+    type Knockles =
+        {
+            id: int
+            name: string
+        }
 
     [<CLIMutable>]
     type Sanic = {
@@ -54,31 +68,55 @@ module Data =
         name: string
         optional : int option 
         modified: string
+        [<On(typeof<Knockles>, 1, 1, "id", JoinDirection.Left, Context.SQLite)>]
+        knockId: int 
+        [<ByJoin(typeof<Knockles>, Context.SQLite)>]
+        [<Arguments(EvaluationStrategy.Lazy, 1, Context.SQLite)>]
+        knock: Relation<Sanic, Knockles>
     }
+    let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
+    let postgresConnectionString () = System.Environment.GetEnvironmentVariable("postgres_connection_string")
+    let sqliteState = SQLite( sqliteConnectionString (), Context.SQLite )
     let small = 1000
     let big = 10000
-    let collectionSmall = 
+    let defaultKnocklesRelation = Relation<Sanic,Knockles>(1, sqliteState)
+    let collectionSmallSanic = 
         [| for i in 1..small -> 
             { 
                 id = i
                 name = "John Doe" 
                 optional = if i % 2 = 0 then None else Some i 
                 modified = DateTime.Now.ToString("yyyy-MM-dd")
+                knockId = i 
+                knock = defaultKnocklesRelation
             } 
         |]
-    let collectionBig = 
+    let collectionSmallKnockles = 
+        [| for i in 1..small -> 
+            { 
+                id = i
+                name = "John Doe" 
+            } 
+        |]
+    let collectionBigSanic = 
         [| for i in 1001..big -> 
             { 
                 id = i
                 name = "Jane Doe"
                 optional = if i % 2 = 0 then None else Some i
                 modified = DateTime.Now.ToString("yyyy-MM-dd") 
+                knockId = i 
+                knock = defaultKnocklesRelation
             } 
         |]
-    let collections = [|collectionSmall; collectionBig|]
+    let collectionBigKnockles = 
+        [| for i in 1001..big -> 
+            { 
+                id = i
+                name = "Jane Doe"
+            } 
+        |]
+    let collectionsSanic = [|collectionSmallSanic; collectionBigSanic|]
 
-    let modifiedCollectionSmall () = Utilities.mapOver collectionSmall
-    let modifiedCollectionBig () = Utilities.mapOver collectionBig
-    let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
-    let postgresConnectionString () = System.Environment.GetEnvironmentVariable("postgres_connection_string")
-    let sqliteState = SQLite( sqliteConnectionString (), Context.SQLite )
+    let modifiedCollectionSmall () = Utilities.mapOver collectionSmallSanic
+    let modifiedCollectionBig () = Utilities.mapOver collectionBigSanic

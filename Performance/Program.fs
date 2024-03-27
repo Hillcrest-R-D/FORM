@@ -23,7 +23,7 @@ type InsertBenchmark() =
     let _sqliteState = SQLite( Data.sqliteConnectionString (), Data.Context.SQLite )
     let mutable _data = Array.empty
     
-    static member public DataValues = Data.collections
+    static member public DataValues = Data.collectionsSanic
     
     [<ParamsSource(nameof(InsertBenchmark.DataValues))>]
     member public _.Data 
@@ -105,7 +105,7 @@ type UpdateBenchmark() =
     let _sqliteState = SQLite( Data.sqliteConnectionString (), Data.Context.SQLite )
     let mutable _data = Array.empty
     
-    static member public DataValues = Data.collections
+    static member public DataValues = Data.collectionsSanic
     
     [<ParamsSource(nameof(InsertBenchmark.DataValues))>]
     member public _.Data 
@@ -196,17 +196,20 @@ type SelectBenchmark() =
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
-        Orm.insertMany<Data.Sanic> _sqliteState transaction true ( [| yield! Data.collectionSmall; yield! Data.collectionBig |] ) |> ignore
+        Orm.insertMany<Data.Knockles> _sqliteState transaction true ( [| yield! Data.collectionSmallKnockles; yield! Data.collectionBigKnockles |] ) |> ignore
+        Orm.insertMany<Data.Sanic> _sqliteState transaction true ( [| yield! Data.collectionSmallSanic; yield! Data.collectionBigSanic |] ) |> ignore
         Orm.commitTransaction transaction |> ignore
         ()
     
 
     [<Benchmark>]
     member _.Form () = 
-        Orm.selectLimit<Data.Sanic> _sqliteState None _data
-        |> Result.toResultSeq
-        |> Result.mapError( printfn "Error: %A" )
-        |> Result.map ( fun x -> for _ in x do () )
+        let a = Orm.selectLimit<Data.Sanic> _sqliteState None _data
+        a
+        |> Seq.map ( fun x -> x )
+        |> Seq.toList
+        // |> Result.toResultSeq
+        // |> Result.mapError( printfn "Error: %A" )
 
     [<Benchmark>]
     member _.Dapper () = 
@@ -230,6 +233,8 @@ type SelectBenchmark() =
                             then None 
                             else Some <| reader.GetInt32(2)
                         modified = reader.GetString(3)
+                        knockId = reader.GetInt32(4)
+                        knock = Data.defaultKnocklesRelation
                     } : Data.Sanic
             }
         for _ in data do ()
@@ -238,9 +243,9 @@ module Main =
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
-        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
         // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
-        // BenchmarkRunner.Run<SelectBenchmark>() |> ignore
+        BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0
         
