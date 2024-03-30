@@ -43,7 +43,9 @@ module BaseOrmTests =
         constructTest 
             "Select" 
             "Select"
-            ( fun _ -> Orm.selectAll< Fact > testingState None |> Result.toResultSeq ) 
+            ( fun _ -> 
+                printfn "%A" <| Form.Utilities.queryBase<Fact> testingState
+                Orm.selectAll< Fact > testingState None |> Result.toResultSeq ) 
             
     // let asyncSelect testingState =
     //     constructTest

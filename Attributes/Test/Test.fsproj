@@ -19,6 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Attributes\Attributes.fsproj" />
+    <ProjectReference Include="..\Lib\Attributes.fsproj" />
   </ItemGroup>
 </Project>

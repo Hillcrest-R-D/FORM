@@ -19,7 +19,7 @@ module Reflection =
     let _relation = Dictionary<Type, ConstructorInfo>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
-    let _relationArguments = Dictionary<(Type * Type), int>()
+    let _relationArguments = Dictionary<(Type * Type), ArgumentsAttribute>()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
     /// We make no promises your code won't break in the future if you use this.
     let _tableNames = Dictionary<Type * OrmState, string>()
@@ -58,11 +58,15 @@ module Reflection =
             ) "" attrs
 
     let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
-        Array.fold ( fun s ( x : OnAttribute ) ->  
-                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (fst x.Value, x.fieldName)
-                else s
-            ) ("", "") attrs 
+        attrs
+        |> Array.filter (fun attr -> snd attr.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) )
+        |> Array.map (fun attr -> attr.tableType, attr.fieldName)
+        |> Array.tryHead
+        // Array.fold ( fun s ( x : OnAttribute ) ->  
+        //         if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
+        //         then (fst x.Value, x.fieldName)
+        //         else s
+        //     ) ("", "") attrs 
 
     let inline tableName< ^T > ( state : OrmState ) = 
         let reifiedType = typeof< ^T >
@@ -91,6 +95,12 @@ module Reflection =
         |> Array.map ( fun y -> y :?> DbAttribute )
         |> fun y -> attrFold y ( context< ^T > state )   
 
+    let inline getContextualizedAttribute< ^A > state (prop : PropertyInfo) =
+        prop.GetCustomAttributes( typeof<ArgumentsAttribute>, false)
+        |> Array.map ( fun y -> y :?> ArgumentsAttribute )
+        |> Array.filter ( fun attr -> snd attr.Value =  (( box( context state ) :?> DbContext )  |> EnumToValue))
+        |> Array.tryHead
+        
     let inline columnMapping< ^T > ( state : OrmState ) = 
         let reifiedType = typeof< ^T >
         let mutable outMapping = Array.empty
@@ -111,14 +121,22 @@ module Reflection =
                         IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
                         IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
                         IsRelation = 
-                            x.PropertyType.GetInterface(nameof(IRelation)) <> null
+                            let interfaces = x.PropertyType.GetInterface(nameof(IRelation))
+                            if interfaces <> null 
+                            then
+                                getContextualizedAttribute<ArgumentsAttribute> state x
+                                |> Option.bind (fun y ->
+                                    _relationArguments[( typeof<^T> ,x.PropertyType)] <- y
+                                    Some y
+                                    )
+                                |> ignore
+                            interfaces <> null
                         IsLazilyEvaluated =
                             x.GetCustomAttributes( typeof< LazyEvaluationAttribute >, false ).Length > 0
                         JoinOn = 
                             x.GetCustomAttributes( typeof< OnAttribute >, false ) 
                             |> Array.map ( fun y -> y :?> OnAttribute )
                             |> fun y -> attrJoinFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
-                            |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
                         Source = source
                         QuotedSource = source
                         SqlName = sqlName

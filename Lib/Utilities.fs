@@ -170,7 +170,7 @@ module Utilities =
     let inline columns< ^T > ( state : OrmState ) = 
         mapping< ^T > state
         |> Array.map ( fun x -> 
-            if Seq.contains typeof<IRelation> ( x.Type.GetInterfaces() )
+            if _relationArguments.ContainsKey((typeof<^T>, x.Type))//Seq.contains typeof<IRelation> ( x.Type.GetInterfaces() )
             then $"null as {x.QuotedSqlName}" 
             else $"{x.QuotedSource}.{x.QuotedSqlName}" 
         )
@@ -351,6 +351,7 @@ module Utilities =
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
     let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
+        let context = unpackContext state
         let reifiedType = typeof< ^T >
         let constructor = 
             let mutable tmp = fun _ -> obj()
@@ -363,7 +364,7 @@ module Utilities =
         let columns = columnMapping<^T> state 
         
         //Memoize this
-        let mutable options = 
+        let options = 
             let mutable tmp : array<obj -> obj> = [||]
             if _options.TryGetValue(reifiedType, &tmp)
             then ()
@@ -379,8 +380,7 @@ module Utilities =
 
         
         //Memoize this
-        let mutable relations = 
-            let context = unpackContext state
+        let relations = 
             let mutable tmp = [||]
             if _relations.TryGetValue((reifiedType, context), &tmp)
             then ()
@@ -389,20 +389,22 @@ module Utilities =
                     [| for fld in columns do  
                         if fld.IsRelation
                         then
-                            let typeParameters = fld.Type.GenericTypeArguments
-                            let reifiedType = typedefof<Relation<_,_>>.MakeGenericType( typeParameters ) 
+                            let reifiedRelationType = typedefof<Relation<_,_>>.MakeGenericType( fld.Type.GenericTypeArguments ) 
                             let mutable constructor : ConstructorInfo = null
-                            if _relation.TryGetValue(reifiedType, &constructor)
+                            if _relation.TryGetValue(reifiedRelationType, &constructor)
                             then ()
                             else
-                                constructor <- reifiedType.GetConstructor([|typeof<int>; typeof<OrmState>|])
-                                _relation[reifiedType] <- constructor
+                                constructor <- reifiedRelationType.GetConstructor([|typeof<int>; typeof<OrmState>|])
+                                _relation[reifiedRelationType] <- constructor
+                                // _relationArguments[(reifiedType, reifiedRelationType)] <- 1
                             fun _ -> constructor.Invoke( [| box 1; box state |]) 
                         else id
                     |]
                 _relations[(reifiedType, context)] <- tmp 
             tmp
-
+        // let ordinals = [| for i in 0..reader.FieldCount-1 do 
+        //                     reader.GetOrdinal(columns[i].SqlName)
+        //                 |] 
         
         //We're going to need to add logic here to instantiate relation types.
         seq { 
@@ -411,7 +413,7 @@ module Utilities =
                     
                     constructor 
                         [| for i in 0..reader.FieldCount-1 do 
-                            reader.GetValue( reader.GetOrdinal( columns[i].SqlName ) )
+                            reader.GetValue( i )
                             |> options[i] 
                             |> relations[i]
                         |] 
@@ -588,15 +590,15 @@ module Utilities =
     let inline joins< ^T > (state : OrmState) = 
         let qoute = sqlQuote state
         mapping< ^T > state
-        |> Array.filter (fun sqlMap -> Option.isSome sqlMap.JoinOn)
+        |> Array.filter (fun sqlMap -> Option.isSome sqlMap.JoinOn && _relation.ContainsKey(fst (Option.get sqlMap.JoinOn)))
         |> Array.groupBy (fun x -> x.JoinOn |> Option.get |> fst)
         |> Array.map (fun (source, maps)  -> 
             Array.map (fun map -> 
                 let secCol = map.JoinOn |> Option.get |> snd 
-                $"{qoute source}.{qoute secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
+                $"{qoute source.Name}.{qoute secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
             ) maps
             |> String.concat " and "
-            |> fun onString -> $"left join {qoute source} on {onString}"
+            |> fun onString -> $"left join {qoute source.Name} on {onString}"
         )
         |> String.concat "\n"
     

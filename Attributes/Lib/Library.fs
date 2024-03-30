@@ -98,6 +98,7 @@ type ByJoinAttribute ( table : Type, context : obj ) =
 type OnAttribute (table : Type, key : int, part : int, fieldName : string, kind : JoinDirection, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
+    member _.tableType = table
     member _.key = key
     member _.part = part
     member _.kind = kind 
@@ -123,7 +124,7 @@ type SqlMapping = {
     IsIndex : bool
     IsRelation : bool
     IsLazilyEvaluated : bool
-    JoinOn : ( string * string ) option 
+    JoinOn : ( Type * string ) option 
     Source : string
     QuotedSource : string 
     SqlName : string 

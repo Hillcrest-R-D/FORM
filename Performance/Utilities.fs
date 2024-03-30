@@ -71,7 +71,7 @@ module Data =
         [<On(typeof<Knockles>, 1, 1, "id", JoinDirection.Left, Context.SQLite)>]
         knockId: int 
         [<ByJoin(typeof<Knockles>, Context.SQLite)>]
-        [<Arguments(EvaluationStrategy.Lazy, 1, Context.SQLite)>]
+        [<Arguments(1, Context.SQLite)>]
         knock: Relation<Sanic, Knockles>
     }
     let sqliteConnectionString () = System.Environment.GetEnvironmentVariable("sqlite_connection_string")
@@ -116,7 +116,7 @@ module Data =
                 name = "Jane Doe"
             } 
         |]
-    let collectionsSanic = [|collectionSmallSanic; collectionBigSanic|]
+    let collectionsSanic = [|collectionSmallSanic|] //; collectionBigSanic
 
     let modifiedCollectionSmall () = Utilities.mapOver collectionSmallSanic
     let modifiedCollectionBig () = Utilities.mapOver collectionBigSanic

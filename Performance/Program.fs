@@ -51,6 +51,7 @@ type InsertBenchmark() =
         Orm.insertMany<Data.Sanic> _sqliteState transaction true _data
         |> ignore
         Orm.commitTransaction transaction
+    
         
     [<Benchmark>]
     member _.Dapper () = 
@@ -182,6 +183,9 @@ type SelectBenchmark() =
 
     let _sqliteState = SQLite( Data.sqliteConnectionString (), Data.Context.SQLite )
     let mutable _data = 0
+    
+    let _sanicSelect = Utilities.queryBase<Data.Sanic> _sqliteState 
+
     static member public DataValues = [| Data.small; Data.big |]
     
     [<ParamsSource(nameof(InsertBenchmark.DataValues))>]
@@ -191,7 +195,8 @@ type SelectBenchmark() =
 
 
     [<GlobalSetup>]
-    member _.Setup () = 
+    member _.Setup () =
+        printfn "%A" _sanicSelect 
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
@@ -199,33 +204,82 @@ type SelectBenchmark() =
         Orm.insertMany<Data.Knockles> _sqliteState transaction true ( [| yield! Data.collectionSmallKnockles; yield! Data.collectionBigKnockles |] ) |> ignore
         Orm.insertMany<Data.Sanic> _sqliteState transaction true ( [| yield! Data.collectionSmallSanic; yield! Data.collectionBigSanic |] ) |> ignore
         Orm.commitTransaction transaction |> ignore
+        Orm.selectLimit<Data.Sanic> _sqliteState None 10 |> Result.toResultSeq |> ignore
+        Orm.selectLimit<Data.Knockles> _sqliteState None 10 |> Result.toResultSeq |> ignore
+        printfn "%A\n%A" Form.Utilities._relations Form.Utilities._options
         ()
     
-
+    [<GlobalCleanup>]
+    member _.End () =
+        printfn "%A\n%A" Form.Utilities._relations Form.Utilities._options
+        ()
     [<Benchmark>]
     member _.Form () = 
-        let a = Orm.selectLimit<Data.Sanic> _sqliteState None _data
-        a
-        |> Seq.map ( fun x -> x )
-        |> Seq.toList
-        // |> Result.toResultSeq
+        let data = Orm.selectLimit<Data.Sanic> _sqliteState None _data
+        data
+        |> Result.toResultSeq
+        |> ignore
         // |> Result.mapError( printfn "Error: %A" )
+
+    [<Benchmark>]
+    member _.ConsumeReader() =
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        connection.Open()
+        use cmd = new SQLiteCommand( $"select {_sanicSelect} limit {_data}", connection )
+        let reader = cmd.ExecuteReader()
+        let data = Form.Utilities.consumeReader<Data.Sanic> _sqliteState reader
+        data
+        |> Result.toResultSeq
+        |> ignore
 
     [<Benchmark>]
     member _.Dapper () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
-        for _ in connection.Query<Data.Sanic>($"select * from Sanic limit {_data};") do () 
+        for _ in connection.Query<Data.Sanic>($"select *, null from Sanic limit {_data};") do () 
+    
+    [<Benchmark>]
+    member _.ConsumeReaderRaw () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        connection.Open()
+        use cmd = new SQLiteCommand( $"select *, null as \"Knock\" from \"Sanic\" limit {_data}", connection )
+        let context = Form.Attributes.Reflection.unpackContext _sqliteState
+        let reifiedType = typeof< Data.Sanic >
+        let columns = Form.Attributes.Reflection.columnMapping<Data.Sanic> _sqliteState 
+        let con = Form.Utilities._constructors[reifiedType]
+        let reader = cmd.ExecuteReader()
+        let relations = Form.Utilities._relations[(reifiedType, context)]
+        let options = Form.Utilities._options[reifiedType]
+        let ordinals = [| for i in 0..reader.FieldCount-1 do 
+                            reader.GetOrdinal(columns[i].SqlName)
+                        |] 
+        let data =
+            seq {
+                while reader.Read( ) do
+                    
+                    con
+                        [| for i in 0..reader.FieldCount-1 do 
+                            reader.GetValue( ordinals[i] )
+                            |> options[i] 
+                            |> relations[i]
+                        |] 
+                    :?> Data.Sanic
+                    |> Ok
+            }
+        data
+        |> Result.toResultSeq
+        |> ignore
+
     
     [<Benchmark(Baseline = true)>]
     member _.Baseline () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
-        use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )
+        use cmd = new SQLiteCommand( $"select *, null from \"Sanic\" limit {_data}", connection )
         let reader = cmd.ExecuteReader()
         let data =
             seq {
                 while (reader.Read()) do
-                    { 
+                    ({ 
                         id = reader.GetInt32(0) //104abc3e
                         name = reader.GetString(1)
                         optional = 
@@ -234,10 +288,61 @@ type SelectBenchmark() =
                             else Some <| reader.GetInt32(2)
                         modified = reader.GetString(3)
                         knockId = reader.GetInt32(4)
-                        knock = Data.defaultKnocklesRelation
-                    } : Data.Sanic
+                        knock = Form.Utilities.Relation<Data.Sanic,Data.Knockles>(1, _sqliteState)
+                    } : Data.Sanic)
+                    |>Ok
             }
         for _ in data do ()
+    
+    [<Benchmark>]
+    member _.BaselineEnumerateResultSeq () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        connection.Open()
+        use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )
+        let reader = cmd.ExecuteReader()
+        let data =
+            seq {
+                while (reader.Read()) do
+                    ({ 
+                        id = reader.GetInt32(0) //104abc3e
+                        name = reader.GetString(1)
+                        optional = 
+                            if reader.IsDBNull(2) 
+                            then None 
+                            else Some <| reader.GetInt32(2)
+                        modified = reader.GetString(3)
+                        knockId = reader.GetInt32(4)
+                        knock = Form.Utilities.Relation<Data.Sanic,Data.Knockles>(1, _sqliteState)
+                    } : Data.Sanic)
+                    |>Ok
+            }
+        for _ in data do ()
+    
+    [<Benchmark>]
+    member _.BaselineEnumerateResultSeqWithLift () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        connection.Open()
+        use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )
+        let reader = cmd.ExecuteReader()
+        let data =
+            seq {
+                while (reader.Read()) do
+                    ({ 
+                        id = reader.GetInt32(0) //104abc3e
+                        name = reader.GetString(1)
+                        optional = 
+                            if reader.IsDBNull(2) 
+                            then None 
+                            else Some <| reader.GetInt32(2)
+                        modified = reader.GetString(3)
+                        knockId = reader.GetInt32(4)
+                        knock = Form.Utilities.Relation<Data.Sanic,Data.Knockles>(1, _sqliteState)
+                    } : Data.Sanic)
+                    |> Ok
+            }
+        data
+        |> Result.toResultSeq
+        |> ignore
 
 module Main = 
     [<EntryPoint>]
