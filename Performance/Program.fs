@@ -198,6 +198,7 @@ type SelectBenchmark() =
     member _.Setup () =
         printfn "%A" _sanicSelect 
         SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        SqlMapper.AddTypeHandler (Utilities.RelationHandler<Data.Sanic, Data.Knockles>())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState

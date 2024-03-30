@@ -44,7 +44,15 @@ module Utilities =
             then None
             else Some (value :?> 'T)
 
-    
+    type RelationHandler<'P, 'C> () =
+        inherit SqlMapper.TypeHandler<Form.Utilities.Relation<'P, 'C>> ()
+
+        override __.SetValue (param, value) =
+            //TODO
+            param.Value <- null
+
+        override __.Parse value =
+            Form.Utilities.Relation<'P, 'C>(1,Data.sqliteState)
 
 module Data =
     open System
