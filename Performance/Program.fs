@@ -8,6 +8,7 @@ open Dapper
 open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open BenchmarkDotNet.Diagnostics.dotTrace
+open BenchmarkDotNet.Diagnostics.Windows.Configs;
 open Configs
 
 
@@ -33,8 +34,8 @@ type InsertBenchmark() =
     
     [<IterationSetup>]
     member _.Setup() = 
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
+        // SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        // SqlMapper.AddTypeHandler (Utilities.OptionHandler<int64>())
         Form.Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
     
@@ -115,7 +116,7 @@ type UpdateBenchmark() =
     
     [<GlobalSetup>]
     member _.Setup () = 
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        // SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
@@ -177,7 +178,8 @@ type UpdateBenchmark() =
   MemoryDiagnoser;
   Config(typeof<BenchmarkConfig>);
   RPlotExporter;
-  DotTraceDiagnoser
+  DotTraceDiagnoser;
+//   EtwProfiler
 >]
 type SelectBenchmark() =
 
@@ -185,6 +187,8 @@ type SelectBenchmark() =
     let mutable _data = 0
     
     let _sanicSelect = Utilities.queryBase<Data.Sanic> _sqliteState 
+
+    
 
     static member public DataValues = [| Data.small; Data.big |]
     
@@ -197,8 +201,8 @@ type SelectBenchmark() =
     [<GlobalSetup>]
     member _.Setup () =
         printfn "%A" _sanicSelect 
-        SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
-        SqlMapper.AddTypeHandler (Utilities.RelationHandler<Data.Sanic, Data.Knockles>())
+        // SqlMapper.AddTypeHandler (Utilities.OptionHandler<int>())
+        SqlMapper.AddTypeHandler (Utilities.RelationHandler())
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
@@ -233,33 +237,86 @@ type SelectBenchmark() =
         |> Result.toResultSeq
         |> ignore
 
-    [<Benchmark>]
-    member _.Dapper () = 
-        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
-        for _ in connection.Query<Data.Sanic>($"select *, null from Sanic limit {_data};") do () 
-    
-    [<Benchmark>]
-    member _.ConsumeReaderRaw () = 
-        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
-        connection.Open()
-        use cmd = new SQLiteCommand( $"select *, null as \"Knock\" from \"Sanic\" limit {_data}", connection )
+    // [<Benchmark>]
+    member _.ConsumerReaderSetup() = 
         let context = Form.Attributes.Reflection.unpackContext _sqliteState
         let reifiedType = typeof< Data.Sanic >
+        let constructor = 
+            let mutable tmp = fun _ -> obj()
+            if Form.Utilities._constructors.TryGetValue(reifiedType, &tmp)
+            then ()
+            else 
+                tmp <- Microsoft.FSharp.Reflection.FSharpValue.PreComputeRecordConstructor(reifiedType)
+                Form.Utilities._constructors[reifiedType] <- tmp
+            tmp       
         let columns = Form.Attributes.Reflection.columnMapping<Data.Sanic> _sqliteState 
+        
+        //Memoize this
+        let options = 
+            let mutable tmp : array<obj -> obj> = [||]
+            if Form.Utilities._options.TryGetValue(reifiedType, &tmp)
+            then ()
+            else 
+                tmp <-
+                    [| for fld in columns do  
+                        match Form.Utilities.optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
+                        | Some _type -> Form.Utilities.toOption _type 
+                        | None -> id
+                    |]
+                Form.Utilities._options[reifiedType] <- tmp 
+            tmp 
+
+        
+        //Memoize this
+        let relations = 
+            let mutable tmp = [||]
+            if Form.Utilities._relations.TryGetValue((reifiedType, context), &tmp)
+            then ()
+            else 
+                tmp <-
+                    [| for fld in columns do  
+                        if fld.IsRelation
+                        then
+                            let reifiedRelationType = typedefof<Form.Utilities.Relation<_,_>>.MakeGenericType( fld.Type.GenericTypeArguments ) 
+                            let mutable constructor : System.Reflection.ConstructorInfo = null
+                            if Form.Attributes.Reflection._relation.TryGetValue(reifiedRelationType, &constructor)
+                            then ()
+                            else
+                                constructor <- reifiedRelationType.GetConstructor([|typeof<int>; typeof<OrmState>|])
+                                Form.Attributes.Reflection._relation[reifiedRelationType] <- constructor
+                                // _relationArguments[(reifiedType, reifiedRelationType)] <- 1
+                            fun _ -> constructor.Invoke( [| box 1; box _sqliteState |]) 
+                        else id
+                    |]
+                Form.Utilities._relations[(reifiedType, context)] <- tmp 
+            tmp
+        box <| 1
+        |> options[2]
+        |> ignore 
+        box <| Data.defaultKnocklesRelation
+        |> relations[5]
+        |> ignore
+
+    [<Benchmark>]
+    member _.SingleSeqReaderConsumer() = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        connection.Open()
+        let query = $"select *, null as \"Knock\" from \"Sanic\" limit {_data}"
+        let context = Form.Attributes.Reflection.context _sqliteState
+        let reifiedType = typeof< Data.Sanic >
         let con = Form.Utilities._constructors[reifiedType]
-        let reader = cmd.ExecuteReader()
         let relations = Form.Utilities._relations[(reifiedType, context)]
         let options = Form.Utilities._options[reifiedType]
-        let ordinals = [| for i in 0..reader.FieldCount-1 do 
-                            reader.GetOrdinal(columns[i].SqlName)
-                        |] 
+        
         let data =
             seq {
+                use cmd = Form.Utilities.makeCommand _sqliteState query connection  
+                use reader = cmd.ExecuteReader( )
                 while reader.Read( ) do
                     
                     con
                         [| for i in 0..reader.FieldCount-1 do 
-                            reader.GetValue( ordinals[i] )
+                            reader.GetValue( i )
                             |> options[i] 
                             |> relations[i]
                         |] 
@@ -269,6 +326,38 @@ type SelectBenchmark() =
         data
         |> Result.toResultSeq
         |> ignore
+
+
+    [<Benchmark>]
+    member _.ConsumeReaderRaw () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        connection.Open()
+        use cmd = new SQLiteCommand( $"select *, null as \"Knock\" from \"Sanic\" limit {_data}", connection )
+        use reader = cmd.ExecuteReader()
+        let reifiedType = typeof<Data.Sanic>
+        let con = Form.Utilities._constructors[typeof< Data.Sanic >]
+        let options = Form.Utilities._options[typeof< Data.Sanic >]
+        let relations = Form.Utilities._relations[(typeof< Data.Sanic >, Form.Attributes.Reflection.context _sqliteState)]
+        seq {
+            while reader.Read( ) do
+                
+                con
+                    [| for i in 0..reader.FieldCount-1 do 
+                        reader.GetValue( i )
+                        |> options[i] 
+                        |> relations[i]
+                    |] 
+                :?> Data.Sanic
+                |> Ok
+        }
+        |> Result.toResultSeq
+        |> ignore
+
+    [<Benchmark>]
+    member _.Dapper () = 
+        use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        for a in connection.Query<Data.Sanic>($"select *, null from Sanic limit {_data};") do { a with knock = Form.Utilities.Relation<Data.Sanic, Data.Knockles>(1, _sqliteState)} |> ignore
+    
 
     
     [<Benchmark(Baseline = true)>]
@@ -291,7 +380,6 @@ type SelectBenchmark() =
                         knockId = reader.GetInt32(4)
                         knock = Form.Utilities.Relation<Data.Sanic,Data.Knockles>(1, _sqliteState)
                     } : Data.Sanic)
-                    |>Ok
             }
         for _ in data do ()
     
@@ -352,6 +440,15 @@ module Main =
         // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
         // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
         BenchmarkRunner.Run<SelectBenchmark>() |> ignore
+        // SelectBenchmark().Setup()
+        // SqlMapper.AddTypeHandler (Utilities.RelationHandler())
+        // use connection = new SQLiteConnection( Data.sqliteConnectionString() )
+        // // connection.Query<Data.Sanic>($"select * from Sanic limit 10;")
+        // SqlMapper.HasTypeHandler(typeof<Form.Utilities.Relation<Data.Sanic, Data.Knockles>>)
+        // |> printfn "%A"
+        // SqlMapper.GetTypeDeserializer
+        // for a in SqlMapper.Query<Data.Sanic>(connection,$"select *, null as knock from Sanic limit 10;") do printfn "%A" a
+        // Form.Orm.selectLimit<Data.Sanic> Data.sqliteState None 10 |> printfn "%A" 
         
         0
         

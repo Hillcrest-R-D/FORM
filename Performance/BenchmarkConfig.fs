@@ -17,4 +17,5 @@ type BenchmarkConfig() as self =
             .With(ExecutionValidator.FailOnError)
             |> ignore
         self.Add(CsvMeasurementsExporter.Default)
+        self.AddDiagnoser(new BenchmarkDotNet.Diagnostics.Windows.EtwProfiler(new BenchmarkDotNet.Diagnostics.Windows.EtwProfilerConfig()))
         self.Add(RPlotExporter.Default)
