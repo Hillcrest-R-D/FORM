@@ -23,10 +23,10 @@ module Orm =
                 Some ( connection.BeginTransaction() )
             with 
             | exn -> 
-                log ( sprintf "Exception when beginning transaction: %A" exn )
+                // log ( sprintf "Exception when beginning transaction: %A" exn )
                 None
         | Error e -> 
-            log ( sprintf "Error when beginning transaction: %A" e )
+            // log ( sprintf "Error when beginning transaction: %A" e )
             None
 
     let commitTransaction = 
@@ -62,7 +62,7 @@ module Orm =
                 try 
                     seq {
                         use cmd = makeCommand state sql connection  
-                        printfn "Execute Cmd: %A" cmd.CommandText 
+                        // printfn "Execute Cmd: %A" cmd.CommandText 
                         yield! seq {cmd.ExecuteNonQuery( ) |> Ok}
                     }
                     |> Seq.map (fun x -> x)
@@ -175,19 +175,19 @@ module Orm =
     ///</example>
     let inline insert< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) includeKeys ( instance : ^T ) =
         let query = insertBase< ^T > state includeKeys 
-        log $"Insert Query Generated: {query}"
+        // log $"Insert Query Generated: {query}"
         transaction 
         |> withTransaction 
             state 
             ( fun transaction ->
                 use command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query conn state
-                log ( 
-                    sprintf "Param count: %A" command.Parameters.Count :: 
-                    [ for i in [0..command.Parameters.Count-1] do 
-                        yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value 
-                    ]
-                    |> String.concat "\n"
-                )  
+                // log ( 
+                    // sprintf "Param count: %A" command.Parameters.Count :: 
+                    // [ for i in [0..command.Parameters.Count-1] do 
+                    //     yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value 
+                    // ]
+                    // |> String.concat "\n"
+                // )  
                 command.Transaction <- transaction
                 seq {
                     try command.ExecuteNonQuery ( ) |> Ok 
@@ -199,12 +199,12 @@ module Orm =
                 let command = parameterizeCommand state query transaction includeKeys Insert instance //makeCommand query connection state
                 try 
                     seq {
-                        log (
-                            sprintf "Param count: %A" command.Parameters.Count ::
-                            [ for i in [0..command.Parameters.Count-1] do 
-                                yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
-                            ] |> String.concat "\n"
-                        )   
+                        // log (
+                            // sprintf "Param count: %A" command.Parameters.Count ::
+                            // [ for i in [0..command.Parameters.Count-1] do 
+                            //     yield sprintf "Param %d - %A: %A" i command.Parameters[i].ParameterName command.Parameters[i].Value
+                            // ] |> String.concat "\n"
+                        // )   
                         command.ExecuteNonQuery ( ) |> Ok 
                     }
                     |> fun x -> 
@@ -240,7 +240,7 @@ module Orm =
             )
             ( fun connection -> 
                 let transaction = connection.BeginTransaction()
-                printfn "%A" transaction
+                // printfn "%A" transaction
                 try  
                     let cmd = makeCommand state query connection
                     seq {
@@ -307,7 +307,7 @@ module Orm =
                 | _ -> sprintf "%s.%s = %s%s" tableName x.QuotedSqlName paramChar x.FSharpName 
             ) 
             |> String.concat " and "
-            |> fun idConditional -> printfn "idConditional %A" idConditional;updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
+            |> fun idConditional -> updateManyHelper< ^T > state transaction ( sprintf " where %s" idConditional ) instances 
         )
 
     ///<summary>Update an <paramref name="instance"/> of <typeparamref name="^T"/> in the table <typeparamref name="^T"/> @ <paramref name="state"/> using the conditional <paramref name="where"/>.</summary>

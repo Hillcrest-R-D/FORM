@@ -63,7 +63,7 @@ type InsertBenchmark() =
     
     
     [<Benchmark(Baseline = true)>]
-    member _.System () = 
+    member _.ADO () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -141,7 +141,7 @@ type UpdateBenchmark() =
         connection.Close()
     
     [<Benchmark(Baseline = true)>]
-    member _.System () = 
+    member _.ADO () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use transaction = connection.BeginTransaction()
@@ -206,7 +206,7 @@ type SelectBenchmark() =
     [<Benchmark>]
     member _.Form () = 
         Orm.selectLimit<Data.Sanic> _sqliteState None _data  
-        |> Result.map ( Seq.iter ignore )
+        |> Seq.iter ( ignore )
 
     [<Benchmark>]
     member _.Dapper () = 
@@ -214,7 +214,7 @@ type SelectBenchmark() =
         for _ in connection.Query<Data.Sanic>($"select * from Sanic limit {_data};") do () 
     
     [<Benchmark(Baseline = true)>]
-    member _.System () = 
+    member _.ADO () = 
         use connection = new SQLiteConnection( Data.sqliteConnectionString() )
         connection.Open()
         use cmd = new SQLiteCommand( $"select * from \"Sanic\" limit {_data}", connection )
