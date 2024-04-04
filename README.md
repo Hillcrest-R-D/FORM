@@ -18,4 +18,4 @@ Ideally, we wish to be able to support inserting, updating, and deleting (maybe)
 
 All the work that has been done will remain on the dev branches. However, we're doing some restructuring of the Git history to make things a bit more linear in terms of versioning.
 
-Eventually, we will come back to FORM to finish it, if it's not already done by that time. We have other projects that need our attention 
+Eventually, we will come back to FORM to finish it, if it's not already done by that time. We have other projects that need our attention at this time and no longer have the bandwidth to work on all of them.

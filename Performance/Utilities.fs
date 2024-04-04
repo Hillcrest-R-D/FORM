@@ -15,7 +15,7 @@ module Utilities =
             id int,
             name varchar(32) not null,
             optional int null,
-            modified timestamp not null
+            modified varchar(16) not null
         )"
 
     let drop = "drop table if exists \"Sanic\";"
@@ -50,9 +50,9 @@ module Data =
     [<CLIMutable>]
     type Sanic = {
         [<PrimaryKey("id", Context.SQLite)>]
-        id: int64 
+        id: int 
         name: string
-        optional : int64 option 
+        optional : int option 
         modified: string
     }
     let small = 1000

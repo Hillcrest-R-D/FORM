@@ -222,11 +222,11 @@ type SelectBenchmark() =
         seq {
             while (reader.Read()) do
                 { 
-                    id = reader.GetValue(0) :?> int64 //104abc3e
+                    id = reader.GetValue(0) :?> int //104abc3e
                     name = reader.GetValue(1) :?> string
                     optional = 
                         reader.GetValue(2) |> function 
-                        | :? int64 as i -> Some i
+                        | :? int as i -> Some i
                         | _ -> None
                     modified = reader.GetValue(3) :?> string
                 } : Data.Sanic
@@ -236,8 +236,8 @@ module Main =
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
-        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
-        BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
+        // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
         BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0
