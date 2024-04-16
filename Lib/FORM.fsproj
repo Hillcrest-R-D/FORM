@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <Authors>
         <Author>Evan Howlett, HCRD</Author> 
         <Author>Mackenzie F. Libby, HCRD</Author>

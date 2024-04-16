@@ -343,10 +343,11 @@ module Utilities =
             seq {
                 match connect state with 
                 | Ok conn -> 
-                    yield! noneFunction conn 
-                | Error exn -> yield Error exn
+                    yield! noneFunction conn
+                    conn.Close()
+                | Error exn -> yield Error exn   
             }
-
+            
     let rec genericTypeName full ( _type : Type ) = 
         if not _type.IsGenericType 
         then _type.Name
@@ -509,7 +510,7 @@ module Utilities =
                 seq {
                     use cmd = makeCommand state query connection  
                     try 
-                        use reader = cmd.ExecuteReader( )
+                        use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
                         yield! consumeReader< ^T > state reader
                     with exn -> yield Error exn
                 }
@@ -561,17 +562,18 @@ module Utilities =
                 } 
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction()
-                let command = parameterizeCommand< ^T > state query transaction false Update instance 
-                try  
-                    seq {
-                        yield! seq {command.ExecuteNonQuery( ) |> Ok}
-                    }
-                    |> Seq.map (fun x -> x)
-                    |> fun x -> transaction.Commit();  x
-                with exn -> 
-                    transaction.Rollback()
-                    seq { Error exn }
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use command = parameterizeCommand< ^T > state query transaction false Update instance 
+                    command.Transaction <- transaction
+                    
+                    try  
+                        yield command.ExecuteNonQuery( ) |> Ok
+                        |> fun x -> transaction.Commit();  x
+                    with exn -> 
+                        transaction.Rollback()
+                        yield Error exn 
+                }
             )
         |> Seq.head
 
@@ -582,20 +584,22 @@ module Utilities =
             state 
             ( fun transaction -> 
                 let cmd = makeCommand state query transaction.Connection
-                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Update instances }
+                seq { 
+                    parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Update instances 
+                }
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction()
-                let cmd = makeCommand state query connection
-                try  
-                    seq {
-                        yield! seq {parameterizeSeqAndExecuteCommand< ^T > state query cmd false Update instances }
-                    }
-                    |> Seq.map (fun x -> x)
-                    |> fun x -> transaction.Commit();  x
-                with exn -> 
-                    transaction.Rollback()
-                    seq { Error exn }
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use cmd = makeCommand state query connection
+                    cmd.Transaction <- transaction
+                    try  
+                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd false Update instances
+                        |> fun x -> transaction.Commit();  x
+                    with exn -> 
+                        transaction.Rollback()
+                        yield Error exn
+                }
             )
         |> Seq.head
 
@@ -619,17 +623,17 @@ module Utilities =
                 } 
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction()
-                let command = parameterizeCommand< ^T > state query transaction false Delete instance 
-                try  
-                    seq {
-                        yield! seq {command.ExecuteNonQuery( ) |> Ok}
-                    }
-                    |> Seq.map (fun x -> x)
-                    |> fun x -> transaction.Commit();  x
-                with exn -> 
-                    transaction.Rollback()
-                    seq { Error exn }
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use command = parameterizeCommand< ^T > state query transaction false Delete instance 
+                    command.Transaction <- transaction
+                    try  
+                        yield command.ExecuteNonQuery( ) |> Ok
+                        |> fun x -> transaction.Commit();  x
+                    with exn -> 
+                        transaction.Rollback()
+                        yield Error exn 
+                }
             )
         |> Seq.head
 
@@ -644,16 +648,16 @@ module Utilities =
                 seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Delete instances }
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction()
-                let cmd = makeCommand state query connection
-                try 
-                    seq {
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    use cmd = makeCommand state query connection
+                    cmd.Transaction <- transaction
+                    try 
                         yield parameterizeSeqAndExecuteCommand< ^T > state query cmd false Delete instances
+                        |> fun x -> transaction.Commit();  x
+                    with exn -> 
+                        transaction.Rollback()
+                        yield Error exn 
                     }
-                    |> Seq.map (fun x -> x)
-                    |> fun x -> transaction.Commit();  x
-                with exn -> 
-                    transaction.Rollback()
-                    seq { Error exn }
             )
         |> Seq.head

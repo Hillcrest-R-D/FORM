@@ -75,6 +75,30 @@ module Main =
         let connect () = 
             constructScalarTest "Connect" "Successfully connected." ( fun _ -> Orm.connect testingState )
 
+        let connectionClosesAfterConsumption () =
+            constructScalarTest 
+                "ConnectionClosesAfterSeqConsumption"
+                ""
+                (fun _ -> 
+                    let mutable connectabetical : System.Data.Common.DbConnection = null
+                    Form.Utilities.withTransaction
+                        testingState
+                        (fun _ -> seq{Ok()})
+                        (fun conn ->
+                            printfn "Assigning connection: %A" conn
+                            connectabetical <- conn
+                            printfn "Connection assigned: %A" connectabetical
+                            seq{Ok()}
+                        )
+                        None
+                    |> Seq.toList
+                    |> ignore
+                    connectabetical.State
+                    |> printfn "%A"
+
+                    if connectabetical.State = System.Data.ConnectionState.Closed then Ok () else Error ( sprintf "Connection not closed: %A" connectabetical.State )
+                    
+                )
         let insert () =
             constructScalarTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
                 
@@ -245,6 +269,7 @@ module Main =
 
         testSequenced <| testList "Base ORM tests" [
             connect ()
+            connectionClosesAfterConsumption ()
             setup ()
             testSequenced <| testList "Tests" [
                 insert ()

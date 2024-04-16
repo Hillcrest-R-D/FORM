@@ -58,7 +58,7 @@ module Orm =
                 }
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction() 
+                use transaction = connection.BeginTransaction() 
                 try 
                     seq {
                         use cmd = makeCommand state sql connection  
@@ -239,18 +239,17 @@ module Orm =
                 } 
             )
             ( fun connection -> 
-                let transaction = connection.BeginTransaction()
-                // printfn "%A" transaction
-                try  
-                    let cmd = makeCommand state query connection
-                    seq {
+                seq {
+                    use transaction = connection.BeginTransaction()
+                    try  
+                        use cmd = makeCommand state query connection
+                        cmd.Transaction <- transaction
                         yield parameterizeSeqAndExecuteCommand< ^T > state query cmd includeKeys Insert instances
-                    }
-                    |> Seq.map (fun x -> x)
-                    |> fun x -> transaction.Commit();  x
-                with exn -> 
-                    transaction.Rollback()
-                    seq { Error exn }
+                        |> fun x -> transaction.Commit();  x
+                    with exn -> 
+                        transaction.Rollback()
+                        yield Error exn
+                }
             )
         |> Seq.head
         
