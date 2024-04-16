@@ -9,11 +9,16 @@ module Main =
     open System.IO
 
     let outputPath = "./console.log"
-    let constructTest name message f =
+    let constructSeqTest name message f =
+        test name {
+            Expect.wantOk ( f () |> Result.map ( fun t -> Seq.toList t; () )) message 
+        }
+    
+    let constructScalarTest name message f =
         test name {
             Expect.wantOk ( f () |> Result.map ( fun _ -> () )) message 
         }
-    
+
     let constructFailureTest name message f =
         test name {
             Expect.wantError ( f () |> Result.mapError ( fun _ -> () )) message 
@@ -40,7 +45,7 @@ module Main =
     
         
         let setup () =
-            constructTest 
+            constructScalarTest 
                 "" 
                 ""
                 ( fun _ ->
@@ -68,13 +73,13 @@ module Main =
                 )
         
         let connect () = 
-            constructTest "Connect" "Successfully connected." ( fun _ -> Orm.connect testingState )
+            constructScalarTest "Connect" "Successfully connected." ( fun _ -> Orm.connect testingState )
 
         let insert () =
-            constructTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
+            constructScalarTest "Insert" "Fact inserted." ( fun _ -> Orm.insert< Fact > testingState None true ( Fact.init() ) ) 
                 
         let insertMany () =
-            constructTest 
+            constructScalarTest 
                 "InsertMany" 
                 "Inserted many facts."
                 ( fun _ ->
@@ -92,7 +97,7 @@ module Main =
         //         )
 
         let select () =
-            constructTest 
+            constructSeqTest 
                 "Select" 
                 "Select"
                 ( fun _ -> Orm.selectAll< Fact > testingState None |> Orm.toResultSeq ) 
@@ -104,19 +109,19 @@ module Main =
         //         (fun _ -> Orm.selectAll< Fact > testingState None)  
         
         let selectLimit () =
-            constructTest 
+            constructScalarTest 
                 "SelectLimit"
                 "SelectLimit"
                 (fun _ -> Orm.selectLimit< Fact > testingState None 5 |> Orm.toResultSeq)
 
         let selectWhere () =
-            constructTest 
+            constructScalarTest 
                 "SelectWhere"
                 "SelectWhere"
                 (fun _ -> Orm.selectWhere< Fact > testingState None ( "\"maybeSomething\" = ':1'", [| "true" |]) |> Orm.toResultSeq )
 
         let selectWhereWithIn () =
-            constructTest 
+            constructScalarTest 
                 "SelectWhereWithIn"
                 "SelectWhereWithIn"
                 (fun _ -> Orm.selectWhere< Fact > testingState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ 1.4; 2.2; 3.5 ] |]) |> Orm.toResultSeq )
@@ -129,7 +134,7 @@ module Main =
                 |> ignore
             }
         let update () =
-            constructTest 
+            constructScalarTest 
                 "Update"
                 "Update"
                 (fun _ ->
@@ -139,7 +144,7 @@ module Main =
                 )
 
         let updateMany () =
-            constructTest 
+            constructScalarTest 
                 "UpdateMany"
                 "UpdateMany"
                 ( fun _ -> 
@@ -169,7 +174,7 @@ module Main =
         
         
         let updateWhere () =
-            constructTest
+            constructScalarTest
                 "UpdateWhere"
                 "UpdateWhere"
                 (fun _ -> 
@@ -179,7 +184,7 @@ module Main =
                 )
 
         let delete () =
-            constructTest 
+            constructScalarTest 
                 "Delete"
                 "Delete"
                 ( fun _ ->
@@ -188,13 +193,13 @@ module Main =
                     Orm.delete< Fact > testingState None changed
                 )
         let deleteWhere () = 
-            constructTest
+            constructScalarTest
                 "DeleteWhere"
                 "DeleteWhere"
                 (fun _ -> Orm.deleteWhere< Fact > testingState None ( "\"indexId\" = :1", [| "1" |] ) )
                 
         let deleteMany () =
-            constructTest
+            constructScalarTest
                 "DeleteMany"
                 "DeleteMany"
                 (fun _ ->
@@ -204,7 +209,7 @@ module Main =
                     Orm.deleteMany< Fact > testingState None [changed;changed2] 
                 )
         let reader () =
-            constructTest
+            constructSeqTest
                 "Reader"
                 "Reader"
                 (fun _ ->
@@ -227,7 +232,7 @@ module Main =
         
         
         let tearDown () = 
-            constructTest 
+            constructScalarTest 
                 "Teardown"
                 "Teardown"
                 ( fun _ -> 
@@ -276,7 +281,7 @@ module Main =
         let commit transaction x = Orm.tryCommit transaction |> ignore; x 
         
         let setup () =
-            constructTest 
+            constructScalarTest 
                     "" 
                     ""
                     ( fun _ ->
@@ -303,7 +308,7 @@ module Main =
                     )         
         
         let insertSelect () =
-            constructTest
+            constructScalarTest
                 "InsertSelect"
                 "InsertSelect"
                 (fun _ ->
@@ -334,7 +339,7 @@ module Main =
                 )
 
         let insertDeleteSelect () =
-            constructTest 
+            constructScalarTest 
                 "InsertDeleteSelect"
                 "InsertDeleteSelect"
                 ( fun _ ->
@@ -365,7 +370,7 @@ module Main =
                 )
 
         let insertUpdateSelect () =
-            constructTest
+            constructSeqTest
                 "InsertUpdateSelect"
                 "InsertUpdateSelect"
                 (fun _ ->
@@ -400,7 +405,7 @@ module Main =
                 )
         
         let readerWithTransaction () =
-            constructTest
+            constructScalarTest
                 "Reader-Transaction"
                 "Reader with Transaction"
                 (fun _ -> 
