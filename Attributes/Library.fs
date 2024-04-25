@@ -104,6 +104,7 @@ type ByJoinAttribute ( table : Type, context : obj ) =
 type OnAttribute (table : Type, on : string, kind : JoinDirection, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( table.Name, ( box( context ) :?> DbContext )  |> EnumToValue)
+    member _.table = table
     member _.key = 
         table.GetProperties()
         // |> Array.map ( fun field -> field :?> PropertyInfo )

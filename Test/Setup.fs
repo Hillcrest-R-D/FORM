@@ -13,7 +13,7 @@ type Contexts =
     | SQLite = 8
     | ODBC = 16
 
-[<Table("SubFact", Contexts.PSQL)>]
+[<Table("public.SubFact", Contexts.PSQL)>]
 [<Table("SubFact", Contexts.MySQL)>]
 [<Table("SubFact", Contexts.MSSQL)>]
 [<Table("SubFact", Contexts.SQLite)>]
@@ -24,7 +24,7 @@ type SubFact =
         subFact : string
     }
 
-[<Table("Fact", Contexts.PSQL)>]
+[<Table("public.Fact", Contexts.PSQL)>]
 [<Table("Fact", Contexts.MySQL)>]
 [<Table("Fact", Contexts.MSSQL)>]
 [<Table("Fact", Contexts.SQLite)>]

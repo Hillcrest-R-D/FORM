@@ -104,12 +104,7 @@ module Utilities =
                 else s
             ) "" attrs
 
-    let inline attrJoinFold ( attrs : OnAttribute array ) ( ctx : Enum ) = 
-        Array.fold ( fun s ( x : OnAttribute ) ->  
-                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (fst x.Value, x.key.Name)
-                else s
-            ) ("", "") attrs 
+    
     
     let inline tableName< ^T > ( state : OrmState ) = 
         let reifiedType = typeof< ^T >
@@ -132,7 +127,34 @@ module Utilities =
             _tableNames[(reifiedType, state)] <- tName 
             tName
 
-    
+    let inline tableNameFromRuntimeType ( state : OrmState ) reifiedType = 
+        let mutable name = ""
+        if _tableNames.TryGetValue( (reifiedType, state), &name ) 
+        then name
+        else 
+            let attrs =
+                reifiedType.GetCustomAttributes( typeof< TableAttribute >, false )
+                |> Array.map ( fun x -> x :?> DbAttribute )
+            
+            let tName = 
+                if attrs = Array.empty 
+                then reifiedType.Name
+                else attrFold attrs ( context< _ > state )
+                |> fun x -> x.Split( "." )
+                |> Array.map ( fun x -> sqlQuote state x )
+                |> String.concat "."
+            
+            _tableNames[(reifiedType, state)] <- tName 
+            tName
+
+    let inline attrJoinFold ( attrs : OnAttribute array ) ( state ) = 
+        let ctx = context<_> state
+        Array.fold ( fun s ( x : OnAttribute ) ->  
+                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
+                then (tableNameFromRuntimeType state x.table, sqlQuote state x.key.Name)
+                else s
+            ) ("", "") attrs 
+
     let inline mappingHelper< ^T, ^A > state (propertyInfo : PropertyInfo) = 
         propertyInfo.GetCustomAttributes( typeof< ^A >, false ) 
         |> Array.map ( fun y -> y :?> DbAttribute )
@@ -148,8 +170,14 @@ module Utilities =
                 FSharpType.GetRecordFields typedefof< ^T > 
                 |> Array.mapi ( fun i x -> 
                     let source =
-                        let tmp = mappingHelper< ^T, ByJoinAttribute > state x
-                        if tmp = "" then tableName< ^T > state else sqlQuote state tmp
+                        let tmp = 
+                            x.GetCustomAttributes( typeof< ByJoinAttribute >, false ) 
+                            |> Array.map ( fun y -> y :?> ByJoinAttribute )
+                            |> Array.tryHead
+                            |> function 
+                            | Some otherTemp -> tableNameFromRuntimeType state otherTemp.table
+                            | None -> ""
+                        if tmp = "" then tableName< ^T > state else tmp
                     let sqlName = 
                         let tmp = mappingHelper< ^T, ColumnAttribute > state x
                         if tmp = "" then x.Name else tmp
@@ -160,7 +188,7 @@ module Utilities =
                         JoinOn = 
                             x.GetCustomAttributes( typeof< OnAttribute >, false ) 
                             |> Array.map ( fun y -> y :?> OnAttribute )
-                            |> fun y -> attrJoinFold y ( context< ^T > state )  //attributes< ^T, ColumnAttribute> state
+                            |> fun y -> attrJoinFold y ( state )  //attributes< ^T, ColumnAttribute> state
                             |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
                         Source = source
                         QuotedSource = source
@@ -477,10 +505,10 @@ module Utilities =
         |> Array.map (fun (source, maps)  -> 
             Array.map (fun map -> 
                 let secCol = map.JoinOn |> Option.get |> snd 
-                $"{qoute source}.{qoute secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
+                $"{source}.{secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
             ) maps
             |> String.concat " and "
-            |> fun onString -> $"left join {qoute source} on {onString}"
+            |> fun onString -> $"left join {source} on {onString}"
         )
         |> String.concat "\n"
     
