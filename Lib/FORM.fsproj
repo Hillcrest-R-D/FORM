@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Form</PackageId>
-    <Version>4.0.3</Version>
+    <Version>4.0.4</Version>
     <Authors>
         <Author>Evan Howlett, HCRD</Author> 
         <Author>Mackenzie F. Libby, HCRD</Author>
@@ -23,7 +23,7 @@
     <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <!-- <PackageReference Include="Form.Attributes" Version="0.0.11" /> -->
+    <PackageReference Include="Form.Attributes" Version="[0.0.11.1]" />
     <PackageReference Include="microsoft.data.sqlclient" Version="5.1.3" />
     <PackageReference Include="microsoft.extensions.logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
@@ -31,8 +31,5 @@
     <PackageReference Include="npgsql" Version="8.0.1" />
     <PackageReference Include="system.data.odbc" Version="8.0.0" />
     <PackageReference Include="system.data.sqlite" Version="1.0.118" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Attributes\Attributes.fsproj" />
   </ItemGroup>
 </Project>
