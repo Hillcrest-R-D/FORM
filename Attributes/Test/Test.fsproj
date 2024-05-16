@@ -2,16 +2,25 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+<<<<<<< HEAD
     <TargetFramework>net6.0</TargetFramework>
+=======
+    <TargetFramework>net8.0</TargetFramework>
+>>>>>>> ef3c08d919ff69869e7858e66b1944d429bf46fb
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
+=======
+    <Compile Include="TestUtilities.fs" />
+>>>>>>> ef3c08d919ff69869e7858e66b1944d429bf46fb
     <Compile Include="Tests.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="Expecto" Version="9.*" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
@@ -20,5 +29,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib\Attributes.fsproj" />
+=======
+    <PackageReference Include="Expecto" Version="10.2.1" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.14.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9" />
+    <PackageReference Update="FSharp.Core" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../src/Attributes.fsproj" />
+>>>>>>> ef3c08d919ff69869e7858e66b1944d429bf46fb
   </ItemGroup>
 </Project>
