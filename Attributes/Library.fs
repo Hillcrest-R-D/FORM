@@ -97,6 +97,11 @@ type ByJoinAttribute ( table : Type, context : obj ) =
     inherit DbAttribute( )
     override _.Value = ( table.Name,  ( box( context ) :?> DbContext )  |> EnumToValue )
     member _.table = table
+    member _.test = ""
+    member val SourceColumn : string= "" 
+        with get,set
+
+    member x.sourceColumn = if String.IsNullOrEmpty(x.SourceColumn) then None else Some x.SourceColumn
     
 
 ///<Description>An attribute type which allows the specification of what fields/columns to join on to bring in ByJoin fields/columns... see ByJoinAttribute</Description>

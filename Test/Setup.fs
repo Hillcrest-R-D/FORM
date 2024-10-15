@@ -22,6 +22,7 @@ type SubFact =
     {
         factId : int64 
         subFact : string
+        commonCol : string
     }
 
 [<Table("public.Fact", Contexts.PSQL)>]
@@ -75,10 +76,11 @@ type Fact =
         [<Unique("group2", Contexts.PSQL)>]
         [<Unique("group2", Contexts.ODBC)>]
         biteSize : string
-        [<ByJoin(typeof<SubFact>, Contexts.SQLite)>]
-        [<ByJoin(typeof<SubFact>, Contexts.PSQL)>]
-        [<ByJoin(typeof<SubFact>, Contexts.ODBC)>]
-        subFact : string option
+        [<ByJoin(typeof<SubFact>, Contexts.SQLite, SourceColumn = "subFact")>]
+        [<ByJoin(typeof<SubFact>, Contexts.PSQL, SourceColumn = "subFact")>]
+        [<ByJoin(typeof<SubFact>, Contexts.ODBC, SourceColumn = "subFact")>]
+        aSubFact : string option
+        commonCol : string
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -99,7 +101,8 @@ module Fact =
             maybeSomething = "true"
             sometimesNothing = Some 1L
             biteSize =  "!aBite"
-            subFact = Some "sooper dooper secret fact"
+            aSubFact = Some "sooper dooper secret fact"
+            commonCol = "Heres a column that might conflict with SubFact"
         }
 
     

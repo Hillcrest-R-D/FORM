@@ -5,6 +5,7 @@
     <!-- <IsPackable>false</IsPackable> -->
     <GenerateProgramFile>false</GenerateProgramFile>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Sdk>8.0</Sdk>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
 namespace Form
 
-module Utilities = 
+module Utilities =
     open Form.Attributes
     open System.Collections.Generic
     open Microsoft.FSharp.Reflection
@@ -16,676 +16,813 @@ module Utilities =
     open System.Data.Common
     open Logging
     open System.Data.Odbc
-    
+
     open System.Text.RegularExpressions
 
-    type Behavior = 
+    type Behavior =
         | Update
-        | Insert 
+        | Insert
         | Delete
 
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _tableNames = Dictionary<Type * OrmState, string>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    let mutable _tableNames = Dictionary<Type * OrmState, string> ()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _constructors = Dictionary< Type, obj[] -> obj>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    let mutable _constructors = Dictionary<Type, obj[] -> obj> ()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping []>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping[]> ()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _toOptions = Dictionary<Type, obj[] -> obj>()
-    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining. 
+    let mutable _toOptions = Dictionary<Type, obj[] -> obj> ()
+    /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _options = Dictionary<Type, Type option>()
+    let mutable _options = Dictionary<Type, Type option> ()
 
-    let inline connect ( state : OrmState ) : Result< DbConnection, exn > = 
-        try 
-            let connection = 
-                match state with 
-                | MSSQL     ( str, _ ) -> new SqlConnection( str ) :> DbConnection
-                | MySQL     ( str, _ ) -> new MySqlConnection( str ) :> DbConnection
-                | PSQL      ( str, _ ) -> new NpgsqlConnection( str ) :> DbConnection
-                | SQLite    ( str, _ ) -> new SQLiteConnection( str ) :> DbConnection
-                | ODBC      ( str, _ ) -> new OdbcConnection( str ) :> DbConnection
-            connection.Open()
+    let inline connect (state : OrmState) : Result<DbConnection, exn> =
+        try
+            let connection =
+                match state with
+                | MSSQL (str, _) -> new SqlConnection (str) :> DbConnection
+                | MySQL (str, _) -> new MySqlConnection (str) :> DbConnection
+                | PSQL (str, _) -> new NpgsqlConnection (str) :> DbConnection
+                | SQLite (str, _) -> new SQLiteConnection (str) :> DbConnection
+                | ODBC (str, _) -> new OdbcConnection (str) :> DbConnection
+
+            connection.Open ()
             Ok connection
-        with 
-        | exn -> Error exn
+        with exn ->
+            Error exn
 
-    let inline sqlQuote ( state : OrmState ) str  =
-        match state with 
+    let inline sqlQuote (state : OrmState) str =
+        match state with
         | MSSQL _ -> $"[{str}]"
         | MySQL _ -> $"`{str}`"
-        | PSQL _ 
-        | SQLite _ 
+        | PSQL _
+        | SQLite _
         | ODBC _ -> $"\"{str}\""
 
-    let pattern = fun t -> Regex.Replace(t, @"'", @"''" )
-        // function 
-        // | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
-        // | t when t :?> seq -> t
+    let pattern = fun t -> Regex.Replace (t, @"'", @"''")
+    // function
+    // | t when t :?> string -> Regex.Replace(t, @"'", @"''" )
+    // | t when t :?> seq -> t
     // [| ("customerType = %s", "retail"); ( "and (hasSaleWithinPastYear = %s", "true" ); ( "or boughtTiresAYearAgo = %s)", "true" ) |]
 
     // "customerType = :1 and (hasSaleWithinPastYear = :2 or boughtTiresAYearAgo = :2)" [| "retail"; "true" |]
-    let inline escape( where : string * obj seq )= 
-        let format, values = where  
+    let inline escape (where : string * obj seq) =
+        let format, values = where
         let mutable i = 0
-        values  
-        |> Seq.fold 
-            (fun accumulator item -> 
-                i <- i+1
 
-                let sanitizedInput = 
-                    match item with 
-                    | :? seq<string> as t -> 
-                        System.String.Join( ", ", Seq.map ( fun innerItem -> $"'{pattern innerItem}'" ) t )
-                    | :? string as t -> pattern <| t.ToString()
-                    | :? System.Collections.IEnumerable as t -> //seq of non string type (for numeric sequences, and any others that will behave in an interpolated string. May need to adjust to get desirable behavior generically)
-                        System.String.Join( ", ", Seq.map (fun innerItem -> $"{innerItem}") [for i in t do yield i] ) 
-                    | _ -> pattern <| item.ToString()
-                
-                Regex.Replace(accumulator, $":{i}", sanitizedInput)
+        values
+        |> Seq.fold
+            (fun accumulator item ->
+                i <- i + 1
+
+                let sanitizedInput =
+                    match item with
+                    | :? seq<string> as t -> System.String.Join (", ", Seq.map (fun innerItem -> $"'{pattern innerItem}'") t)
+                    | :? string as t -> pattern <| t.ToString ()
+                    | :? System.Collections.IEnumerable as t ->
+                        //seq of non string type (for numeric sequences, and any others that will behave in an interpolated string.)
+                        //May need to adjust to get desirable behavior generically
+                        System.String.Join (
+                            ", ",
+                            Seq.map
+                                (fun innerItem -> $"{innerItem}")
+                                [
+                                    for i in t do
+                                        yield i
+                                ]
+                        )
+                    | _ -> pattern <| item.ToString ()
+
+                Regex.Replace (accumulator, $":{i}", sanitizedInput)
             )
-            format 
-    let inline context< ^T > ( state : OrmState ) = 
-        match state with 
-        | MSSQL     ( _, c ) -> c 
-        | MySQL     ( _, c ) -> c 
-        | PSQL      ( _, c ) -> c 
-        | SQLite    ( _, c ) -> c 
-        | ODBC      ( _, c ) -> c 
+            format
 
-    let inline attrFold ( attrs : DbAttribute array ) ( ctx : Enum ) = 
-        Array.fold ( fun s ( x : DbAttribute ) ->  
-                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then fst x.Value
-                else s
-            ) "" attrs
+    let inline context< ^T> (state : OrmState) =
+        match state with
+        | MSSQL (_, c) -> c
+        | MySQL (_, c) -> c
+        | PSQL (_, c) -> c
+        | SQLite (_, c) -> c
+        | ODBC (_, c) -> c
 
-    
-    
-    let inline tableName< ^T > ( state : OrmState ) = 
-        let reifiedType = typeof< ^T >
+    let inline attrFold (attrs : DbAttribute array) (ctx : Enum) =
+        Array.fold
+            (fun s (x : DbAttribute) ->
+                if snd x.Value = ((box (ctx) :?> DbContext) |> EnumToValue) then
+                    fst x.Value
+                else
+                    s
+            )
+            ""
+            attrs
+
+
+
+    let inline tableName< ^T> (state : OrmState) =
+        let reifiedType = typeof< ^T>
         let mutable name = ""
-        if _tableNames.TryGetValue( (reifiedType, state), &name ) 
-        then name
-        else 
+
+        if _tableNames.TryGetValue ((reifiedType, state), &name) then
+            name
+        else
             let attrs =
-                typedefof< ^T >.GetCustomAttributes( typeof< TableAttribute >, false )
-                |> Array.map ( fun x -> x :?> DbAttribute )
-            
-            let tName = 
-                if attrs = Array.empty 
-                then typedefof< ^T >.Name
-                else attrFold attrs ( context< ^T > state )
-                |> fun x -> x.Split( "." )
-                |> Array.map ( fun x -> sqlQuote state x )
+                typedefof< ^T>.GetCustomAttributes (typeof<TableAttribute>, false)
+                |> Array.map (fun x -> x :?> DbAttribute)
+
+            let tName =
+                if attrs = Array.empty then
+                    typedefof< ^T>.Name
+                else
+                    attrFold attrs (context< ^T> state)
+                |> fun x -> x.Split (".")
+                |> Array.map (fun x -> sqlQuote state x)
                 |> String.concat "."
-            
-            _tableNames[(reifiedType, state)] <- tName 
+
+            _tableNames[(reifiedType, state)] <- tName
             tName
 
-    let inline tableNameFromRuntimeType ( state : OrmState ) reifiedType = 
+    let inline tableNameFromRuntimeType (state : OrmState) reifiedType =
         let mutable name = ""
-        if _tableNames.TryGetValue( (reifiedType, state), &name ) 
-        then name
-        else 
+
+        if _tableNames.TryGetValue ((reifiedType, state), &name) then
+            name
+        else
             let attrs =
-                reifiedType.GetCustomAttributes( typeof< TableAttribute >, false )
-                |> Array.map ( fun x -> x :?> DbAttribute )
-            
-            let tName = 
-                if attrs = Array.empty 
-                then reifiedType.Name
-                else attrFold attrs ( context< _ > state )
-                |> fun x -> x.Split( "." )
-                |> Array.map ( fun x -> sqlQuote state x )
+                reifiedType.GetCustomAttributes (typeof<TableAttribute>, false)
+                |> Array.map (fun x -> x :?> DbAttribute)
+
+            let tName =
+                if attrs = Array.empty then
+                    reifiedType.Name
+                else
+                    attrFold attrs (context<_> state)
+                |> fun x -> x.Split (".")
+                |> Array.map (fun x -> sqlQuote state x)
                 |> String.concat "."
-            
-            _tableNames[(reifiedType, state)] <- tName 
+
+            _tableNames[(reifiedType, state)] <- tName
             tName
 
-    let inline attrJoinFold ( attrs : OnAttribute array ) ( state ) = 
+    let inline attrJoinFold (attrs : OnAttribute array) (state) =
         let ctx = context<_> state
-        Array.fold ( fun s ( x : OnAttribute ) ->  
-                if snd x.Value = ( ( box( ctx ) :?> DbContext ) |> EnumToValue ) 
-                then (tableNameFromRuntimeType state x.table, sqlQuote state x.key.Name)
-                else s
-            ) ("", "") attrs 
 
-    let inline mappingHelper< ^T, ^A > state (propertyInfo : PropertyInfo) = 
-        propertyInfo.GetCustomAttributes( typeof< ^A >, false ) 
-        |> Array.map ( fun y -> y :?> DbAttribute )
-        |> fun y -> attrFold y ( context< ^T > state )   
- 
-    let inline columnMapping< ^T > ( state : OrmState ) = 
-        let reifiedType = typeof< ^T >
+        Array.fold
+            (fun s (x : OnAttribute) ->
+                if snd x.Value = ((box (ctx) :?> DbContext) |> EnumToValue) then
+                    (tableNameFromRuntimeType state x.table, sqlQuote state x.key.Name)
+                else
+                    s
+            )
+            ("", "")
+            attrs
+
+    let inline mappingHelper< ^T, ^A> state (propertyInfo : PropertyInfo) =
+        propertyInfo.GetCustomAttributes (typeof< ^A>, false)
+        |> Array.map (fun y -> y :?> DbAttribute)
+        |> fun y -> attrFold y (context< ^T> state)
+
+    let inline columnMapping< ^T> (state : OrmState) =
+        let reifiedType = typeof< ^T>
         let mutable outMapping = Array.empty
-        if _mappings.TryGetValue((reifiedType, state), &outMapping) 
-        then outMapping 
-        else 
-            let mapping = 
-                FSharpType.GetRecordFields typedefof< ^T > 
-                |> Array.mapi ( fun i x -> 
+
+        if _mappings.TryGetValue ((reifiedType, state), &outMapping) then
+            outMapping
+        else
+            let mapping =
+                FSharpType.GetRecordFields typedefof< ^T>
+                |> Array.mapi (fun i x ->
+                    let byJoin =
+                        x.GetCustomAttributes (typeof<ByJoinAttribute>, false)
+                        |> Array.map (fun y -> y :?> ByJoinAttribute)
+                        |> Array.tryHead
+
                     let source =
-                        let tmp = 
-                            x.GetCustomAttributes( typeof< ByJoinAttribute >, false ) 
-                            |> Array.map ( fun y -> y :?> ByJoinAttribute )
-                            |> Array.tryHead
-                            |> function 
-                            | Some otherTemp -> tableNameFromRuntimeType state otherTemp.table
-                            | None -> ""
-                        if tmp = "" then tableName< ^T > state else tmp
-                    let sqlName = 
-                        let tmp = mappingHelper< ^T, ColumnAttribute > state x
-                        if tmp = "" then x.Name else tmp
-                    { 
+                        let tmp =
+                            byJoin
+                            |> function
+                                | Some otherTemp -> tableNameFromRuntimeType state otherTemp.table
+                                | None -> ""
+
+                        if tmp = "" then tableName< ^T> state else tmp
+
+                    let sqlName =
+                        byJoin
+                        |> Option.bind (fun att -> att.sourceColumn)
+                        |> function
+                            | Some a -> a
+                            | None ->
+                                mappingHelper< ^T, ColumnAttribute> state x
+                                |> function
+                                    | "" -> x.Name
+                                    | str -> str
+
+                    {
                         Index = i
-                        IsKey = if (mappingHelper< ^T, PrimaryKeyAttribute > state x) = "" then false else true
-                        IsIndex = if (mappingHelper< ^T, IdAttribute > state x) = "" then false else true
-                        JoinOn = 
-                            x.GetCustomAttributes( typeof< OnAttribute >, false ) 
-                            |> Array.map ( fun y -> y :?> OnAttribute )
-                            |> fun y -> attrJoinFold y ( state )  //attributes< ^T, ColumnAttribute> state
+                        IsKey =
+                            if (mappingHelper< ^T, PrimaryKeyAttribute> state x) = "" then
+                                false
+                            else
+                                true
+                        IsIndex =
+                            if (mappingHelper< ^T, IdAttribute> state x) = "" then
+                                false
+                            else
+                                true
+                        JoinOn =
+                            x.GetCustomAttributes (typeof<OnAttribute>, false)
+                            |> Array.map (fun y -> y :?> OnAttribute)
+                            |> fun y -> attrJoinFold y (state) //attributes< ^T, ColumnAttribute> state
                             |> fun (y : (string * string)) -> if y = ("", "") then None else Some y
                         Source = source
                         QuotedSource = source
                         SqlName = sqlName
                         QuotedSqlName = sqlQuote state sqlName
                         FSharpName = x.Name
-                        Type = x.PropertyType 
+                        Type = x.PropertyType
                         PropertyInfo = x
-                    } 
+                    }
                 )
-            _mappings[(reifiedType, state)] <- mapping 
+
+            _mappings[(reifiedType, state)] <- mapping
             mapping
 
-    let inline table< ^T > ( state : OrmState ) = 
-        tableName< ^T > state
-    
-    let inline mapping< ^T > ( state : OrmState ) = 
-        columnMapping< ^T > state
+    let inline table< ^T> (state : OrmState) = tableName< ^T> state
 
-    let inline columns< ^T > ( state : OrmState ) = 
-        mapping< ^T > state
-        |> Array.map ( fun x -> $"{x.QuotedSource}.{x.QuotedSqlName}" )
-       
-    let inline fields< ^T >  ( state : OrmState ) = 
-        mapping< ^T > state
-        |> Array.map ( fun x -> x.FSharpName )
+    let inline mapping< ^T> (state : OrmState) = columnMapping< ^T> state
 
-    
-    let inline toOption ( type_: Type ) ( value: obj ) : obj =
-        let constructor = 
-            if _toOptions.ContainsKey( type_ )
-            then _toOptions[type_]
-            else
-                let info = FSharpType.GetUnionCases( typedefof<Option<_>>.MakeGenericType( [|type_|] ) )
-                _toOptions[type_] <- FSharpValue.PreComputeUnionConstructor(info[1])
+    let inline columns< ^T> (state : OrmState) =
+        mapping< ^T> state |> Array.map (fun x -> $"{x.QuotedSource}.{x.QuotedSqlName}")
+
+    let inline fields< ^T> (state : OrmState) =
+        mapping< ^T> state |> Array.map (fun x -> x.FSharpName)
+
+
+    let inline toOption (type_ : Type) (value : obj) : obj =
+        let constructor =
+            if _toOptions.ContainsKey (type_) then
                 _toOptions[type_]
-                
+            else
+                let info =
+                    FSharpType.GetUnionCases (typedefof<Option<_>>.MakeGenericType ([| type_ |]))
 
-        if DBNull.Value.Equals( value ) 
-        then None
-        else constructor [|value|]
+                _toOptions[type_] <- FSharpValue.PreComputeUnionConstructor (info[1])
+                _toOptions[type_]
 
-    
-    let inline optionType ( type_ : Type )  =
-        let mutable opt = None 
-        if _options.TryGetValue( type_, &opt )
-        then opt
-        else 
-            let tmp = 
-                if type_.IsGenericType && type_.GetGenericTypeDefinition( ) = typedefof<Option<_>>
-                then Some ( type_.GetGenericArguments( ) |> Array.head ) // optionType Option<User> -> User  
-                else None
+
+        if DBNull.Value.Equals (value) then
+            None
+        else
+            constructor [| value |]
+
+
+    let inline optionType (type_ : Type) =
+        let mutable opt = None
+
+        if _options.TryGetValue (type_, &opt) then
+            opt
+        else
+            let tmp =
+                if type_.IsGenericType && type_.GetGenericTypeDefinition () = typedefof<Option<_>> then
+                    Some (type_.GetGenericArguments () |> Array.head) // optionType Option<User> -> User
+                else
+                    None
+
             _options[type_] <- tmp
             tmp
-        
-    let inline makeParameter ( state : OrmState ) : DbParameter =
+
+    let inline makeParameter (state : OrmState) : DbParameter =
         match state with
-        | MSSQL     _ -> SqlParameter( )
-        | MySQL     _ -> MySqlParameter( )
-        | PSQL      _ -> NpgsqlParameter( )
-        | SQLite    _ -> SQLiteParameter( )
-        | ODBC      _ -> OdbcParameter( )
-        
-    let toDbType ( typeCode : TypeCode ) = 
-        match typeCode with 
-            | TypeCode.Byte     -> DbType.Byte
-            | TypeCode.Char     -> DbType.StringFixedLength    // ???
-            | TypeCode.Int16    -> DbType.Int16
-            | TypeCode.Int32    -> DbType.Int32
-            | TypeCode.Int64    -> DbType.Int64
-            | TypeCode.SByte    -> DbType.SByte
-            | TypeCode.Double   -> DbType.Double
-            | TypeCode.Single   -> DbType.Single
-            | TypeCode.String   -> DbType.String
-            | TypeCode.UInt16   -> DbType.UInt16
-            | TypeCode.UInt32   -> DbType.UInt32
-            | TypeCode.UInt64   -> DbType.UInt64
-            | TypeCode.Boolean  -> DbType.Boolean
-            | TypeCode.Decimal  -> DbType.Decimal
-            | TypeCode.DateTime -> DbType.DateTime // Used for Date, DateTime and DateTime2 DbTypes DbType.DateTime
-            | _ -> DbType.Object 
-    
-    let inline unwrapOption ( tmp : DbParameter ) ( opt : obj ) ( ) = 
-        match opt with 
-        | :? Option<Byte>       as t -> tmp.Value <- t |> Option.get
-        | :? Option<Char>       as t -> tmp.Value <- t |> Option.get
-        | :? Option<SByte>      as t -> tmp.Value <- t |> Option.get //Int8
-        | :? Option<Int16>      as t -> tmp.Value <- t |> Option.get
-        | :? Option<Int32>      as t -> tmp.Value <- t |> Option.get
-        | :? Option<Int64>      as t -> tmp.Value <- t |> Option.get
-        #if NET7_0_OR_GREATER
-        | :? Option<Int128>     as t -> tmp.Value <- t |> Option.get
-        #endif
-        | :? Option<Double>     as t -> tmp.Value <- t |> Option.get
-        | :? Option<Single>     as t -> tmp.Value <- t |> Option.get
-        | :? Option<String>     as t -> tmp.Value <- t |> Option.get
-        | :? Option<UInt16>     as t -> tmp.Value <- t |> Option.get
-        | :? Option<UInt32>     as t -> tmp.Value <- t |> Option.get
-        | :? Option<UInt64>     as t -> tmp.Value <- t |> Option.get
-        #if NET7_0_OR_GREATER
-        | :? Option<UInt128>    as t -> tmp.Value <- t |> Option.get
-        #endif
-        | :? Option<Boolean>    as t -> tmp.Value <- t |> Option.get
-        | :? Option<Decimal>    as t -> tmp.Value <- t |> Option.get
-        | :? Option<DateTime>   as t -> tmp.Value <- t |> Option.get
+        | MSSQL _ -> SqlParameter ()
+        | MySQL _ -> MySqlParameter ()
+        | PSQL _ -> NpgsqlParameter ()
+        | SQLite _ -> SQLiteParameter ()
+        | ODBC _ -> OdbcParameter ()
+
+    let toDbType (typeCode : TypeCode) =
+        match typeCode with
+        | TypeCode.Byte -> DbType.Byte
+        | TypeCode.Char -> DbType.StringFixedLength // ???
+        | TypeCode.Int16 -> DbType.Int16
+        | TypeCode.Int32 -> DbType.Int32
+        | TypeCode.Int64 -> DbType.Int64
+        | TypeCode.SByte -> DbType.SByte
+        | TypeCode.Double -> DbType.Double
+        | TypeCode.Single -> DbType.Single
+        | TypeCode.String -> DbType.String
+        | TypeCode.UInt16 -> DbType.UInt16
+        | TypeCode.UInt32 -> DbType.UInt32
+        | TypeCode.UInt64 -> DbType.UInt64
+        | TypeCode.Boolean -> DbType.Boolean
+        | TypeCode.Decimal -> DbType.Decimal
+        | TypeCode.DateTime -> DbType.DateTime // Used for Date, DateTime and DateTime2 DbTypes DbType.DateTime
+        | _ -> DbType.Object
+
+    let inline unwrapOption (tmp : DbParameter) (opt : obj) () =
+        match opt with
+        | :? Option<Byte> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Char> as t -> tmp.Value <- t |> Option.get
+        | :? Option<SByte> as t -> tmp.Value <- t |> Option.get //Int8
+        | :? Option<Int16> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int32> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Int64> as t -> tmp.Value <- t |> Option.get
+#if NET7_0_OR_GREATER
+        | :? Option<Int128> as t -> tmp.Value <- t |> Option.get
+#endif
+        | :? Option<Double> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Single> as t -> tmp.Value <- t |> Option.get
+        | :? Option<String> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt16> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt32> as t -> tmp.Value <- t |> Option.get
+        | :? Option<UInt64> as t -> tmp.Value <- t |> Option.get
+#if NET7_0_OR_GREATER
+        | :? Option<UInt128> as t -> tmp.Value <- t |> Option.get
+#endif
+        | :? Option<Boolean> as t -> tmp.Value <- t |> Option.get
+        | :? Option<Decimal> as t -> tmp.Value <- t |> Option.get
+        | :? Option<DateTime> as t -> tmp.Value <- t |> Option.get
         | _ -> ()
-    
-    let inline getParamChar state = 
+
+    let inline getParamChar state =
         match state with
         | ODBC _ -> "?"
         | _ -> "@"
 
 
     ///<Description> Takes a reader of type IDataReader and a state of type OrmState -> consumes the reader and returns a sequence of type ^T.</Description>
-    let inline consumeReader< ^T > ( state : OrmState ) ( reader : IDataReader ) = 
-        let reifiedType = typeof< ^T >
-        let constructor = 
-            let mutable tmp = fun _ -> obj()
-            if _constructors.TryGetValue(reifiedType, &tmp)
-            then ()
-            else 
-                tmp <- FSharpValue.PreComputeRecordConstructor(reifiedType)
+    let inline consumeReader< ^T> (state : OrmState) (reader : IDataReader) =
+        let reifiedType = typeof< ^T>
+
+        let constructor =
+            let mutable tmp = fun _ -> obj ()
+
+            if _constructors.TryGetValue (reifiedType, &tmp) then
+                ()
+            else
+                tmp <- FSharpValue.PreComputeRecordConstructor (reifiedType)
                 _constructors[reifiedType] <- tmp
-            tmp        
-        let mutable options = 
-            [| for fld in ( columnMapping< ^T > state  ) do  
-                match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
-                | Some _type -> toOption _type 
-                | None -> id
+
+            tmp
+
+        let mutable options =
+            [|
+                for fld in (columnMapping< ^T> state) do
+                    match optionType fld.Type with //handle option type, i.e. option<T> if record field is optional, else T
+                    | Some _type -> toOption _type
+                    | None -> id
             |]
-        seq { 
-            try 
-                while reader.Read( ) do
-                    constructor 
-                        [| for i in 0..reader.FieldCount-1 do 
-                            options[i] <| reader.GetValue( i ) 
-                        |] 
+
+        seq {
+            try
+                while reader.Read () do
+                    constructor
+                        [|
+                            for i in 0 .. reader.FieldCount - 1 do
+                                options[i] <| reader.GetValue (i)
+                        |]
                     :?> ^T // dang ol' class factory man
                     |> Ok
-                    
-            with exn -> 
-                Error exn                
-        }  
+            with exn ->
+                Error exn
+        }
 
-    let inline insertBase< ^T > ( state : OrmState ) insertKeys =
+    let inline insertBase< ^T> (state : OrmState) insertKeys =
         let paramChar = getParamChar state
-        let tableName = ( table< ^T > state ) 
-        let cols = 
-            mapping< ^T > state
-            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName ) //! Filter out joins for non-select queries 
-            |> Array.filter (fun col -> not col.IsKey || insertKeys )
-        let placeHolders = 
+        let tableName = (table< ^T> state)
+
+        let cols =
+            mapping< ^T> state
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName) //! Filter out joins for non-select queries
+            |> Array.filter (fun col -> not col.IsKey || insertKeys)
+
+        let placeHolders =
             cols
-            |> Array.map ( fun col ->  
-                match state with 
+            |> Array.map (fun col ->
+                match state with
                 | ODBC _ -> paramChar
                 | _ -> sprintf "%s%s" paramChar col.FSharpName
             )
             |> String.concat ", "
-        let columnNames = 
-            cols
-            |> Array.map ( fun x -> x.QuotedSqlName )
-            |> String.concat ", "  
-        
-        sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
-    
-    let inline makeCommand ( state : OrmState ) ( query : string ) ( connection : DbConnection ) : DbCommand = 
-        // log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
-        match state with 
-        | MSSQL _ ->    new SqlCommand ( query, connection :?> SqlConnection )
-        | MySQL _ ->    new MySqlCommand ( query, connection :?> MySqlConnection )
-        | PSQL _ ->     new NpgsqlCommand ( query, connection :?> NpgsqlConnection )
-        | SQLite _ ->   new SQLiteCommand ( query, connection :?> SQLiteConnection )
-        | ODBC _ ->     new OdbcCommand ( query, connection :?> OdbcConnection )
 
-    let inline withTransaction state transactionFunction (noneFunction : DbConnection -> Result<'a, exn> seq) transaction : Result<'a, exn> seq =
-        match transaction with 
-        | Some ( transaction : DbTransaction ) -> transactionFunction transaction
-        | None -> 
+        let columnNames = cols |> Array.map (fun x -> x.QuotedSqlName) |> String.concat ", "
+
+        sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
+
+    let inline makeCommand (state : OrmState) (query : string) (connection : DbConnection) : DbCommand =
+        // log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
+        match state with
+        | MSSQL _ -> new SqlCommand (query, connection :?> SqlConnection)
+        | MySQL _ -> new MySqlCommand (query, connection :?> MySqlConnection)
+        | PSQL _ -> new NpgsqlCommand (query, connection :?> NpgsqlConnection)
+        | SQLite _ -> new SQLiteCommand (query, connection :?> SQLiteConnection)
+        | ODBC _ -> new OdbcCommand (query, connection :?> OdbcConnection)
+
+    type ExecutionResult<'a> =
+        | Sequence of Result<'a, exn> seq
+        | Single of Result<'a, exn>
+        | ConnectionError of exn
+
+    let liftSequenceResult =
+        function
+        | Sequence a -> a
+        | ConnectionError exn -> seq { Error exn }
+        | _ ->
             seq {
-                match connect state with 
-                | Ok conn -> 
-                    yield! noneFunction conn
-                    conn.Close()
-                | Error exn -> yield Error exn   
+                Error
+                <| Types.UndefinedBehaviorException "Call returned a Single result, but expected a Sequence result."
             }
-            
-    let rec genericTypeName full ( _type : Type ) = 
-        if not _type.IsGenericType 
-        then _type.Name
-        else 
-            let typeName = 
-                let mutable tmp = _type.GetGenericTypeDefinition().Name 
-                tmp <- tmp.Substring(0, tmp.IndexOf('`'))
+
+    let liftSingleResult =
+        function
+        | Single a -> a
+        | ConnectionError exn -> Error exn
+        | _ ->
+            Error
+            <| Types.UndefinedBehaviorException "Call returned a Sequence result, but expected a Single result."
+
+    /// <summary></summary>
+    /// <param name="state"></param>
+    /// <param name="eFunc"></param>
+    /// <param name="iFunc">The command to run with an implicit transaction</param>
+    /// <param name="transaction"></param>
+    /// <typeparam name="'a"></typeparam>
+    /// <returns></returns>
+    let inline withTransaction state eFunc iFunc transaction = //: Result<'a, exn> seq =
+        match transaction with
+        | Some (transaction : DbTransaction) -> eFunc transaction
+        | None ->
+            match connect state with
+            | Ok conn ->
+                let result = iFunc conn
+                result
+            | Error exn -> ConnectionError exn
+
+    let rec genericTypeName full (_type : Type) =
+        if not _type.IsGenericType then
+            _type.Name
+        else
+            let typeName =
+                let mutable tmp = _type.GetGenericTypeDefinition().Name
+                tmp <- tmp.Substring (0, tmp.IndexOf ('`'))
                 tmp
-            if not full 
-            then typeName 
-            else 
-                let args = 
-                    _type.GetGenericArguments()
+
+            if not full then
+                typeName
+            else
+                let args =
+                    _type.GetGenericArguments ()
                     |> Array.map (genericTypeName full)
                     |> String.concat ","
-                
+
                 sprintf "%s<%s>" typeName args
 
-    let inline parameterizeCommand< ^T > state query (transaction : DbTransaction) includeKeys behavior ( instance : ^T ) =
+    let inline parameterizeCommand< ^T> state query (transaction : DbTransaction) includeKeys behavior (instance : ^T) =
         let cmd = makeCommand state query transaction.Connection
         cmd.Transaction <- transaction
         let paramChar = getParamChar state
-        let allColumns = 
-            mapping< ^T > state
-            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T > state)  ) //! Filter out joins for non-select queries
-        
-        match behavior with 
-        | Insert -> allColumns |> Array.filter (fun col ->  not col.IsKey || includeKeys )
-        | Update -> allColumns |> Array.filter (fun col ->  not col.IsKey || includeKeys ) |> fun x -> Array.append x ( Array.filter (fun col -> col.IsKey ) allColumns )
-        | Delete -> allColumns |> Array.filter (fun col ->  col.IsKey )
-        |> Array.iteri ( fun i mappedInstance -> 
+
+        let allColumns =
+            mapping< ^T> state
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = (tableName< ^T> state)) //! Filter out joins for non-select queries
+
+        match behavior with
+        | Insert -> allColumns |> Array.filter (fun col -> not col.IsKey || includeKeys)
+        | Update ->
+            allColumns
+            |> Array.filter (fun col -> not col.IsKey || includeKeys)
+            |> fun x -> Array.append x (Array.filter (fun col -> col.IsKey) allColumns)
+        | Delete -> allColumns |> Array.filter (fun col -> col.IsKey)
+        |> Array.iteri (fun i mappedInstance ->
             // log (sprintf "binding value %s(%A) to position %i - " mappedInstance.FSharpName (mappedInstance.PropertyInfo.GetValue( instance )) i )
             let param =
-                let mutable tmp = cmd.CreateParameter( )    
-                let mappedValue = mappedInstance.PropertyInfo.GetValue( instance )
-                match state with 
+                let mutable tmp = cmd.CreateParameter ()
+                let mappedValue = mappedInstance.PropertyInfo.GetValue (instance)
+
+                match state with
                 | ODBC _ -> ()
                 | _ -> tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
-                if
-                    mappedValue = null 
-                then
+
+                if mappedValue = null then
                     tmp.IsNullable <- true
                     tmp.Value <- DBNull.Value
+                else if genericTypeName false mappedInstance.Type = "FSharpOption" then
+                    tmp.IsNullable <- true
+                    unwrapOption tmp (mappedValue) ()
                 else
-                    if 
-                        genericTypeName false mappedInstance.Type = "FSharpOption"
-                    then
-                        tmp.IsNullable <- true
-                        unwrapOption tmp (mappedValue) ()
-                    else
-                        tmp.Value <- mappedValue // Some 1
+                    tmp.Value <- mappedValue // Some 1
+
                 tmp
 
-            cmd.Parameters.Add ( param ) |> ignore
+            cmd.Parameters.Add (param) |> ignore
         )
-        
+
         cmd
 
-    let inline parameterizeSeqAndExecuteCommand< ^T > state query (cmd : DbCommand) includeKeys behavior ( instances : ^T seq ) =
-         
-        
-        let mapp = 
-            let tmp = 
-                mapping< ^T > state
-                |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries 
-            
-            match behavior with 
-            | Insert -> tmp |> Array.filter (fun col ->  not col.IsKey || includeKeys )
-            | Update -> tmp |> Array.filter (fun col ->  not col.IsKey || includeKeys ) |> fun x -> Array.append x ( Array.filter (fun col -> col.IsKey ) tmp )
-            | Delete -> tmp |> Array.filter (fun col ->  col.IsKey )
+    let inline parameterizeSeqAndExecuteCommand< ^T> state query (cmd : DbCommand) includeKeys behavior (instances : ^T seq) =
 
-        let paramChar = getParamChar state        
-        let mutable cmdParams = 
-            mapp 
-            |> Array.map (
-                fun (mappedInstance : SqlMapping ) ->
-                    let mutable tmp = cmd.CreateParameter( ) 
-                    match state with 
-                    | ODBC _ -> ()
-                    | _ -> tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
-                    cmd.Parameters.Add ( tmp ) |> ignore
-                    tmp
-                )
-            
-        instances 
-        |> Seq.mapi ( fun index instance ->
-            mapp 
-            |> Array.iteri ( fun jindex mappedInstance ->   
-                let thing = mappedInstance.PropertyInfo.GetValue( instance )                  
-                if
-                    thing = null 
-                then
+
+        let mapp =
+            let tmp =
+                mapping< ^T> state
+                |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T> state) //! Filter out joins for non-select queries
+
+            match behavior with
+            | Insert -> tmp |> Array.filter (fun col -> not col.IsKey || includeKeys)
+            | Update ->
+                tmp
+                |> Array.filter (fun col -> not col.IsKey || includeKeys)
+                |> fun x -> Array.append x (Array.filter (fun col -> col.IsKey) tmp)
+            | Delete -> tmp |> Array.filter (fun col -> col.IsKey)
+
+        let paramChar = getParamChar state
+
+        let mutable cmdParams =
+            mapp
+            |> Array.map (fun (mappedInstance : SqlMapping) ->
+                let mutable tmp = cmd.CreateParameter ()
+
+                match state with
+                | ODBC _ -> ()
+                | _ -> tmp.ParameterName <- sprintf "%s%s" paramChar mappedInstance.FSharpName
+
+                cmd.Parameters.Add (tmp) |> ignore
+                tmp
+            )
+
+        instances
+        |> Seq.mapi (fun index instance ->
+            mapp
+            |> Array.iteri (fun jindex mappedInstance ->
+                let thing = mappedInstance.PropertyInfo.GetValue (instance)
+
+                if thing = null then
                     cmdParams[jindex].IsNullable <- true
                     cmdParams[jindex].Value <- DBNull.Value
-                else 
-                    if genericTypeName false mappedInstance.Type = "FSharpOption"
-                    then
-                        cmdParams[jindex].IsNullable <- true
-                        unwrapOption cmdParams[jindex] (thing) ()
-                        
-                    else
-                        cmdParams[jindex].Value <- thing // Some 1
-            )
-            
-            // log ( 
-                //     sprintf "Param count: %A" cmd.Parameters.Count :: 
-                //     [ for i in [0..cmd.Parameters.Count-1] do 
-                //         yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value 
-                //     ]
-                //     |> String.concat "\n"
-                // )  
-            try cmd.ExecuteNonQuery() |> Ok
-            with exn -> Error exn
-        )
-        |> Seq.fold ( fun accumulator item -> 
-            match accumulator, item with 
-            | Ok a, Ok i -> Ok ( a + i )
-            | Error e, _ 
-            | _, Error e -> Error e
-        ) ( Ok 0 )
+                else if genericTypeName false mappedInstance.Type = "FSharpOption" then
+                    cmdParams[jindex].IsNullable <- true
+                    unwrapOption cmdParams[jindex] (thing) ()
 
-    let inline joins< ^T > (state : OrmState) = 
+                else
+                    cmdParams[jindex].Value <- thing // Some 1
+            )
+
+            // log (
+            //     sprintf "Param count: %A" cmd.Parameters.Count ::
+            //     [ for i in [0..cmd.Parameters.Count-1] do
+            //         yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
+            //     ]
+            //     |> String.concat "\n"
+            // )
+            try
+                cmd.ExecuteNonQuery () |> Ok
+            with exn ->
+                Error exn
+        )
+        |> Seq.fold
+            (fun accumulator item ->
+                match accumulator, item with
+                | Ok a, Ok i -> Ok (a + i)
+                | Error e, _
+                | _, Error e -> Error e
+            )
+            (Ok 0)
+
+    let inline joins< ^T> (state : OrmState) =
         let qoute = sqlQuote state
-        mapping< ^T > state
+
+        mapping< ^T> state
         |> Array.filter (fun sqlMap -> Option.isSome sqlMap.JoinOn)
         |> Array.groupBy (fun x -> x.JoinOn |> Option.get |> fst)
-        |> Array.map (fun (source, maps)  -> 
-            Array.map (fun map -> 
-                let secCol = map.JoinOn |> Option.get |> snd 
-                $"{source}.{secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
-            ) maps
+        |> Array.map (fun (source, maps) ->
+            Array.map
+                (fun map ->
+                    let secCol = map.JoinOn |> Option.get |> snd
+                    $"{source}.{secCol} = {map.QuotedSource}.{map.QuotedSqlName}"
+                )
+                maps
             |> String.concat " and "
             |> fun onString -> $"left join {source} on {onString}"
         )
         |> String.concat "\n"
-    
-    let inline queryBase< ^T > ( state : OrmState ) = 
-        let cols = columns< ^T > state 
-        let joins = joins<^T> state 
-        ( String.concat ", " cols ) + " from " + table< ^T > state
-        + " " + joins
 
-    let inline selectHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) f = 
-        let query = queryBase< ^T > state |> f
+    let inline queryBase< ^T> (state : OrmState) =
+        let cols = columns< ^T> state
+        let joins = joins< ^T> state
+        (String.concat ", " cols) + " from " + table< ^T> state + " " + joins
+
+    let inline selectHelper< ^T> (state : OrmState) (transaction : DbTransaction option) f =
+        let query = queryBase< ^T> state |> f
 
         transaction
-        |> withTransaction  
-            state 
-            ( fun (transaction : DbTransaction) -> 
+        |> withTransaction
+            state
+            (fun (transaction : DbTransaction) ->
                 seq {
-                    use cmd = makeCommand state query ( transaction.Connection ) 
-                    cmd.Transaction <- transaction 
-                    try 
-                        use reader = cmd.ExecuteReader( ) 
-                        yield! consumeReader< ^T > state reader  
-                    with exn -> Error exn
-                } 
-            )
-            ( fun ( connection : DbConnection ) -> 
-                seq {
-                    use cmd = makeCommand state query connection  
-                    try 
-                        use reader = cmd.ExecuteReader( CommandBehavior.CloseConnection )
-                        yield! consumeReader< ^T > state reader
-                    with exn -> yield Error exn
-                }
-            )
+                    if transaction.Connection.State <> ConnectionState.Open then
+                        transaction.Connection.Open ()
 
-    let inline updateBase< ^T > ( state : OrmState )  = 
-        let paramChar = getParamChar state
-        let cols = 
-            mapping< ^T > state
-            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-            |> Array.filter (fun col -> not col.IsKey) //Can't update keys
-        // log ( sprintf "columns to update: %A" cols )
-        let queryParams = 
-            cols 
-            |> Array.map (fun col -> 
-                match state with 
-                | ODBC _ -> paramChar
-                | _ -> sprintf "%s%s" paramChar col.FSharpName ) // @col1, @col2, @col3
-            
-
-        let table = table< ^T > state 
-        let set = 
-            Array.zip cols queryParams
-            |> Array.map ( fun x -> sprintf "%s = %s" (fst x).QuotedSqlName (snd x) ) 
-            |> String.concat ", "
-
-        "update " + table + " set " + set 
-
-    let inline ensureId< ^T > ( state: OrmState ) = 
-        mapping< ^T > state 
-        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T > state  ) //! Filter out joins for non-select queries
-        |> Array.filter ( fun x -> x.IsKey )
-        |> fun x -> if Array.length x = 0 then "Record must have at least one ID attribute specified..." |> exn |> Error else Ok x
-    
-    let inline updateHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instance : ^T ) = 
-        let query = ( updateBase< ^T > state ) + (whereClause) 
-        transaction
-        |> withTransaction 
-            state 
-            ( fun transaction ->  
-                use command = parameterizeCommand< ^T > state query transaction false Update instance 
-                command.Transaction <- transaction
-                seq { 
-                    try 
-                        command.ExecuteNonQuery ( ) |> Ok 
-                    with exn -> 
-                        // log ( sprintf "%A" exn )
-                        Error exn
-                } 
-            )
-            ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use command = parameterizeCommand< ^T > state query transaction false Update instance 
-                    command.Transaction <- transaction
-                    
-                    try  
-                        yield command.ExecuteNonQuery( ) |> Ok
-                        |> fun x -> transaction.Commit();  x
-                    with exn -> 
-                        transaction.Rollback()
-                        yield Error exn 
-                }
-            )
-        |> Seq.head
-
-    let inline updateManyHelper<^T> ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) = 
-        let query = ( updateBase< ^T > state ) + (whereClause) 
-        transaction
-        |> withTransaction 
-            state 
-            ( fun transaction -> 
-                let cmd = makeCommand state query transaction.Connection
-                seq { 
-                    parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Update instances 
-                }
-            )
-            ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use cmd = makeCommand state query connection
+                    use cmd = makeCommand state query (transaction.Connection)
                     cmd.Transaction <- transaction
-                    try  
-                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd false Update instances
-                        |> fun x -> transaction.Commit();  x
-                    with exn -> 
-                        transaction.Rollback()
+
+                    try
+                        use reader = cmd.ExecuteReader ()
+                        yield! consumeReader< ^T> state reader
+                    with exn ->
+                        Error exn
+                }
+                |> Sequence
+            )
+            (fun (connection : DbConnection) ->
+                seq {
+                    use cmd = makeCommand state query connection
+
+                    try
+                        use reader = cmd.ExecuteReader (CommandBehavior.CloseConnection)
+                        yield! consumeReader< ^T> state reader
+                        connection.Close ()
+                    with exn ->
                         yield Error exn
                 }
+                |> Sequence
             )
-        |> Seq.head
+        |> liftSequenceResult
 
-    let inline deleteBase< ^T > state =
-        table< ^T > state 
-        |> sprintf "delete from %s where "
+    let inline updateBase< ^T> (state : OrmState) =
+        let paramChar = getParamChar state
 
-    let inline deleteHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instance : ^T ) =
-        let query = deleteBase< ^T > state + (whereClause) 
+        let cols =
+            mapping< ^T> state
+            |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T> state) //! Filter out joins for non-select queries
+            |> Array.filter (fun col -> not col.IsKey) //Can't update keys
+        // log ( sprintf "columns to update: %A" cols )
+        let queryParams =
+            cols
+            |> Array.map (fun col ->
+                match state with
+                | ODBC _ -> paramChar
+                | _ -> sprintf "%s%s" paramChar col.FSharpName
+            ) // @col1, @col2, @col3
+
+
+        let table = table< ^T> state
+
+        let set =
+            Array.zip cols queryParams
+            |> Array.map (fun x -> sprintf "%s = %s" (fst x).QuotedSqlName (snd x))
+            |> String.concat ", "
+
+        "update " + table + " set " + set
+
+    let inline ensureId< ^T> (state : OrmState) =
+        mapping< ^T> state
+        |> Array.filter (fun mappedInstance -> mappedInstance.QuotedSource = tableName< ^T> state) //! Filter out joins for non-select queries
+        |> Array.filter (fun x -> x.IsKey)
+        |> fun x ->
+            if Array.length x = 0 then
+                ("Record must have at least one ID attribute specified...", typeof< ^T>)
+                |> Types.KeylessTypeException
+                |> Error
+            else
+                Ok x
+
+    let inline updateHelper< ^T> (state : OrmState) (transaction : DbTransaction option) (whereClause : string) (instance : ^T) =
+        let query = (updateBase< ^T> state) + (whereClause)
+
         transaction
-        |> withTransaction 
-            state 
-            ( fun transaction ->  
-                use command = parameterizeCommand< ^T > state query transaction false Delete instance 
+        |> withTransaction
+            state
+            (fun transaction ->
+                use command = parameterizeCommand< ^T> state query transaction false Update instance
                 command.Transaction <- transaction
-                seq { 
-                    try command.ExecuteNonQuery ( ) |> Ok 
-                    with exn -> 
-                        // log ( sprintf "%A" exn )
-                        Error exn
-                } 
-            )
-            ( fun connection -> 
-                seq {
-                    use transaction = connection.BeginTransaction()
-                    use command = parameterizeCommand< ^T > state query transaction false Delete instance 
-                    command.Transaction <- transaction
-                    try  
-                        yield command.ExecuteNonQuery( ) |> Ok
-                        |> fun x -> transaction.Commit();  x
-                    with exn -> 
-                        transaction.Rollback()
-                        yield Error exn 
-                }
-            )
-        |> Seq.head
 
-    
-    let inline deleteManyHelper< ^T > ( state : OrmState ) ( transaction : DbTransaction option ) ( whereClause : string ) ( instances : ^T seq ) =
-        let query = deleteBase< ^T > state + (whereClause) 
-        transaction 
-        |> withTransaction 
-            state 
-            ( fun transaction -> 
-                let cmd = makeCommand state query transaction.Connection
-                seq { parameterizeSeqAndExecuteCommand< ^T > state query ( cmd ) false Delete instances }
+                try
+                    command.ExecuteNonQuery () |> Ok
+                with exn ->
+                    // log ( sprintf "%A" exn )
+                    Error exn
+                |> Single
             )
-            ( fun connection -> 
+            (fun connection ->
+                use transaction = connection.BeginTransaction ()
+                use command = parameterizeCommand< ^T> state query transaction false Update instance
+                command.Transaction <- transaction
+
+                try
+                    command.ExecuteNonQuery ()
+                    |> Ok
+                    |> fun x ->
+                        transaction.Commit ()
+                        x
+                with exn ->
+                    transaction.Rollback ()
+                    Error exn
+                |> Single
+            )
+        |> liftSingleResult
+
+    let inline updateManyHelper< ^T> (state : OrmState) (transaction : DbTransaction option) (whereClause : string) (instances : ^T seq) =
+        let query = (updateBase< ^T> state) + (whereClause)
+
+        transaction
+        |> withTransaction
+            state
+            (fun transaction ->
+                let cmd = makeCommand state query transaction.Connection
+
+                seq { parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Update instances }
+                |> Sequence
+            )
+            (fun connection ->
                 seq {
-                    use transaction = connection.BeginTransaction()
+                    use transaction = connection.BeginTransaction ()
                     use cmd = makeCommand state query connection
                     cmd.Transaction <- transaction
-                    try 
-                        yield parameterizeSeqAndExecuteCommand< ^T > state query cmd false Delete instances
-                        |> fun x -> transaction.Commit();  x
-                    with exn -> 
-                        transaction.Rollback()
-                        yield Error exn 
-                    }
+
+                    try
+                        yield
+                            parameterizeSeqAndExecuteCommand< ^T> state query cmd false Update instances
+                            |> fun x ->
+                                transaction.Commit ()
+                                x
+                    with exn ->
+                        transaction.Rollback ()
+                        yield Error exn
+                }
+                |> Sequence
             )
-        |> Seq.head
+        |> liftSequenceResult
+
+    let inline deleteBase< ^T> state =
+        table< ^T> state |> sprintf "delete from %s where "
+
+    let inline deleteHelper< ^T> (state : OrmState) (transaction : DbTransaction option) (whereClause : string) (instance : ^T) =
+        let query = deleteBase< ^T> state + (whereClause)
+
+        transaction
+        |> withTransaction
+            state
+            (fun transaction ->
+                use command = parameterizeCommand< ^T> state query transaction false Delete instance
+                command.Transaction <- transaction
+
+                try
+                    command.ExecuteNonQuery () |> Ok
+                with exn ->
+                    // log ( sprintf "%A" exn )
+                    Error exn
+                |> Single
+            )
+            (fun connection ->
+                use transaction = connection.BeginTransaction ()
+                use command = parameterizeCommand< ^T> state query transaction false Delete instance
+                command.Transaction <- transaction
+
+                try
+
+                    command.ExecuteNonQuery ()
+                    |> Ok
+                    |> fun x ->
+                        transaction.Commit ()
+                        x
+                with exn ->
+                    transaction.Rollback ()
+                    Error exn
+                |> Single
+            )
+        |> liftSingleResult
+
+
+    let inline deleteManyHelper< ^T> (state : OrmState) (transaction : DbTransaction option) (whereClause : string) (instances : ^T seq) =
+        let query = deleteBase< ^T> state + (whereClause)
+
+        transaction
+        |> withTransaction
+            state
+            (fun transaction ->
+                let cmd = makeCommand state query transaction.Connection
+
+                seq { parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Delete instances }
+                |> Sequence
+            )
+            (fun connection ->
+                seq {
+                    use transaction = connection.BeginTransaction ()
+                    use cmd = makeCommand state query connection
+                    cmd.Transaction <- transaction
+
+                    try
+                        yield
+                            parameterizeSeqAndExecuteCommand< ^T> state query cmd false Delete instances
+                            |> fun x ->
+                                transaction.Commit ()
+                                x
+                    with exn ->
+                        transaction.Rollback ()
+                        yield Error exn
+                }
+                |> Sequence
+            )
+        |> liftSequenceResult

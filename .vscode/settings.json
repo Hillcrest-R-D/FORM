@@ -1,3 +1,5 @@
 {
-    "editor.inlayHints.enabled": "offUnlessPressed"
+    "editor.inlayHints.enabled": "on",
+    "FSharp.inlayHints.disableLongTooltip": true,
+    "FSharp.inlineValues.enabled": true
 }
