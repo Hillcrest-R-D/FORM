@@ -50,34 +50,30 @@ module Orm =
                 use cmd = makeCommand state sql (transaction.Connection)
                 cmd.Transaction <- transaction
 
-                seq {
-                    try
-                        cmd.ExecuteNonQuery () |> Ok
-                    with exn ->
-                        Error exn
-                }
-                |> Sequence
+                try
+                    cmd.ExecuteNonQuery () |> Ok
+                with exn ->
+                    Error exn
+                |> Single
             )
             (fun connection ->
                 use transaction = connection.BeginTransaction ()
 
                 try
-                    seq {
-                        use cmd = makeCommand state sql connection
-                        // printfn "Execute Cmd: %A" cmd.CommandText
-                        yield! seq { cmd.ExecuteNonQuery () |> Ok }
-                    }
-                    |> Seq.map (fun x -> x)
+                    use cmd = makeCommand state sql connection
+                    cmd.Transaction <- transaction
+                    // printfn "Execute Cmd: %A" cmd.CommandText
+                    cmd.ExecuteNonQuery ()
+                    |> Ok
                     |> fun x ->
                         transaction.Commit ()
                         x
                 with exn ->
                     transaction.Rollback ()
-                    seq { Error exn }
-
-                |> Sequence
+                    Error exn
+                |> Single
             )
-        |> liftSequenceResult
+        |> liftSingleResult
 
     ///<summary>
     /// Takes a function of IDataReader -> Result&lt; 't seq, exn&gt; (see FORMs consumeReader function as example) to
@@ -233,6 +229,7 @@ module Orm =
                         |> String.concat "\n"
                     )
 #endif
+                    command.Transaction <- transaction
 
                     command.ExecuteNonQuery ()
                     |> Ok
@@ -445,24 +442,25 @@ module Orm =
             (fun transaction ->
                 use cmd = makeCommand state query (transaction.Connection)
                 cmd.Transaction <- transaction
-                seq { cmd.ExecuteNonQuery () |> Ok } |> Sequence
+                cmd.ExecuteNonQuery () |> Ok |> Single
             )
             (fun connection ->
-                let transaction = connection.BeginTransaction ()
-                let cmd = makeCommand state query connection
+                use transaction = connection.BeginTransaction ()
+                use cmd = makeCommand state query connection
+                cmd.Transaction <- transaction
 
                 try
-                    seq { yield cmd.ExecuteNonQuery () |> Ok }
-                    |> Seq.map (fun x -> x)
+                    cmd.ExecuteNonQuery ()
+                    |> Ok
                     |> fun x ->
                         transaction.Commit ()
                         x
                 with exn ->
                     transaction.Rollback ()
-                    seq { Error exn }
-                |> Sequence
+                    Error exn
+                |> Single
             )
-        |> liftSequenceResult
+        |> liftSingleResult
 
 
 

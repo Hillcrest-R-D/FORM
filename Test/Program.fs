@@ -77,10 +77,6 @@ module Main =
                             "
 
                     Orm.execute testingState None createTable
-                    |> fun x ->
-                        // printfn "Setup: %A" x
-                        x
-                    |> Orm.toResultSeq
                 )
 
         let connect () =
@@ -293,7 +289,6 @@ module Main =
                 "DeleteWhere"
                 (fun _ ->
                     Orm.deleteWhere<Fact> testingState None ("\"indexId\" = :1", [| "1" |])
-                    |> Orm.toResultSeq
                 )
 
         let deleteMany () =
@@ -323,12 +318,24 @@ module Main =
                 "Reader"
                 "Reader"
                 (fun _ ->
+                    let qb = Utilities.queryBase<Fact> testingState 
+                    
+                    Orm.consumeReader<Fact> testingState
+                    |> fun reader ->
+                        Orm.executeWithReader testingState None $"""select {qb}""" reader
+                        |> Orm.toResultSeq
+                )
+
+        let readerByJoinFailure () =
+            constructFailureTest
+                "ReaderByJoinFailure"
+                "ReaderByJoinFailure"
+                (fun _ ->
                     Orm.consumeReader<Fact> testingState
                     |> fun reader ->
                         Orm.executeWithReader testingState None "select * from \"Fact\"" reader
                         |> Orm.toResultSeq
                 )
-
         //
         //
         // let readerWithTransaction () =
@@ -428,7 +435,7 @@ module Main =
                             );
                             "
 
-                    Orm.execute testingState None createTable |> Orm.toResultSeq
+                    Orm.execute testingState None createTable
                 )
 
         let insertSelect () =

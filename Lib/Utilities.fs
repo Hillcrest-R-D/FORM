@@ -1,23 +1,24 @@
 namespace Form
 
 module Utilities =
-    open Form.Attributes
-    open System.Collections.Generic
     open Microsoft.FSharp.Reflection
     open Microsoft.FSharp.Core.LanguagePrimitives
-    open NpgsqlTypes
+    open System.Collections.Generic
     open System
     open System.Data
-    open System.Data.SQLite
-    open Npgsql
-    open MySqlConnector
-    open System.Data.SqlClient
     open System.Reflection
     open System.Data.Common
-    open Logging
-    open System.Data.Odbc
-
     open System.Text.RegularExpressions
+    
+    open System.Data.SQLite
+    open System.Data.Odbc
+    open Microsoft.Data.SqlClient
+    open Npgsql
+    open NpgsqlTypes
+    open MySqlConnector
+
+    open Logging
+    open Form.Attributes
 
     type Behavior =
         | Update
@@ -569,13 +570,6 @@ module Utilities =
                     cmdParams[jindex].Value <- thing // Some 1
             )
 
-            // log (
-            //     sprintf "Param count: %A" cmd.Parameters.Count ::
-            //     [ for i in [0..cmd.Parameters.Count-1] do
-            //         yield sprintf "Param %d - %A: %A" i cmd.Parameters[i].ParameterName cmd.Parameters[i].Value
-            //     ]
-            //     |> String.concat "\n"
-            // )
             try
                 cmd.ExecuteNonQuery () |> Ok
             with exn ->
@@ -730,7 +724,7 @@ module Utilities =
         |> withTransaction
             state
             (fun transaction ->
-                let cmd = makeCommand state query transaction.Connection
+                use cmd = makeCommand state query transaction.Connection
 
                 seq { parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Update instances }
                 |> Sequence
@@ -802,7 +796,7 @@ module Utilities =
         |> withTransaction
             state
             (fun transaction ->
-                let cmd = makeCommand state query transaction.Connection
+                use cmd = makeCommand state query transaction.Connection
 
                 seq { parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Delete instances }
                 |> Sequence

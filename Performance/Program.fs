@@ -49,7 +49,7 @@ type InsertBenchmark() =
     member _.FormMany () = 
         let transaction = Orm.beginTransaction _sqliteState
         Orm.insertMany<Data.Sanic> _sqliteState transaction true _data
-        |> ignore
+        |> Orm.toResultSeq
         Orm.commitTransaction transaction
         
     [<Benchmark>]
@@ -119,16 +119,24 @@ type UpdateBenchmark() =
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
-        Orm.insertMany<Data.Sanic> _sqliteState transaction true _data |> ignore
+        Orm.insertMany<Data.Sanic> _sqliteState transaction true _data |> Orm.toResultSeq
         Orm.commitTransaction transaction |> ignore
         ()
-    
+
     [<Benchmark>]
     member _.Form () = 
         let transaction = Orm.beginTransaction _sqliteState
+        _data
+        |> Array.map ( Orm.update<Data.Sanic> _sqliteState transaction ) 
+        |> ignore
+        Orm.commitTransaction transaction
+        
+    [<Benchmark>]
+    member _.FormMany () = 
+        let transaction = Orm.beginTransaction _sqliteState
         _data 
         |> Orm.updateMany<Data.Sanic> _sqliteState transaction 
-        |> ignore
+        |> Orm.toResultSeq
         Orm.commitTransaction transaction
 
     [<Benchmark>]
@@ -198,7 +206,7 @@ type SelectBenchmark() =
         Orm.execute _sqliteState None Utilities.drop |> ignore
         Orm.execute _sqliteState None Utilities.create |> ignore
         let transaction = Orm.beginTransaction _sqliteState
-        Orm.insertMany<Data.Sanic> _sqliteState transaction true ( [| yield! Data.collectionSmall; yield! Data.collectionBig |] ) |> ignore
+        Orm.insertMany<Data.Sanic> _sqliteState transaction true ( [| yield! Data.collectionSmall; yield! Data.collectionBig |] ) |> Orm.toResultSeq
         Orm.commitTransaction transaction |> ignore
         ()
     
@@ -237,8 +245,8 @@ module Main =
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
         // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
-        // BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
-        BenchmarkRunner.Run<SelectBenchmark>() |> ignore
+        BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
+        // BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0
         
