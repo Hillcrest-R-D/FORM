@@ -28,7 +28,7 @@
     <PackageReference Include="microsoft.extensions.logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="mysqlconnector" Version="2.3.4" />
-    <PackageReference Include="npgsql" Version="8.0.1" />
+    <PackageReference Include="npgsql" Version="8.0.3" />
     <PackageReference Include="system.data.odbc" Version="8.0.0" />
     <PackageReference Include="system.data.sqlite" Version="1.0.118" />
   </ItemGroup>
