@@ -41,6 +41,18 @@ module Main =
         | SQLite _ -> "integer"
         | _ -> "bigint"
 
+    let datetimeType =
+        function
+        | PSQL _ -> "timestamp"
+        | SQLite _ -> "datetime"
+        | _ -> "datetime"
+
+    let datetimeOffsetType =
+        function
+        | PSQL _ -> "timestamp without time zone"
+        | SQLite _ -> "datetime"
+        | _ -> "datetime"
+
     let orm testingState =
         let testGuid1 = System.Guid.NewGuid().ToString ()
         let testGuid2 = System.Guid.NewGuid().ToString ()
@@ -67,7 +79,9 @@ module Main =
                                 \"maybeSomething\" text,
                                 \"sometimesNothing\" {intType testingState} null,
                                 \"biteSize\" text,
-                                \"commonCol\" text
+                                \"commonCol\" text,
+                                \"aDateTime\" {datetimeType testingState} null,
+                                \"aDateTimeOffset\" {datetimeOffsetType testingState} null
                             );
                             CREATE TABLE \"SubFact\" (
                                 \"factId\" {intType testingState} not null,
@@ -426,7 +440,9 @@ module Main =
                                 \"maybeSomething\" text,
                                 \"sometimesNothing\" {intType testingState} null,
                                 \"biteSize\" text,
-                                \"commonCol\" text
+                                \"commonCol\" text,
+                                \"aDateTime\" {datetimeType testingState} null,
+                                \"aDateTimeOffset\" {datetimeOffsetType testingState} null
                             );
                             CREATE TABLE \"SubFact\" (
                                 \"factId\" {intType testingState} not null,
