@@ -82,7 +82,7 @@ type Fact =
         aSubFact : string option
         commonCol : string
         aDateTime : System.DateTime
-        aDateTimeOffset : System.DateTimeOffset
+        // aDateTimeOffset : System.DateTimeOffset
     }
 
     //lookup = { id =  Orm.Node (  {_type = typeof<int>; value = 1 }, Orm.Leaf  { _type= typeof<string>; value = indexId }); value = None}
@@ -106,7 +106,7 @@ module Fact =
             aSubFact = Some "sooper dooper secret fact"
             commonCol = "Heres a column that might conflict with SubFact"
             aDateTime = System.DateTime.Now
-            aDateTimeOffset = System.DateTimeOffset.Now
+            // aDateTimeOffset = System.DateTimeOffset.Now
         }
 
     

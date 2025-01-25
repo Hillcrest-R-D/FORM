@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <PackageId>Form</PackageId>
-        <Version>4.1.1</Version>
+        <Version>4.1.3</Version>
         <Authors>
             Evan Howlett,
             Mackenzie F. Libby
@@ -31,10 +31,10 @@
         <PackageReference Include="microsoft.extensions.logging" Version="9.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
         <PackageReference Include="mysqlconnector" Version="2.4.0" />
-        <PackageReference Include="npgsql" Version="9.0.1" />
+        <PackageReference Include="npgsql" Version="9.0.2" />
         <PackageReference Include="system.data.odbc" Version="9.0.0" />
-        <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
         <PackageReference Include="system.data.sqlite" Version="1.0.119" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     </ItemGroup>
 
 </Project>

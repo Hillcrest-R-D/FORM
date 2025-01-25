@@ -244,9 +244,9 @@ module Main =
     [<EntryPoint>]
     let main _ =
         DotNetEnv.Env.Load "../" |> printfn "%A"
-        // BenchmarkRunner.Run<InsertBenchmark>() |> ignore
+        BenchmarkRunner.Run<InsertBenchmark>() |> ignore
         BenchmarkRunner.Run<UpdateBenchmark>() |> ignore
-        // BenchmarkRunner.Run<SelectBenchmark>() |> ignore
+        BenchmarkRunner.Run<SelectBenchmark>() |> ignore
         
         0
         

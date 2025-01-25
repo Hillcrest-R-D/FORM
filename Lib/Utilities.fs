@@ -7,7 +7,6 @@ module Utilities =
     open System
     open System.Data
     open System.Reflection
-    open System.Data.Common
     open System.Text.RegularExpressions
     
     open System.Data.SQLite
@@ -19,6 +18,7 @@ module Utilities =
 
     open Logging
     open Form.Attributes
+    open System.Data.Common
 
     type Behavior =
         | Update
@@ -41,16 +41,30 @@ module Utilities =
     /// We make no promises your code won't break in the future if you use this.
     let mutable _options = Dictionary<Type, Type option> ()
 
+    // let dataSource (state : OrmState) : Result<DbDataSource, exn> =
+    //     try
+    //         let dataSource =
+    //             match state with
+    //             | MSSQL (str, _) -> Microsoft.Data.SqlTypes (str) :> DbDataSource
+    //             | MySQL (str, _) -> new MySqlDataSource (str)
+    //             | PSQL (str, _) -> NpgsqlDataSource.Create (str)
+    //             // | SQLite (str, _) -> new SQLiteConnection (str)
+    //             // | ODBC (str, _) -> new OdbcConnection (str) 
+    //         connection.Open ()
+    //         Ok dataSource
+    //     with exn ->
+    //         Error exn
+
     let inline connect (state : OrmState) : Result<DbConnection, exn> =
         try
             let connection =
                 match state with
                 | MSSQL (str, _) -> new SqlConnection (str) :> DbConnection
-                | MySQL (str, _) -> new MySqlConnection (str) :> DbConnection
-                | PSQL (str, _) -> new NpgsqlConnection (str) :> DbConnection
-                | SQLite (str, _) -> new SQLiteConnection (str) :> DbConnection
-                | ODBC (str, _) -> new OdbcConnection (str) :> DbConnection
-
+                | MySQL (str, _) -> new MySqlConnection (str)
+                | PSQL (str, _) -> new NpgsqlConnection (str)
+                | SQLite (str, _) -> new SQLiteConnection (str)
+                | ODBC (str, _) -> new OdbcConnection (str) 
+            // let t = DbDataSource()
             connection.Open ()
             Ok connection
         with exn ->
@@ -295,9 +309,9 @@ module Utilities =
             _options[type_] <- tmp
             tmp
 
-    let inline makeParameter (state : OrmState) : DbParameter =
+    let inline makeParameter (state : OrmState) : IDbDataParameter =
         match state with
-        | MSSQL _ -> SqlParameter ()
+        | MSSQL _ -> SqlParameter () :> IDbDataParameter
         | MySQL _ -> MySqlParameter ()
         | PSQL _ -> NpgsqlParameter ()
         | SQLite _ -> SQLiteParameter ()
@@ -322,7 +336,7 @@ module Utilities =
         | TypeCode.DateTime -> DbType.DateTime // Used for Date, DateTime and DateTime2 DbTypes DbType.DateTime
         | _ -> DbType.Object
 
-    let inline unwrapOption (tmp : DbParameter) (opt : obj) () =
+    let inline unwrapOption (tmp : IDbDataParameter) (opt : obj) () =
         match opt with
         | :? Option<Byte> as t -> tmp.Value <- t |> Option.get
         | :? Option<Char> as t -> tmp.Value <- t |> Option.get
@@ -412,7 +426,7 @@ module Utilities =
 
         sprintf "insert into %s ( %s ) values ( %s )" tableName columnNames placeHolders
 
-    let inline makeCommand (state : OrmState) (query : string) (connection : DbConnection) : DbCommand =
+    let inline makeCommand (state : OrmState) (query : string) (connection : IDbConnection) : DbCommand =
         // log ( sprintf "Query being generated:\n\n%s\n\n" <| query )
         match state with
         | MSSQL _ -> new SqlCommand (query, connection :?> SqlConnection)
@@ -709,9 +723,13 @@ module Utilities =
                     |> Ok
                     |> fun x ->
                         transaction.Commit ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         x
                 with exn ->
                     transaction.Rollback ()
+                    if connection.State = ConnectionState.Open
+                    then connection.Close()
                     Error exn
                 |> Single
             )
@@ -740,9 +758,13 @@ module Utilities =
                             parameterizeSeqAndExecuteCommand< ^T> state query cmd false Update instances
                             |> fun x ->
                                 transaction.Commit ()
+                                if connection.State = ConnectionState.Open
+                                then connection.Close()
                                 x
                     with exn ->
                         transaction.Rollback ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         yield Error exn
                 }
                 |> Sequence
@@ -780,9 +802,13 @@ module Utilities =
                     |> Ok
                     |> fun x ->
                         transaction.Commit ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         x
                 with exn ->
                     transaction.Rollback ()
+                    if connection.State = ConnectionState.Open
+                    then connection.Close()
                     Error exn
                 |> Single
             )
@@ -812,9 +838,13 @@ module Utilities =
                             parameterizeSeqAndExecuteCommand< ^T> state query cmd false Delete instances
                             |> fun x ->
                                 transaction.Commit ()
+                                if connection.State = ConnectionState.Open
+                                then connection.Close()
                                 x
                     with exn ->
                         transaction.Rollback ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         yield Error exn
                 }
                 |> Sequence

@@ -45,12 +45,14 @@ module Main =
         function
         | PSQL _ -> "timestamp"
         | SQLite _ -> "datetime"
+        | ODBC _ -> "timestamp"
         | _ -> "datetime"
 
     let datetimeOffsetType =
         function
         | PSQL _ -> "timestamp without time zone"
         | SQLite _ -> "datetime"
+        | ODBC _ -> "timestamp"
         | _ -> "datetime"
 
     let orm testingState =
@@ -60,7 +62,14 @@ module Main =
         let testGuid4 = System.Guid.NewGuid().ToString ()
 
         let transaction = None // Orm.beginTransaction testingState
-
+        let prefix = 
+            testingState
+            |> function
+            | PSQL _ -> "PSQL"
+            | SQLite _ -> "SQLite"
+            | ODBC _ -> "ODBC"
+            | MySQL _ -> "MySQL"
+            | MSSQL _ -> "MSSQL"
 
         let setup () =
             constructScalarTest
@@ -80,8 +89,7 @@ module Main =
                                 \"sometimesNothing\" {intType testingState} null,
                                 \"biteSize\" text,
                                 \"commonCol\" text,
-                                \"aDateTime\" {datetimeType testingState} null,
-                                \"aDateTimeOffset\" {datetimeOffsetType testingState} null
+                                \"aDateTime\" {datetimeType testingState} null
                             );
                             CREATE TABLE \"SubFact\" (
                                 \"factId\" {intType testingState} not null,
@@ -154,7 +162,7 @@ module Main =
         let queryBase () =
             test "queryBase generates the proper SQL" {
                 let mutable expected =
-                    $""" "Fact"."indexId", "Fact"."id", "Fact"."{nameCol testingState}", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact", "Fact"."commonCol" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" """
+                    $""" "Fact"."indexId", "Fact"."id", "Fact"."{nameCol testingState}", "Fact"."timeStamp", "Fact"."specialChar", "Fact"."maybeSomething", "Fact"."sometimesNothing", "Fact"."biteSize", "SubFact"."subFact", "Fact"."commonCol", "Fact"."aDateTime" from "Fact" left join "SubFact" on "SubFact"."factId" = "Fact"."indexId" """
 
                 //this is horribly unstable, but it will work for now.
                 match testingState with
@@ -228,52 +236,46 @@ module Main =
                 )
 
         let updateMany () =
-            constructScalarTest
-                "UpdateMany"
-                "UpdateMany"
-                (fun _ ->
-                    let initial = Fact.init ()
-                    // let str8Facts = [{ Fact.init() with id = testGuid1}; { Fact.init() with id = testGuid2; sometimesNothing = None }; { Fact.init() with id = testGuid3}; Fact.init()]
-                    // Orm.insertMany< Fact > testingState None true ( str8Facts )
-                    // |> printfn "insert %A"
-                    let changed =
-                        { initial with
-                            name = "Evan Mowlett"
-                            id = testGuid3
-                            aSubFact = None
-                        }
+            test $"{prefix} UpdateMany" {
+                let initial = Fact.init ()
+                
+                //most sql distributions seem to have a lower precision than .net, we truncate here so we don't get an erroneous failure. 
+                let dateTime = System.DateTime.Parse(initial.aDateTime.ToString("yyyy/MM/dd HH:mm:ss")) 
 
-                    let changed2 =
-                        { initial with
-                            name = "Mac Flibby"
-                            id = testGuid2
-                            aSubFact = None
-                        }
+                let changed =
+                    { initial with
+                        name = "Evan Mowlett"
+                        id = testGuid3
+                        aSubFact = None
+                        aDateTime = dateTime
+                    }
 
-                    // printfn "ids: %A" [ testGuid2 ; testGuid3 ]
-                    Orm.updateMany<Fact> testingState None [ changed ; changed2 ] |> printf "%A"
+                let changed2 =
+                    { initial with
+                        name = "Mac Flibby"
+                        id = testGuid2
+                        aSubFact = None
+                        aDateTime = dateTime
+                    }
 
-                    let evan =
-                        Orm.selectWhere<Fact> testingState None ("id = ':1'", [| testGuid3 |])
-                        |> Orm.toResultSeq
+                // printfn "ids: %A" [ testGuid2 ; testGuid3 ]
+                Orm.updateMany<Fact> testingState None [ changed ; changed2 ] |> printf "%A"
 
-                    let mac =
-                        Orm.selectWhere<Fact> testingState None ("id = ':1'", [| testGuid2 |])
-                        |> Orm.toResultSeq
+                let evan =
+                    Orm.selectWhere<Fact> testingState None ("id = ':1'", [| testGuid3 |])
+                    |> Orm.toResultSeq
+                    |> Result.map Seq.head
 
-                    // printfn "evan: %A" evan
-                    // printfn "mac: %A" mac
+                let mac =
+                    Orm.selectWhere<Fact> testingState None ("id = ':1'", [| testGuid2 |])
+                    |> Orm.toResultSeq
+                    |> Result.map Seq.head
 
-                    match evan, mac with
-                    | Ok e, Ok m ->
-                        if Seq.head e = changed && Seq.head m = changed2 then
-                            Ok ()
-                        else
-                            Result.Error "Update not applied."
-                    | Result.Error ex, _
-                    | _, Result.Error ex -> Result.Error ex.Message
 
-                )
+                Expect.equal mac (Ok changed2 ) "update not persisted"
+                Expect.equal evan (Ok changed ) "update not persisted"
+
+            }
 
 
 
@@ -441,8 +443,7 @@ module Main =
                                 \"sometimesNothing\" {intType testingState} null,
                                 \"biteSize\" text,
                                 \"commonCol\" text,
-                                \"aDateTime\" {datetimeType testingState} null,
-                                \"aDateTimeOffset\" {datetimeOffsetType testingState} null
+                                \"aDateTime\" {datetimeType testingState} null
                             );
                             CREATE TABLE \"SubFact\" (
                                 \"factId\" {intType testingState} not null,

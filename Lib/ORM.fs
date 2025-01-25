@@ -2,16 +2,12 @@
 
 
 module Orm =
-    open System
     open System.Data
-    open FSharp.Reflection
-    open Npgsql
-    open System.Data.SQLite
     open MySqlConnector
-    open System.Data.Common
     open Form.Attributes
     open Utilities
     open Logging
+    open System.Data.Common
 
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect (state : OrmState) = Utilities.connect state
@@ -67,6 +63,8 @@ module Orm =
                     |> Ok
                     |> fun x ->
                         transaction.Commit ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         x
                 with exn ->
                     transaction.Rollback ()
@@ -238,6 +236,8 @@ module Orm =
                         x
                 with exn ->
                     transaction.Rollback ()
+                    if connection.State = ConnectionState.Open
+                    then connection.Close()
                     Error exn
                 |> Single
             )
@@ -280,9 +280,13 @@ module Orm =
                             parameterizeSeqAndExecuteCommand< ^T> state query cmd includeKeys Insert instances
                             |> fun x ->
                                 transaction.Commit ()
+                                if connection.State = ConnectionState.Open
+                                then connection.Close()
                                 x
                     with exn ->
                         transaction.Rollback ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         yield Error exn
                 }
                 |> Sequence
