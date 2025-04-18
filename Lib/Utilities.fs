@@ -652,6 +652,8 @@ module Utilities =
                         yield! consumeReader< ^T> state reader
                         connection.Close ()
                     with exn ->
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         yield Error exn
                 }
                 |> Sequence

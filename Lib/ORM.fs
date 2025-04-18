@@ -9,6 +9,63 @@ module Orm =
     open Logging
     open System.Data.Common
 
+    
+    ///<summary>A utility function which takes a query result and returns a result of <c>Ok seq&lt;'a&gt;</c> or <c>Error e</c>, where <c>'a</c> would be the static type parameter <c>^T</c> fed to a previously called query function (e.g. selectAll, selectWhere, etc)</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toResultSeq<^T> (results : seq<Result<^T, exn>>) =
+        Seq.fold
+            (fun accumulator item ->
+                match accumulator, item with
+                | Ok state, Ok i ->
+                    Ok (
+                        seq {
+                            yield! state
+                            yield i
+                        }
+                    )
+                | Error e, _
+                | _, Error e -> Error e
+            )
+            (Ok Seq.empty)
+            results
+
+    let inline toResultList<^T> : seq<Result<^T, exn>> -> Result<^T list, exn> = toResultSeq<^T> >> Result.map Seq.toList<^T>
+    let inline toResultArray<^T> : seq<Result<^T, exn>> -> Result<^T array, exn> = toResultSeq<^T> >> Result.map Seq.toArray<^T>
+
+
+    ///<summary>A utility function which takes a query result and returns a sequence of the unwrapped Ok results.</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeq (results : seq<Result<'a, 'b>>) =
+        results
+        |> Seq.takeWhile (Result.isOk)
+        |> Seq.map (Result.defaultValue Unchecked.defaultof<'a>)
+
+
+    ///<summary>A utility function which takes a query result and returns a tuple whose first element is the unwrapped Ok results and second element is the unwrapped Error results</summary>
+    ///<param name="results"></param>
+    ///<description></description>
+    let inline toSeqs (results : seq<Result<'a, 'b>>) : (seq<'a> * seq<'b>) =
+        Seq.fold
+            (fun (okAcc, errAcc) item ->
+                match item with
+                | Ok i ->
+                    (seq {
+                        yield! okAcc
+                        yield i
+                     },
+                     errAcc)
+                | Error e ->
+                    (okAcc,
+                     seq {
+                         yield! errAcc
+                         yield e
+                     })
+            )
+            (Seq.empty, Seq.empty)
+            results
+            
     ///<Description>Stores the flavor And context used for a particular connection.</Description>
     let inline connect (state : OrmState) = Utilities.connect state
 
@@ -68,6 +125,8 @@ module Orm =
                         x
                 with exn ->
                     transaction.Rollback ()
+                    if connection.State = ConnectionState.Open
+                    then connection.Close()
                     Error exn
                 |> Single
             )
@@ -113,7 +172,11 @@ module Orm =
                     try
                         use reader = cmd.ExecuteReader (CommandBehavior.CloseConnection)
                         yield! readerFunction reader
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                     with exn ->
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         Error exn
                 }
                 |> Sequence
@@ -157,6 +220,11 @@ module Orm =
     let inline selectWhere< ^T> (state : OrmState) (transaction : DbTransaction option) (where) =
         selectHelper< ^T> state transaction (fun x -> $"select {x} where {escape where}")
 
+    let inline selectFirstWhere<^T> (state : OrmState) (transaction : DbTransaction option) (where) = 
+        selectWhere<^T> state transaction where
+        |> toResultArray<^T>
+        |> Result.bind (Array.tryHead >> function Some i -> Ok i | None -> Error <| Types.NoResultsException "The conditions given returned no results.")
+        
     ///<summary>Select all records from the table <typeparamref name="^T"/> @ <paramref name="state"/></summary>
     ///<param name="state"></param>
     ///<param name="transaction"></param>
@@ -233,6 +301,8 @@ module Orm =
                     |> Ok
                     |> fun x ->
                         transaction.Commit ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         x
                 with exn ->
                     transaction.Rollback ()
@@ -458,9 +528,13 @@ module Orm =
                     |> Ok
                     |> fun x ->
                         transaction.Commit ()
+                        if connection.State = ConnectionState.Open
+                        then connection.Close()
                         x
                 with exn ->
                     transaction.Rollback ()
+                    if connection.State = ConnectionState.Open
+                    then connection.Close()
                     Error exn
                 |> Single
             )
@@ -471,55 +545,3 @@ module Orm =
     // {Ok a; Ok b; Ok c} -> Ok {a; b; c}
     // {Ok a; Ok b; Ok c; Error e} -> Error e
 
-    ///<summary>A utility function which takes a query result and returns a result of <c>Ok seq&lt;'a&gt;</c> or <c>Error e</c>, where <c>'a</c> would be the static type parameter <c>^T</c> fed to a previously called query function (e.g. selectAll, selectWhere, etc)</summary>
-    ///<param name="results"></param>
-    ///<description></description>
-    let inline toResultSeq (results : seq<Result<'a, 'b>>) =
-        Seq.fold
-            (fun accumulator item ->
-                match accumulator, item with
-                | Ok state, Ok i ->
-                    Ok (
-                        seq {
-                            yield! state
-                            yield i
-                        }
-                    )
-                | Error e, _
-                | _, Error e -> Error e
-            )
-            (Ok Seq.empty)
-            results
-
-
-    ///<summary>A utility function which takes a query result and returns a sequence of the unwrapped Ok results.</summary>
-    ///<param name="results"></param>
-    ///<description></description>
-    let inline toSeq (results : seq<Result<'a, 'b>>) =
-        results
-        |> Seq.takeWhile (Result.isOk)
-        |> Seq.map (Result.defaultValue Unchecked.defaultof<'a>)
-
-
-    ///<summary>A utility function which takes a query result and returns a tuple whose first element is the unwrapped Ok results and second element is the unwrapped Error results</summary>
-    ///<param name="results"></param>
-    ///<description></description>
-    let inline toSeqs (results : seq<Result<'a, 'b>>) : (seq<'a> * seq<'b>) =
-        Seq.fold
-            (fun (okAcc, errAcc) item ->
-                match item with
-                | Ok i ->
-                    (seq {
-                        yield! okAcc
-                        yield i
-                     },
-                     errAcc)
-                | Error e ->
-                    (okAcc,
-                     seq {
-                         yield! errAcc
-                         yield e
-                     })
-            )
-            (Seq.empty, Seq.empty)
-            results

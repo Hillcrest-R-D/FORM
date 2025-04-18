@@ -204,7 +204,7 @@ module Main =
                         testingState
                         None
                         ("""("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""",
-                         [| [ testGuid1 ; testGuid2 ; testGuid3 ] ; "false" ; [ 1.4 ; 2.2 ; 3.5 ] |])
+                        [| [ testGuid1 ; testGuid2 ; testGuid3 ] ; "false" ; [ 1.4 ; 2.2 ; 3.5 ] |])
                     |> Orm.toResultSeq
                 )
 
@@ -216,13 +216,53 @@ module Main =
                         None
                         ("""("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""",
                          [|
-                             [ testGuid1 ; testGuid2 ; testGuid3 ]
-                             "false"
-                             [ Fact.init () ; Fact.init () ; Fact.init () ]
+                            [ testGuid1 ; testGuid2 ; testGuid3 ]
+                            "false"
+                            [ Fact.init () ; Fact.init () ; Fact.init () ]
                          |])
                      |> Orm.toResultSeq)
                     "SelectWhereWithInFailure"
                 |> ignore
+            }
+
+        let selectFirstWhere () =
+            test "SelectFirstWhere Returns One" {
+                Expect.isOk
+                    (Orm.selectFirstWhere<Fact>
+                        testingState
+                        None
+                        (""" "id" = ':1' """, [testGuid1])
+                    )
+                    "SelectFirstWhere did not return the single expected result"
+                |> ignore
+            }
+
+        let selectFirstWhereFailure () =
+            test "SelectFirstWhere Returns None (Fails)" {
+                Expect.isError
+                    (Orm.selectFirstWhere<Fact>
+                        testingState
+                        None
+                        (""" "id" = ':1' """, [System.Guid.NewGuid()])
+                    )
+                    "SelectFirstWhere returned a result when none was expected"
+                |> ignore
+            }
+        
+        let toResultFuncs () =
+            test "Seq,List,Array helpers" {
+                Expect.isOk
+                    (seq { Ok 1 }
+                    |> Orm.toResultSeq)
+                    "toResultSeq fails"
+                Expect.isOk
+                    (seq { Ok 1 }
+                    |> Orm.toResultList)
+                    "toResultList fails"
+                Expect.isOk
+                    (seq { Ok 1 }
+                    |> Orm.toResultArray)
+                    "toResultArray fails"
             }
 
         let update () =
@@ -399,6 +439,8 @@ module Main =
                         selectWhere ()
                         selectWhereWithIn ()
                         selectWhereWithInFailure ()
+                        selectFirstWhere ()
+                        toResultFuncs ()
                         update ()
                         updateMany ()
                         updateWhere ()
