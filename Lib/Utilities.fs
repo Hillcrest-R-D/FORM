@@ -374,7 +374,8 @@ module Utilities =
         let constructor =
             let mutable tmp = fun _ -> obj ()
 
-            if _constructors.TryGetValue (reifiedType, &tmp) then
+            if _constructors.TryGetValue (reifiedType, &tmp) 
+            then
                 ()
             else
                 tmp <- FSharpValue.PreComputeRecordConstructor (reifiedType)
@@ -537,8 +538,6 @@ module Utilities =
         cmd
 
     let inline parameterizeSeqAndExecuteCommand< ^T> state query (cmd : DbCommand) includeKeys behavior (instances : ^T seq) =
-
-
         let mapp =
             let tmp =
                 mapping< ^T> state
@@ -744,9 +743,11 @@ module Utilities =
         |> withTransaction
             state
             (fun transaction ->
-                use cmd = makeCommand state query transaction.Connection
 
-                seq { parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Update instances }
+                seq { 
+                    use cmd = makeCommand state query transaction.Connection
+                    yield parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Update instances 
+                }
                 |> Sequence
             )
             (fun connection ->
@@ -824,9 +825,11 @@ module Utilities =
         |> withTransaction
             state
             (fun transaction ->
-                use cmd = makeCommand state query transaction.Connection
 
-                seq { parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Delete instances }
+                seq { 
+                    use cmd = makeCommand state query transaction.Connection
+                    yield parameterizeSeqAndExecuteCommand< ^T> state query (cmd) false Delete instances 
+                }
                 |> Sequence
             )
             (fun connection ->

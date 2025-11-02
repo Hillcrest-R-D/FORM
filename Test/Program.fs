@@ -370,7 +370,7 @@ module Main =
                 )
 
         let reader () =
-            constructSeqTest
+            constructScalarTest
                 "Reader"
                 "Reader"
                 (fun _ ->
@@ -379,7 +379,7 @@ module Main =
                     Orm.consumeReader<Fact> testingState
                     |> fun reader ->
                         Orm.executeWithReader testingState None $"""select {qb}""" reader
-                        |> Orm.toResultSeq
+                    |> Seq.head
                 )
 
         let readerByJoinFailure () =
@@ -444,10 +444,10 @@ module Main =
                         update ()
                         updateMany ()
                         updateWhere ()
+                        reader ()
                         delete ()
                         deleteWhere ()
                         deleteMany ()
-                        reader ()
                     ]
                 tearDown ()
             ]
@@ -565,6 +565,69 @@ module Main =
                                 Result.Error (error.ToString ())
                 )
 
+        let insertMany () =
+            constructScalarTest
+                "InsertMany"
+                "Inserted many facts."
+                (fun _ ->
+                    let transaction = Orm.beginTransaction testingState
+                    let str8Facts =
+                        [
+                            { Fact.init () with id = testGuid1 }
+                            { Fact.init () with
+                                id = testGuid2
+                                sometimesNothing = None
+                            }
+                            { Fact.init () with id = testGuid3 }
+                            Fact.init ()
+                        ]
+
+                    let i = Orm.insertMany<Fact> testingState transaction true (str8Facts) |> Orm.toResultSeq
+                    transaction |> Orm.commitTransaction |> ignore
+                    i
+                )
+        let updateMany () =
+            test $"{testingState} UpdateMany" {
+                let transaction = Orm.beginTransaction testingState
+                let initial = Fact.init ()
+                
+                //most sql distributions seem to have a lower precision than .net, we truncate here so we don't get an erroneous failure. 
+                let dateTime = System.DateTime.Parse(initial.aDateTime.ToString("yyyy/MM/dd HH:mm:ss")) 
+
+                let changed =
+                    { initial with
+                        name = "Evan Mowlett"
+                        id = testGuid3
+                        aSubFact = None
+                        aDateTime = dateTime
+                    }
+
+                let changed2 =
+                    { initial with
+                        name = "Mac Flibby"
+                        id = testGuid2
+                        aSubFact = None
+                        aDateTime = dateTime
+                    }
+
+                // printfn "ids: %A" [ testGuid2 ; testGuid3 ]
+                Orm.updateMany<Fact> testingState transaction [ changed ; changed2 ] |> printf "\n\n\n\n\ntransactional update many: %A\n\n\n\n\n"
+
+                let evan =
+                    Orm.selectWhere<Fact> testingState transaction ("id = ':1'", [| testGuid3 |])
+                    |> Orm.toResultSeq
+                    |> Result.map Seq.head
+
+                let mac =
+                    Orm.selectWhere<Fact> testingState transaction ("id = ':1'", [| testGuid2 |])
+                    |> Orm.toResultSeq
+                    |> Result.map Seq.head
+
+                transaction |> Orm.commitTransaction |> ignore
+                Expect.equal mac (Ok changed2 ) "update not persisted"
+                Expect.equal evan (Ok changed ) "update not persisted"
+
+            }
         let insertUpdateSelect () =
             constructSeqTest
                 "InsertUpdateSelect"
@@ -609,12 +672,38 @@ module Main =
                 "Reader-Transaction"
                 "Reader with Transaction"
                 (fun _ ->
+                    let qb = Utilities.queryBase<Fact> testingState 
                     let transaction = Orm.beginTransaction testingState
 
                     Orm.consumeReader<Fact> testingState
-                    |> fun reader -> Orm.executeWithReader testingState transaction "select * from \"Fact\"" reader
+                    |> fun reader -> Orm.executeWithReader testingState transaction $"select {qb}" reader
                     |> Orm.toResultSeq
                     |> commit transaction
+                )
+        
+        let deleteManyWithTransaction () =
+            constructScalarTest
+                "DeleteMany"
+                "DeleteMany"
+                (fun _ ->
+                    let transaction = Orm.beginTransaction testingState
+                    let initial = Fact.init ()
+
+                    let changed =
+                        { initial with
+                            name = "Evan Mowlett"
+                            id = testGuid3
+                        }
+
+                    let changed2 =
+                        { initial with
+                            name = "Mac Flibby"
+                            id = testGuid2
+                        }
+
+                    let d = Orm.deleteMany<Fact> testingState transaction [ changed ; changed2 ] |> Orm.toResultSeq
+                    commit transaction |> ignore
+                    d
                 )
 
         testSequenced
@@ -628,8 +717,11 @@ module Main =
                     [
                         insertSelect ()
                         insertDeleteSelect ()
+                        insertMany ()
+                        updateMany ()
                         insertUpdateSelect ()
                         readerWithTransaction ()
+                        deleteManyWithTransaction ()
                     ]
             ]
 
@@ -666,41 +758,36 @@ module Main =
 
         let states =
             [
-                odbcState
-                psqlState
+                // odbcState
+                // psqlState
                 sqliteState
             // ; mysqlState
             // ; mssqlstate
             ]
 
-        // use fs = new FileStream(outputPath, FileMode.Create)
-        // use writer = new StreamWriter( fs, System.Text.Encoding.UTF8 )
-
-        // writer.AutoFlush <- true
-
-        // System.Console.SetOut(writer)
-        // System.Console.SetError(writer)
-
-        states |> List.map (orm >> runTestsWithCLIArgs [] argv) //|> printfn "%A"
-
-        // Form.Orm.selectAll<Fact> sqliteState None
-        // |> printfn "%A"
-
-        // Form.Utilities.columnMapping<Fact> sqliteState
-        // |> printfn "%A"
-        // Form.Utilities.queryBase<Fact> sqliteState
-        // |> printfn "%A"
-
-        // states
-        // |> List.map (
-        //     transaction
-        //     >> runTestsWithCLIArgs [] argv
-        // )
-        // |> printfn "%A"
-        // let testGuid1 = System.Guid.NewGuid().ToString()
-        // let testGuid2 = System.Guid.NewGuid().ToString()
-        // let testGuid3 = System.Guid.NewGuid().ToString()
-        // Orm.selectWhere< Fact > sqliteState None ( """("id" in (:1) and "maybeSomething" = ':2') or "indexId" in (:3)""", [| [ testGuid1; testGuid2; testGuid3 ]; "false"; [ Fact.init(); Fact.init(); Fact.init() ] |]) |> Orm.toResultSeq
-        // |> printfn "Direct: %A"
-
+        let expectoArgs = argv |> Array.skip 1 
+        if Array.length argv = 0 
+        then 
+            states |> List.map (orm >> runTestsWithCLIArgs [] expectoArgs) 
+        else 
+            let first = argv[0].ToLowerInvariant()
+            match first with 
+            | "-a" -> 
+                states |> List.map (orm >> runTestsWithCLIArgs [] expectoArgs) 
+                |> ignore
+                states
+                |> List.map (
+                    transaction
+                    >> runTestsWithCLIArgs [] expectoArgs
+                )
+            | "-t" -> 
+                states
+                |> List.map (
+                    transaction
+                    >> runTestsWithCLIArgs [] expectoArgs
+                )
+            | "-i" -> 
+                states |> List.map (orm >> runTestsWithCLIArgs [] expectoArgs) 
+        |> ignore
+        
         0

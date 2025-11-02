@@ -331,9 +331,9 @@ module Orm =
         |> withTransaction
             state
             (fun transaction ->
-                let cmd = makeCommand state query transaction.Connection
 
                 seq {
+                    use cmd = makeCommand state query transaction.Connection
                     yield parameterizeSeqAndExecuteCommand state query cmd includeKeys Insert instances //makeCommand query connection state
                 }
                 |> Sequence
@@ -369,7 +369,7 @@ module Orm =
     ///<param name="transaction"></param>
     ///<param name="instance"></param>
     ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
-    ///<remarks><para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for an update call to succeed.</para>
+    ///<remarks><para>There must be at least one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for an update call to succeed.</para>
     ///<para></para></remarks>
     ///<example>
     ///     <code>update&lt;^T&gt; someState None instanceOfT</code>
@@ -397,7 +397,7 @@ module Orm =
     ///<param name="includeKeys"></param>
     ///<param name="instances"></param>
     ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
-    ///<remarks><para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for an update call to succeed.</para>
+    ///<remarks><para>There must be at least one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for an update call to succeed.</para>
     ///<para></para></remarks>
     ///<example>
     ///     <code>updateMany&lt;^T&gt; someState None instancesOfT</code>
@@ -443,7 +443,7 @@ module Orm =
     ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
     ///<remarks>
     ///   <para>Just like with delete statements in plain SQL, be careful when using this - it deletes stuff!</para>
-    ///   <para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for a delete call to succeed.</para>
+    ///   <para>There must be at least one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for a delete call to succeed.</para>
     /// </remarks>
     ///<example>
     ///     <code>delete&lt;^T&gt; someState None instanceOfT</code>
@@ -471,7 +471,7 @@ module Orm =
     ///<param name="includeKeys"></param>
     ///<param name="instances"></param>
     ///<typeparam name="^T">The record type representation of the table being acted on.</typeparam>
-    ///<remarks><para>There must be atleast one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for a delete call to succeed.</para>
+    ///<remarks><para>There must be at least one <see cref="PrimaryKeyAttribute">PrimaryKeyAttribute</see> or <see cref="IdAttribute">IdAttribute</see> on <typeparamref name="^T"/> for a delete call to succeed.</para>
     ///<para></para></remarks>
     ///<example>
     ///     <code>deleteMany&lt;^T&gt; someState None instancesOfT</code>
