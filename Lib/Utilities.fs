@@ -19,6 +19,7 @@ module Utilities =
     open Logging
     open Form.Attributes
     open System.Data.Common
+    open System.Collections.Concurrent
 
     type Behavior =
         | Update
@@ -27,19 +28,19 @@ module Utilities =
 
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _tableNames = Dictionary<Type * OrmState, string> ()
+    let mutable _tableNames = ConcurrentDictionary<Type * OrmState, string> ()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _constructors = Dictionary<Type, obj[] -> obj> ()
+    let mutable _constructors = ConcurrentDictionary<Type, obj[] -> obj> ()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _mappings = Dictionary<(Type * OrmState), SqlMapping[]> ()
+    let mutable _mappings = ConcurrentDictionary<(Type * OrmState), SqlMapping[]> ()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _toOptions = Dictionary<Type, obj[] -> obj> ()
+    let mutable _toOptions = ConcurrentDictionary<Type, obj[] -> obj> ()
     /// **Do not use.** This is internal to Form and cannot be hidden due to inlining.
     /// We make no promises your code won't break in the future if you use this.
-    let mutable _options = Dictionary<Type, Type option> ()
+    let mutable _options = ConcurrentDictionary<Type, Type option> ()
 
     // let dataSource (state : OrmState) : Result<DbDataSource, exn> =
     //     try
@@ -333,7 +334,7 @@ module Utilities =
         | TypeCode.UInt64 -> DbType.UInt64
         | TypeCode.Boolean -> DbType.Boolean
         | TypeCode.Decimal -> DbType.Decimal
-        | TypeCode.DateTime -> DbType.DateTime // Used for Date, DateTime and DateTime2 DbTypes DbType.DateTime
+        | TypeCode.DateTime -> DbType.DateTime // Used for Date, DateTime and DateTime2 DbTypes DbType.DateTime 
         | _ -> DbType.Object
 
     let inline unwrapOption (tmp : IDbDataParameter) (opt : obj) () =
